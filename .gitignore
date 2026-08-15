@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Gemini source renders — 55MB of PNG. The shipped, converted JPGs
+# live in public/ and are committed; these originals stay local.
+Gemini_Generated_Image_*.png

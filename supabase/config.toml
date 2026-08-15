@@ -1,0 +1,15 @@
+# Supabase configuration
+# Project setup and function definitions
+
+[functions.verify-payment]
+runtime = "edge"
+
+[functions.notify-biomarker]
+runtime = "edge"
+
+# Environment variables for functions
+[env.local.functions.verify-payment]
+RAZORPAY_SECRET_KEY = ""
+
+[env.production.functions.verify-payment]
+RAZORPAY_SECRET_KEY = ""
