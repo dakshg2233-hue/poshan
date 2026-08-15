@@ -117,6 +117,14 @@ export const MagneticCursor: FC<MagneticCursorProps> = ({
       const { speedMultiplier, maxScaleX, maxScaleY, lerpAmount } = configRef.current;
       const effectiveLerp = prefersReducedMotion ? 1 : lerpAmount;
 
+      /* Idle skip. The ticker fires 60 times a second whether or not the
+         pointer moved; without this the cursor wrote transforms to the DOM
+         every frame forever, including while the page sat perfectly still.
+         Below a quarter pixel there is nothing to see. */
+      const dx0 = state.pos.target.x - state.pos.current.x;
+      const dy0 = state.pos.target.y - state.pos.current.y;
+      if (!state.isDetaching && Math.abs(dx0) < 0.25 && Math.abs(dy0) < 0.25) return;
+
       state.pos.current.lerp(state.pos.target, effectiveLerp);
       const delta = state.pos.current.clone().sub(state.pos.previous);
       state.pos.previous.copy(state.pos.current);

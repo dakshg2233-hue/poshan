@@ -309,6 +309,11 @@ export default function Thali3D({ band, plan }: { band: Band; plan: Plan }) {
               {inView && (
                 <Canvas
                   aria-hidden
+                  /* Render on demand rather than every frame. The scene only
+                     changes while you drag or the plan updates, and both call
+                     invalidate(). Without this the canvas ran a continuous
+                     render loop for a static plate. */
+                  frameloop="demand"
                   dpr={[1, 2]}
                   shadows={!calm}
                   /* Pulled back and narrowed: the ring is 4.04 across, and the

@@ -72,7 +72,7 @@ export function Premium({
 
         {/* ------------------------------------------------ the customiser */}
         <div
-          className="on-panel liquid-glass-strong backdrop-blur-2xl rounded-3xl p-6 md:p-9 mb-10 relative"
+          className="on-panel liquid-glass-strong backdrop-blur-xl rounded-3xl p-6 md:p-9 mb-10 relative"
           style={{ background: "var(--panel)", color: "var(--panel-ink)" }}
         >
           {/* Cursor-tracked light. Dark surfaces are where this reads as
