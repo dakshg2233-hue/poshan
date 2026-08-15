@@ -260,7 +260,7 @@ export default function Thali3D({ band, plan }: { band: Band; plan: Plan }) {
     <section className="py-14 md:py-24">
       <div className="w-[min(1180px,100%-2.5rem)] mx-auto">
         <div
-          className="on-panel rounded-3xl overflow-hidden relative"
+          className="on-panel liquid-glass backdrop-blur-sm rounded-3xl overflow-hidden relative"
           style={{ background: "var(--panel)" }}
         >
           <div className="grid md:grid-cols-2">

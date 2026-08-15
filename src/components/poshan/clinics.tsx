@@ -2,6 +2,7 @@
 
 import { useLang, useReveal } from "./lang-provider";
 import { CLINIC_TIERS, CLINIC_ROADMAP, type ClinicTier } from "@/lib/poshan-data";
+import { BlurText } from "@/components/ui/blur-text";
 
 /**
  * Poshan for Clinics — the B2B tier.
@@ -31,18 +32,18 @@ export function Clinics() {
           >
             {T({ en: "For hospitals and clinics", hi: "अस्पतालों और क्लिनिकों के लिए" })}
           </p>
-          <h2
+          {/* Word-by-word blur-in. Renders as plain text under reduced motion —
+              no motion components mounted at all. */}
+          <BlurText
+            as="h2"
+            text={T({
+              en: "Your patients already eat at home. Send them a plan that fits it.",
+              hi: "आपके मरीज़ घर पर ही खाते हैं। उन्हें उसी के अनुसार प्लान भेजें।",
+            })}
             className="text-[clamp(1.9rem,4.4vw,2.85rem)] leading-tight"
             style={{ fontFamily: "var(--font-display)" }}
-          >
-            {T({
-              en: "Your patients already eat at home.",
-              hi: "आपके मरीज़ घर पर ही खाते हैं।",
-            })}{" "}
-            <em style={{ color: "var(--kesar)", fontStyle: "italic" }}>
-              {T({ en: "Send them a plan that fits it.", hi: "उन्हें उसी के अनुसार प्लान भेजें।" })}
-            </em>
-          </h2>
+            stagger={0.07}
+          />
           <p className="mt-4 text-[1.02rem]" style={{ color: "var(--ink-soft)" }}>
             {T({
               en: "Enter a patient's lab values, and Poshan drafts a plan from the food their region actually cooks. You review it, sign it off, and only then does the patient see it — every approval logged against your registration number.",

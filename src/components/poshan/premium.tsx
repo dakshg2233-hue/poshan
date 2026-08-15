@@ -72,7 +72,7 @@ export function Premium({
 
         {/* ------------------------------------------------ the customiser */}
         <div
-          className="on-panel rounded-3xl p-6 md:p-9 mb-10 relative"
+          className="on-panel liquid-glass-strong backdrop-blur-2xl rounded-3xl p-6 md:p-9 mb-10 relative"
           style={{ background: "var(--panel)", color: "var(--panel-ink)" }}
         >
           {/* Cursor-tracked light. Dark surfaces are where this reads as
@@ -201,7 +201,7 @@ export function Premium({
 
           {/* Poshan Home */}
           <div
-            className="on-panel rounded-2xl p-7 h-full relative overflow-hidden"
+            className="on-panel liquid-glass backdrop-blur-sm rounded-2xl p-7 h-full relative overflow-hidden"
             style={{ background: "var(--panel)", color: "var(--panel-ink)" }}
           >
             <Spotlight className="from-orange-100 via-amber-200 to-transparent" size={260} />
