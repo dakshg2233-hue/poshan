@@ -986,6 +986,15 @@ section.on-panel,
 
 /* Depth on hover instead of a jump: the card lights up rather than moving.
    Replaces the hover:-translate-y-1 that six places shared. */
+/* Anchor targets must clear the nav bar. Without this every in-page link
+   ("Check your BMI", "Your plate", …) parked its section's first 66px behind
+   the bar — the heading you clicked toward was the part covered up. Applies
+   whether the bar is fixed or stuck, so this was wrong before the hero too.
+   80px, not 66: landing a heading flush against the bar reads as clipped. */
+html {
+  scroll-padding-top: 80px;
+}
+
 /* Nav stows itself while the video hero owns the top of the frame.
    It is never removed from the DOM and never made inert: the skip link lives
    inside it, so a keyboard user pressing Tab on load must still reach it.

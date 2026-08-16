@@ -81,7 +81,11 @@ export function Thali({
               <circle cx={k.cx} cy={k.cy} r={30} />
             </clipPath>
           ))}
-          <radialGradient id="plate" cx="40%" cy="32%">
+          {/* Namespaced: a bare id="plate" collided with the <section
+              id="plate"> anchor, and since this gradient comes first in the
+              document the nav's "Your plate" link resolved to a <defs> node
+              with no layout box instead of the thali section. */}
+          <radialGradient id="thali-plate-fill" cx="40%" cy="32%">
             <stop offset="0" stopColor="var(--surface)" />
             <stop offset="1" stopColor="var(--roti-2)" />
           </radialGradient>
@@ -146,7 +150,7 @@ export function Thali({
 
         {/* steel plate */}
         <circle cx={200} cy={200} r={162} fill="none" stroke="var(--steel)" strokeWidth={7} />
-        <circle cx={200} cy={200} r={152} fill="url(#plate)" />
+        <circle cx={200} cy={200} r={152} fill="url(#thali-plate-fill)" />
         <circle cx={200} cy={200} r={152} fill="none" stroke="var(--steel-lo)" strokeWidth={1.5} opacity={0.7} />
 
         {/* katoris, filling to the plan */}

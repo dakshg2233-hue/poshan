@@ -160,7 +160,13 @@ function TierCard({ tier }: { tier: ClinicTier }) {
       </ul>
 
       <a
-        href={tier.selfServe ? "#clinic-signup" : "#clinic-contact"}
+        /* Both of these were #clinic-signup / #clinic-contact, and neither
+           target has ever existed — every tier's CTA was a link to nowhere.
+           /login is the real path: it is where an account actually starts.
+           The enterprise tier still wants a genuine contact route (a form or
+           a published address); until there is one, sending it somewhere
+           real beats sending it to a missing anchor. */
+        href="/login"
         data-magnetic
         className="inline-flex items-center justify-center min-h-11 px-5 rounded-full font-extrabold text-[0.86rem] no-underline"
         style={
