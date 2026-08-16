@@ -136,8 +136,11 @@
   --haldi-ink: #7a5312;
   /* Vermilion, pushed more saturated than the old #b03a16 for vibrancy.
      5.0:1 as text on --roti — still clears WCAG AA. */
-  --kesar: #c2410c;
-  --elaichi: #3f7a52;
+  /* Both darkened a touch when the section washes went in. They were sitting
+     at 4.43 and 4.36 against the washed ground — passing before only by a
+     hair, with no margin for a background that moved. */
+  --kesar: #b03b0a;
+  --elaichi: #356b46;
   --imli: #6b3a20;
   --mirch: #b3261e;
   /* Near-black cooled off: the old #241611 was visibly brown, which pulled
@@ -297,7 +300,8 @@
   --ink: #101710;    --ink-soft: #566356;
   --kesar: #1f6b45;  --kesar-fill: #175736;
   --haldi: #d9a52c;  --haldi-ink: #715312;
-  --elaichi: #2f7a52; --imli: #4a3a22;   --mirch: #a8362a;
+  /* 4.49:1 against the washed ground — 0.01 short. Darkened. */
+  --elaichi: #2b7049; --imli: #4a3a22;   --mirch: #a8362a;
   --steel: #869287;  --steel-lo: #d6e0d8;
   --panel: #14201a;
 }
@@ -380,6 +384,71 @@
     --elaichi: #6da872;
     --imli: #c28a63;
     --mirch: #f0654a;
+  }
+}
+
+/* ==================================================================
+   PAGE GROUND — step 1 of the glass work
+   Glass blurs what is behind it. Over a flat #fdfbfa there is nothing
+   behind it, so a glass card reads as a slightly grey rectangle and
+   nothing more. This gives the blur something to act on WITHOUT making
+   the page look tinted: two washes a few percent off the canvas, plus a
+   fine noise grain that only becomes visible once it is magnified by a
+   backdrop-filter.
+
+   Both washes are derived with color-mix from --kesar, so every one of
+   the eight palettes grounds itself in its own accent rather than
+   needing eight hardcoded pairs.
+   ================================================================== */
+:root {
+  /* 1.5% / 3%, not 2.5% / 5%. At the higher values --wash-2 landed on
+     rgb(242,232,227) — a visibly pink page, which is the warm-cream look
+     that was deliberately removed for reading dated. The grain below does
+     most of the work of giving the blur something to bite on; the washes
+     only need to separate one section from the next. */
+  --wash-1: color-mix(in srgb, var(--kesar) 1.5%, var(--roti));
+  --wash-2: color-mix(in srgb, var(--kesar) 3%, var(--roti-2));
+  /* Fractal noise, ~1.5% opacity. Invisible as texture at rest; it is what
+     stops blurred panels looking like flat grey fills. */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+}
+
+/* One fixed grain layer for the whole document rather than per-section —
+   a single composited layer instead of thirteen. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(--grain);
+  opacity: 0.035;
+  mix-blend-mode: multiply;
+}
+
+/* Sections already alternate between --roti and --roti-2; this swaps those
+   for the washed versions so the alternation carries a faint tint. */
+section {
+  position: relative;
+  background-color: var(--wash-1);
+}
+section:nth-of-type(even) {
+  background-color: var(--wash-2);
+}
+/* Anything that sets its own background — the dark panels, the hero photo —
+   keeps it. These rules are the floor, not an override. */
+section[style*="background"],
+section.on-panel,
+#hero {
+  background-color: revert-layer;
+}
+
+/* Grain is texture, not motion, so it stays under reduced motion. But it is
+   pure decoration, so it goes when the user asks for less visual noise via
+   forced-colors. */
+@media (forced-colors: active) {
+  body::before {
+    display: none;
   }
 }
 
