@@ -15,12 +15,11 @@ export function Nav() {
 
   return (
     <header
-      className="sticky top-0 z-50 border-b"
-      style={{
-        borderColor: "var(--line)",
-        background: "color-mix(in srgb, var(--roti) 88%, transparent)",
-        backdropFilter: "blur(12px)",
-      }}
+      /* background and backdrop-filter come from .liquid-glass-chrome, not
+         from here — an inline backdropFilter beats any stylesheet rule and
+         would silently win over the refraction. */
+      className="liquid-glass-chrome refract sticky top-0 z-50 border-b"
+      style={{ borderColor: "var(--line)" }}
     >
       {/* Off-screen until focused, so a keyboard user's first Tab skips the nav. */}
       <a

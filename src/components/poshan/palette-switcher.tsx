@@ -15,7 +15,7 @@ import { useState, useEffect } from "react";
  */
 
 export type PaletteKey =
-  | "sindoor" | "seed" | "neel" | "madhu" | "tulsi" | "kesari" | "kaajal" | "jamun";
+  | "sindoor" | "seed" | "kaali" | "neel" | "madhu" | "tulsi" | "kesari" | "kaajal" | "jamun";
 
 export const PALETTES: {
   key: PaletteKey;
@@ -34,6 +34,12 @@ export const PALETTES: {
     name: "Seed",
     note: "Botanical-clinical. Forest green as the only colour, lime confined to badges, whisper-light 300 headings — and it switches OFF every shadow, gradient and the ladoo, per the system's own rules.",
     swatch: ["#FCFCF7", "#1C3A13", "#D3FA99"],
+  },
+  {
+    key: "kaali",
+    name: "Kaali",
+    note: "Matte black. Not #000 — pure black clips shadow detail on OLED and makes every border vanish. The only dark palette here, and the one glass looks best on.",
+    swatch: ["#0E0E0E", "#FF8A5B", "#F0B055"],
   },
   {
     key: "neel",
@@ -96,8 +102,7 @@ export function PaletteSwitcher() {
     <div className="fixed bottom-4 right-4 z-[100] print:hidden">
       {open && (
         <div
-          className="mb-2 w-[300px] max-h-[70vh] overflow-y-auto rounded-2xl p-3 shadow-2xl"
-          style={{ background: "var(--surface)", border: "1px solid var(--line)" }}
+          className="liquid-glass-chrome refract mb-2 w-[300px] max-h-[70vh] overflow-y-auto rounded-2xl p-3 shadow-2xl"
         >
           <p
             className="text-[0.66rem] font-extrabold uppercase mb-2.5 px-1"

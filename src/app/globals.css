@@ -187,6 +187,61 @@
    --verdict-* badges deliberately do not flip, so they are inherited.
    ================================================================== */
 
+/* --- Kaali: matte black. The first genuinely DARK palette, which
+       inverts assumptions the other eight share.
+
+       Not #000. Pure black on an OLED clips shadow detail and makes
+       every border disappear; #0e0e0e keeps a floor to build on and is
+       what "matte" actually looks like — light absorbed, not a void.
+
+       Two things had to be rethought rather than recoloured:
+       - --panel is the "always dark showcase" token. On a black page a
+         darker panel is invisible, so here it LIFTS instead.
+       - --kesar-fill sits under hardcoded white button labels, so it
+         stays dark even though everything around it is darker still.
+       ------------------------------------------------------------------ */
+:root[data-palette="kaali"] {
+  --roti: #0e0e0e;
+  --roti-2: #151515;
+  --surface: #1a1a1a;
+  --ink: #f2f0ee;
+  --ink-soft: #a09c98;
+  --line: #2b2b2b;
+  --steel: #6e6a66;
+  --steel-lo: #2b2b2b;
+
+  /* Accent text has to LIGHTEN on a dark ground, the mirror of every
+     other palette here. */
+  --kesar: #ff8a5b;
+  --kesar-fill: #a8380f;
+
+  --haldi: #f0b055;
+  --haldi-ink: #f0b055;
+
+  --elaichi: #7fbf8b;
+  --elaichi-fill: #35603f;
+  --imli: #c49a78;
+  --imli-fill: #5c3c26;
+  --mirch: #ff6b52;
+
+  /* Lifted, not sunk — see the note above. */
+  --panel: #1c1c1c;
+  --panel-ink: #f2f0ee;
+
+  /* Badge fills still carry white text, so they stay deep. */
+  --verdict-good: #35603f;
+  --verdict-caution: #6b4a10;
+  --verdict-avoid: #8f2c1e;
+}
+
+/* The grain multiplies, which does nothing over black. Screen it instead so
+   the texture still reads. */
+:root[data-palette="kaali"] body::before,
+:root[data-palette="kaali"] ~ body::before {
+  mix-blend-mode: screen;
+  opacity: 0.05;
+}
+
 /* --- Seed: botanical-clinical. A whole design language, not a palette.
        Forest green as the only chromatic authority, warm off-white canvas,
        lime confined to badge-sized emphasis. Whisper-light display weights,
@@ -542,6 +597,55 @@ section.on-panel,
 }
 
 /* ==================================================================
+   CHROME GLASS
+   For floating UI that passes OVER content — the nav, the cursor
+   picker, the palette button. This is where glass genuinely belongs on
+   a light page: there is real movement behind it as you scroll, which
+   is the entire premise of the effect.
+
+   Built from --roti and --ink rather than hardcoded white, so it adapts
+   to every palette automatically — including dark ones, where a
+   white-tinted pane would glow and a hardcoded dark one would vanish.
+   ================================================================== */
+.liquid-glass-chrome {
+  /* 82%, not 70%. At 70 the nav sat over the hero photograph and its links
+     landed anywhere from 3.78:1 to 5.66:1 depending on what happened to be
+     behind each one — some passing, some not, which is the instability of
+     translucent chrome over imagery. 82 still reads as glass (the blur and
+     the hairline do most of that work) but stops the photo deciding whether
+     a link is legible. */
+  background: color-mix(in srgb, var(--roti) 82%, transparent);
+  position: relative;
+  overflow: hidden;
+  /* Two inset lines: a bright one catching light at the top edge, and a
+     faint dark one at the bottom, which is what stops the panel reading
+     as a flat translucent rectangle. */
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--roti) 90%, #fff),
+    inset 0 -1px 0 color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+.liquid-glass-chrome::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--ink) 14%, transparent) 0%,
+    transparent 35%,
+    transparent 65%,
+    color-mix(in srgb, var(--ink) 10%, transparent) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ==================================================================
    REFRACTION
    Adds true edge lensing on top of the blur, via the SVG displacement
    filter mounted by <GlassFilter />. Content behind a panel bends at
@@ -574,6 +678,11 @@ section.on-panel,
     backdrop-filter: url(#poshan-glass) blur(10px);
   }
 
+  .liquid-glass-chrome.refract {
+    -webkit-backdrop-filter: url(#poshan-glass-soft) blur(14px);
+    backdrop-filter: url(#poshan-glass-soft) blur(14px);
+  }
+
   /* Refraction is a continuously-sampled backdrop effect and the most
      expensive thing on the page. Off on small screens, where the GPU
      budget is smallest and the panels are largest relative to the
@@ -581,7 +690,8 @@ section.on-panel,
   @media (prefers-reduced-motion: reduce), (max-width: 900px) {
     .liquid-glass.refract,
     .liquid-glass-strong.refract,
-    .liquid-glass-dark.refract {
+    .liquid-glass-dark.refract,
+    .liquid-glass-chrome.refract {
       -webkit-backdrop-filter: blur(8px);
       backdrop-filter: blur(8px);
     }

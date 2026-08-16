@@ -69,8 +69,11 @@ export function CursorPicker() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="flex items-center gap-2 min-h-9 pl-2 pr-3.5 rounded-full text-[0.76rem] font-extrabold cursor-pointer shadow-lg"
-        style={{ background: "var(--surface)", border: "1px solid var(--line)", color: "var(--ink)" }}
+        className="liquid-glass-chrome refract flex items-center gap-2 min-h-9 pl-2 pr-3.5 rounded-full text-[0.76rem] font-extrabold cursor-pointer shadow-lg"
+        /* No opaque background here — .liquid-glass-chrome supplies a
+           translucent one, and an opaque inline fill would leave nothing
+           for the blur to show through. */
+        style={{ color: "var(--ink)" }}
       >
         <span aria-hidden data-swatch={current.key} className="food-swatch block w-5 h-5 shrink-0" />
         {T({ en: "Cursor", hi: "कर्सर" })}
@@ -78,8 +81,7 @@ export function CursorPicker() {
 
       {open && (
         <ul
-          className="mt-2 w-[178px] rounded-2xl p-2 shadow-2xl grid gap-0.5 list-none"
-          style={{ background: "var(--surface)", border: "1px solid var(--line)" }}
+          className="liquid-glass-chrome refract mt-2 w-[178px] rounded-2xl p-2 shadow-2xl grid gap-0.5 list-none"
           role="radiogroup"
           aria-label={T({ en: "Choose a cursor", hi: "कर्सर चुनें" })}
         >
