@@ -60,8 +60,7 @@ export function Clinics() {
 
         {/* What is not built yet. Stated up front, not buried. */}
         <ul
-          className="mt-9 grid gap-2 list-none p-0 rounded-2xl p-5"
-          style={{ background: "var(--surface)", border: "1px solid var(--line)" }}
+          className="surface-card mt-9 grid gap-2 list-none p-0 rounded-2xl p-5"
         >
           {CLINIC_ROADMAP.map((r, i) => (
             <li
@@ -87,12 +86,10 @@ function TierCard({ tier }: { tier: ClinicTier }) {
 
   return (
     <div
-      className="lift rounded-2xl p-6 h-full flex flex-col"
-      style={
-        tier.best
-          ? { background: "var(--surface)", border: "2px solid var(--kesar)" }
-          : { background: "var(--surface)", border: "1px solid var(--line)" }
-      }
+      className="surface-card lift rounded-2xl p-6 h-full flex flex-col"
+      /* Fill and depth come from .surface-card. Only the highlighted tier
+         overrides the border, so it still reads as the chosen one. */
+      style={tier.best ? { border: "2px solid var(--kesar)" } : undefined}
     >
       {tier.best && (
         <span

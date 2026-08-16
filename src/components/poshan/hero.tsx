@@ -156,8 +156,7 @@ export function Hero({
           </div>
 
           <div
-            className="mt-7 p-5 rounded-2xl max-w-[520px] mx-auto"
-            style={{ background: "var(--surface)", border: "1px solid var(--line)" }}
+            className="surface-card mt-7 p-5 rounded-2xl max-w-[520px] mx-auto"
           >
             <Slider
               id="ht"

@@ -177,8 +177,7 @@ export function Premium({
         <div ref={revealCards} className="rise grid gap-5 md:grid-cols-2 items-start">
           {/* Free */}
           <div
-            className="rounded-2xl p-7 h-full"
-            style={{ background: "var(--surface)", border: "1px solid var(--line)" }}
+            className="surface-card rounded-2xl p-7 h-full"
           >
             <h3 className="text-[1.5rem]" style={{ fontFamily: "var(--font-display)" }}>
               {T({ en: "Free", hi: "मुफ़्त" })}

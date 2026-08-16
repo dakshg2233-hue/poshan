@@ -200,8 +200,10 @@ export function MealLibrary({ goal }: { goal: GoalKey }) {
               {meals.map((m) => (
                 <li
                   key={m.id}
-                  className="lift rounded-2xl p-5 flex flex-col"
-                  style={{ background: "var(--surface)", border: "1px solid var(--line)" }}
+                  /* Fill, border and depth all come from .surface-card. No
+                     inline background here — an inline style beats the
+                     stylesheet and would flatten the card back out. */
+                  className="surface-card lift rounded-2xl p-5 flex flex-col"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-2.5 min-w-0">

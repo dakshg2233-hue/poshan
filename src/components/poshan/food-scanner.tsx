@@ -211,8 +211,7 @@ export function FoodScanner() {
           <div className="grid gap-5 lg:grid-cols-2 items-start">
             {/* ---------------- capture ---------------- */}
             <div
-              className="rounded-2xl overflow-hidden"
-              style={{ background: "var(--surface)", border: "1px solid var(--line)" }}
+              className="surface-card rounded-2xl overflow-hidden"
             >
               <div
                 className="on-panel relative aspect-[4/3] grid place-items-center"
@@ -322,8 +321,7 @@ export function FoodScanner() {
 
             {/* ---------------- count ---------------- */}
             <div
-              className="rounded-2xl p-5"
-              style={{ background: "var(--surface)", border: "1px solid var(--line)" }}
+              className="surface-card rounded-2xl p-5"
             >
               <div className="flex items-end justify-between gap-4 mb-4">
                 <div>

@@ -132,8 +132,7 @@ export function Conditions() {
             {active.map((c) => (
               <article
                 key={c.key}
-                className="rounded-2xl p-5"
-                style={{ background: "var(--surface)", border: "1px solid var(--line)" }}
+                className="surface-card rounded-2xl p-5"
               >
                 <h3 className="text-[1.3rem]" style={{ fontFamily: "var(--font-display)" }}>
                   {T(c.name)}

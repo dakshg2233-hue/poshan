@@ -1029,6 +1029,60 @@ html {
   }
 }
 
+/* Card surfaces.
+ *
+ * Replaces the flat `background: var(--surface); border: 1px solid var(--line)`
+ * that every card carried inline. Flat fill plus hairline on a near-white
+ * ground is what made the densest part of the page — 38 meal cards in a grid —
+ * read as a spreadsheet rather than a set of objects.
+ *
+ * Deliberately NOT glass. These sit on a flat section ground with no image
+ * behind them, so a backdrop-filter would refract nothing and cost compositor
+ * time on every card for a visually identical result. Depth here is free:
+ * gradient, border and shadow are all painted once.
+ *
+ * Everything derives from tokens via color-mix, so the same rule holds on the
+ * near-white palettes and on Kaali's matte black without a second definition.
+ */
+.surface-card {
+  /* A barely-there vertical gradient. A perfectly flat fill is the main
+     reason a card reads as a rectangle of colour instead of a surface. */
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--surface) 94%, #fff) 0%,
+    var(--surface) 52%,
+    color-mix(in srgb, var(--surface) 96%, var(--ink)) 100%
+  );
+  border: 1px solid color-mix(in srgb, var(--line) 86%, var(--ink));
+  box-shadow:
+    /* Top edge catching light — the strongest single cue for "physical", and
+       the one that survives on dark palettes where a drop shadow cannot. */
+    inset 0 1px 0 color-mix(in srgb, var(--surface) 62%, #fff),
+    /* Contact shadow: tight and close, seats the card on the page. */
+    0 1px 2px color-mix(in srgb, var(--ink) 7%, transparent),
+    /* Ambient: wide and soft, tinted with the palette's own warm tone rather
+       than grey — a grey shadow under a warm palette reads as dirt. */
+    0 8px 24px -14px color-mix(in srgb, var(--imli) 30%, transparent);
+}
+
+/* Beats .lift:hover, which would otherwise replace the whole stack and drop
+   the inset highlight mid-hover. */
+.surface-card.lift:hover {
+  border-color: color-mix(in srgb, var(--kesar) 55%, var(--line)) !important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--surface) 62%, #fff),
+    0 2px 4px color-mix(in srgb, var(--ink) 8%, transparent),
+    0 14px 34px -16px color-mix(in srgb, var(--imli) 46%, transparent);
+}
+
+/* Seed is flat by instruction, and that is the whole point of it as an
+   option — so it keeps the border and loses the depth. */
+:root[data-palette="seed"] .surface-card,
+:root[data-palette="seed"] .surface-card.lift:hover {
+  background: var(--surface);
+  box-shadow: none !important;
+}
+
 .lift {
   transition:
     border-color 0.35s ease,

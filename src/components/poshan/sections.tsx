@@ -41,8 +41,7 @@ export function Bands() {
           </div>
 
           <div
-            className="rounded-2xl p-6 overflow-x-auto"
-            style={{ background: "var(--surface)", border: "1px solid var(--line)" }}
+            className="surface-card rounded-2xl p-6 overflow-x-auto"
           >
             <div className="grid grid-cols-4 min-w-[520px]">
               {BANDS.map((b) => (
@@ -229,8 +228,7 @@ export function Biomarkers() {
             {BIOMARKERS.map((b) => (
               <article
                 key={b.short}
-                className="rounded-2xl p-5"
-                style={{ background: "var(--surface)", border: "1px solid var(--line)" }}
+                className="surface-card rounded-2xl p-5"
               >
                 <div className="flex justify-between items-start gap-3">
                   <div>
@@ -330,8 +328,7 @@ export function Testimonials() {
             {QUOTES.map((q) => (
               <figure
                 key={q.initials}
-                className="rounded-2xl p-6 flex flex-col m-0"
-                style={{ background: "var(--surface)", border: "1px solid var(--line)" }}
+                className="surface-card rounded-2xl p-6 flex flex-col m-0"
               >
                 <blockquote
                   className="text-[1.16rem] leading-relaxed flex-1 m-0"
