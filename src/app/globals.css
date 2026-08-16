@@ -184,6 +184,91 @@
    --verdict-* badges deliberately do not flip, so they are inherited.
    ================================================================== */
 
+/* --- Seed: botanical-clinical. A whole design language, not a palette.
+       Forest green as the only chromatic authority, warm off-white canvas,
+       lime confined to badge-sized emphasis. Whisper-light display weights,
+       and — per the system — no shadows and no gradients anywhere.
+       ------------------------------------------------------------------ */
+:root[data-palette="seed"] {
+  --roti: #fcfcf7;        /* Snow White — never pure #fff, the warm tint is the point */
+  --roti-2: #eeeee9;      /* Warm Stone */
+  --surface: #fcfcf7;
+  --ink: #1c3a13;         /* Forest Depths — reads as ink, stays botanical */
+  --ink-soft: #666666;    /* Pewter */
+  --line: #dedeD8;
+  --steel: #b3b3b3;       /* Ash */
+  --steel-lo: #eeeee9;
+
+  /* Forest is the only chromatic authority — accent text AND button fill. */
+  --kesar: #1c3a13;
+  --kesar-fill: #1c3a13;
+
+  /* Lime is a background for badges, never text. --haldi-ink therefore
+     resolves to forest, because lime-on-white is 1.2:1 and unreadable. */
+  --haldi: #d3fa99;
+  --haldi-ink: #1c3a13;
+
+  /* Seed lists Eucalyptus #698e79 as a product-card accent, not a text
+     colour — at 3.55:1 on Snow White it fails AA, and Poshan uses this token
+     for the "Normal" BMI band label and the "Favour" verdict. Darkened for
+     text; the original stays as the fill, the same split --haldi already has. */
+  --elaichi: #3f6b52;
+  /* Also dark. This token is a FILL under white text (the testimonial avatar
+     initials) — putting Seed's light Eucalyptus here dropped them to 3.65:1.
+     Both the text role and the fill role need depth on this palette. */
+  --elaichi-fill: #3f6b52;
+  --imli: #757c5d;        /* Sage Moss */
+  --imli-fill: #5f6549;
+
+  --panel: #1c3a13;
+  --panel-ink: #fcfcf7;
+
+  /* DELIBERATE DEVIATION. Seed forbids reds outright. The conditions module
+     uses traffic-light semantics on real health data — an "avoid" badge that
+     is not red is a safety regression, not a style choice. Muted toward the
+     palette, but kept legible as a warning. */
+  --mirch: #8f3a2a;
+  --verdict-good: #3d6b4f;
+  --verdict-caution: #7a5312;
+  --verdict-avoid: #8f3a2a;
+}
+
+/* Structure, not just colour. This is what makes it Seed rather than a
+   green repaint. */
+:root[data-palette="seed"] h1,
+:root[data-palette="seed"] h2,
+:root[data-palette="seed"] h3 {
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+
+/* "Do not introduce drop shadows... the design is intentionally flat." */
+:root[data-palette="seed"] .lift,
+:root[data-palette="seed"] .shadow-lg,
+:root[data-palette="seed"] .shadow-2xl,
+:root[data-palette="seed"] .liquid-glass,
+:root[data-palette="seed"] .liquid-glass-strong,
+:root[data-palette="seed"] .liquid-glass-dark {
+  box-shadow: none !important;
+}
+
+/* "Do not use gradients of any kind." The glass hairline is a gradient, so
+   under Seed it becomes a flat hairline instead. */
+:root[data-palette="seed"] .liquid-glass::before,
+:root[data-palette="seed"] .liquid-glass-strong::before,
+:root[data-palette="seed"] .liquid-glass-dark::before {
+  background: rgb(252 252 247 / 0.22);
+}
+
+/* The six sweets stay in every theme, Seed included. The system says no
+   gradients, but the food cursors are a brand feature Daksh wants kept —
+   his call, and they are the one piece of the page with any playfulness. */
+
+/* Cards 16px, pills stay pills. */
+:root[data-palette="seed"] .lift {
+  border-radius: 16px;
+}
+
 /* --- Neel: indigo, the dye India exported for centuries ----------- */
 :root[data-palette="neel"] {
   --roti: #fafbfd;   --roti-2: #eef2f8;  --line: #dde4ee;

@@ -15,7 +15,7 @@ import { useState, useEffect } from "react";
  */
 
 export type PaletteKey =
-  | "sindoor" | "neel" | "madhu" | "tulsi" | "kesari" | "kaajal" | "jamun";
+  | "sindoor" | "seed" | "neel" | "madhu" | "tulsi" | "kesari" | "kaajal" | "jamun";
 
 export const PALETTES: {
   key: PaletteKey;
@@ -28,6 +28,12 @@ export const PALETTES: {
     name: "Sindoor",
     note: "Vermilion. What ships today — warmest and most appetising of the set.",
     swatch: ["#FDFBFA", "#C2410C", "#EEAA3C"],
+  },
+  {
+    key: "seed",
+    name: "Seed",
+    note: "Botanical-clinical. Forest green as the only colour, lime confined to badges, whisper-light 300 headings — and it switches OFF every shadow, gradient and the ladoo, per the system's own rules.",
+    swatch: ["#FCFCF7", "#1C3A13", "#D3FA99"],
   },
   {
     key: "neel",

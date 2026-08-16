@@ -13,7 +13,10 @@ import { LangProvider } from "@/components/poshan/lang-provider";
  * grotesque rather than a calligraphic serif. */
 const display = Anek_Devanagari({
   variable: "--font-display",
-  weight: ["500", "600", "700"],
+  /* 300 added for the Seed theme, whose signature is whisper-light display
+     weights. Anek is variable and covers Devanagari, so the Hindi headings
+     thin out with the Latin rather than falling back to a different face. */
+  weight: ["300", "400", "500", "600", "700"],
   subsets: ["devanagari", "latin"],
   display: "swap",
 });
