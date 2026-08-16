@@ -16,6 +16,7 @@ import { Features } from "@/components/ui/features-8";
 import { Conditions } from "./conditions";
 import { MotionLayer } from "./motion-layer";
 import { Clinics } from "./clinics";
+import { HeroCinematic } from "./hero-cinematic";
 import { PaletteSwitcher } from "./palette-switcher";
 import { MagneticCursor } from "@/components/ui/magnetic-cursor";
 import { Bands, Meals, Biomarkers, Testimonials, ClosingCta, Footer } from "./sections";
@@ -114,6 +115,9 @@ function PoshanAppInner({
       <MotionLayer />
       <Nav />
       <main id="top" className="flex-1">
+        {/* Photographic opener. The BMI tool below is untouched — it is the
+            core interaction and does not belong buried under a hero. */}
+        <HeroCinematic />
         <Hero
           height={height}
           weight={weight}
