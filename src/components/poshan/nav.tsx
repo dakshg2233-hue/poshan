@@ -1,6 +1,7 @@
 "use client";
 
 import { useLang } from "./lang-provider";
+import { LangHint } from "./lang-hint";
 
 const LINKS = [
   { href: "#check", en: "Check your BMI", hi: "बीएमआई जाँचें" },
@@ -56,12 +57,15 @@ export function Nav() {
           ))}
         </nav>
 
-        <div
-          className="lg:ml-0 ml-auto flex rounded-full overflow-hidden shrink-0"
-          style={{ border: "1.5px solid var(--ink)" }}
-          role="group"
-          aria-label="Language / भाषा"
-        >
+        {/* Hint sits immediately left of the toggle it is pointing at. */}
+        <div className="lg:ml-0 ml-auto flex items-center gap-2 shrink-0">
+          <LangHint />
+          <div
+            className="flex rounded-full overflow-hidden"
+            style={{ border: "1.5px solid var(--ink)" }}
+            role="group"
+            aria-label="Language / भाषा"
+          >
           {(["en", "hi"] as const).map((l) => (
             <button
               key={l}
@@ -76,8 +80,9 @@ export function Nav() {
               }
             >
               {l === "en" ? "EN" : "हिं"}
-            </button>
-          ))}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </header>

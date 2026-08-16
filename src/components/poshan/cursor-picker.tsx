@@ -42,6 +42,7 @@ export function CursorPicker() {
       (window.matchMedia("(hover: none)").matches ||
         window.matchMedia("(prefers-reduced-motion: reduce)").matches)
   );
+  const [open, setOpen] = useState(false);
   const [active, setActive] = useState("ladoo");
 
   useEffect(() => {
@@ -58,43 +59,57 @@ export function CursorPicker() {
 
   if (hidden) return null;
 
+  const current = FOOD_CURSORS.find((f) => f.key === active) ?? FOOD_CURSORS[0];
+
   return (
-    <div className="flex flex-wrap items-center gap-2.5">
-      <span
-        className="text-[0.68rem] font-extrabold uppercase"
-        style={{ letterSpacing: "0.13em", color: "var(--ink-soft)" }}
+    /* Top-left, clear of the nav. Floating chrome rather than a footer row —
+       a cursor picker 23,000px down the page is one nobody ever finds. */
+    <div className="fixed top-20 left-4 z-[95] print:hidden">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex items-center gap-2 min-h-9 pl-2 pr-3.5 rounded-full text-[0.76rem] font-extrabold cursor-pointer shadow-lg"
+        style={{ background: "var(--surface)", border: "1px solid var(--line)", color: "var(--ink)" }}
       >
-        {T({ en: "Your cursor", hi: "आपका कर्सर" })}
-      </span>
-      <ul className="flex flex-wrap gap-1.5 list-none p-0 m-0" role="radiogroup"
-          aria-label={T({ en: "Choose a cursor", hi: "कर्सर चुनें" })}>
-        {FOOD_CURSORS.map((f) => (
-          <li key={f.key}>
-            <button
-              type="button"
-              role="radio"
-              aria-checked={active === f.key}
-              onClick={() => apply(f.key)}
-              title={T(f.name)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[0.74rem] cursor-pointer transition-colors"
-              style={
-                active === f.key
-                  ? { background: "var(--kesar-fill)", color: "#fff", border: "1px solid var(--kesar-fill)" }
-                  : { background: "var(--surface)", color: "var(--ink-soft)", border: "1px solid var(--line)" }
-              }
-            >
-              {/* The same CSS that paints the cursor, at swatch size, so the
-                  button shows the actual thing rather than a description. */}
-              <span
-                aria-hidden
-                data-swatch={f.key}
-                className="food-swatch block w-3.5 h-3.5 shrink-0"
-              />
-              {T(f.name)}
-            </button>
-          </li>
-        ))}
-      </ul>
+        <span aria-hidden data-swatch={current.key} className="food-swatch block w-5 h-5 shrink-0" />
+        {T({ en: "Cursor", hi: "कर्सर" })}
+      </button>
+
+      {open && (
+        <ul
+          className="mt-2 w-[178px] rounded-2xl p-2 shadow-2xl grid gap-0.5 list-none"
+          style={{ background: "var(--surface)", border: "1px solid var(--line)" }}
+          role="radiogroup"
+          aria-label={T({ en: "Choose a cursor", hi: "कर्सर चुनें" })}
+        >
+          {FOOD_CURSORS.map((f) => (
+            <li key={f.key}>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={active === f.key}
+                onClick={() => apply(f.key)}
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-[0.8rem] text-left cursor-pointer transition-colors"
+                style={
+                  active === f.key
+                    ? { background: "var(--kesar-fill)", color: "#fff" }
+                    : { color: "var(--ink-soft)" }
+                }
+              >
+                {/* The same CSS that paints the cursor, at swatch size, so the
+                    button shows the actual thing rather than a description. */}
+                <span
+                  aria-hidden
+                  data-swatch={f.key}
+                  className="food-swatch block w-4 h-4 shrink-0"
+                />
+                {T(f.name)}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

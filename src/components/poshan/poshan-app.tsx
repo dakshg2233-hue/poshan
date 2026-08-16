@@ -18,6 +18,7 @@ import { MotionLayer } from "./motion-layer";
 import { Clinics } from "./clinics";
 import { HeroCinematic } from "./hero-cinematic";
 import { PaletteSwitcher } from "./palette-switcher";
+import { CursorPicker } from "./cursor-picker";
 import { MagneticCursor } from "@/components/ui/magnetic-cursor";
 import { Bands, Meals, Biomarkers, Testimonials, ClosingCta, Footer } from "./sections";
 import {
@@ -152,6 +153,10 @@ function PoshanAppInner({
         <ClosingCta />
       </main>
       <Footer />
+      {/* Both are chrome, not content, so they sit outside <main>. Moved up
+          from the footer — a cursor picker buried 23,000px down is a picker
+          nobody finds. */}
+      <CursorPicker />
       {/* Decision tool while Daksh picks a palette — remove once chosen. */}
       <PaletteSwitcher />
     </MagneticCursor>

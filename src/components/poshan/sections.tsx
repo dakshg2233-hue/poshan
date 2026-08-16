@@ -2,7 +2,6 @@
 
 import { useLang, useReveal } from "./lang-provider";
 import { DishArt } from "./dish-art";
-import { CursorPicker } from "./cursor-picker";
 import {
   BANDS,
   DISHES,
@@ -455,12 +454,6 @@ export function Footer() {
             </a>
           ))}
         </nav>
-      </div>
-
-      {/* Pick your sweet. Hides itself on touch and under reduced motion,
-          where a pointer cursor either cannot exist or should not. */}
-      <div className={`${SHELL} mt-7 pt-6`} style={{ borderTop: "1px solid var(--line)" }}>
-        <CursorPicker />
       </div>
     </footer>
   );
