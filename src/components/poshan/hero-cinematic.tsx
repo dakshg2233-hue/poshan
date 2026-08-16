@@ -53,7 +53,7 @@ export function HeroCinematic() {
                 ground is the only fix that holds whatever the photo does. */}
             <FadeIn delay={100} duration={800}>
               <span
-                className="liquid-glass-dark backdrop-blur-sm inline-block rounded-full px-3.5 py-1.5 mb-5 text-[0.72rem] font-extrabold uppercase"
+                className="liquid-glass-dark refract backdrop-blur-sm inline-block rounded-full px-3.5 py-1.5 mb-5 text-[0.72rem] font-extrabold uppercase"
                 style={{
                   letterSpacing: "0.17em",
                   color: "#f0b055",
@@ -107,7 +107,7 @@ export function HeroCinematic() {
                 <a
                   href="#plate"
                   data-magnetic
-                  className="liquid-glass-dark backdrop-blur-sm inline-flex items-center min-h-12 px-8 rounded-lg font-medium text-white no-underline"
+                  className="liquid-glass-dark refract backdrop-blur-sm inline-flex items-center min-h-12 px-8 rounded-lg font-medium text-white no-underline"
                   style={{ border: "1px solid rgb(255 255 255 / 0.2)" }}
                 >
                   {T({ en: "See my thali", hi: "मेरी थाली देखें" })}
@@ -123,7 +123,7 @@ export function HeroCinematic() {
             className="flex items-end justify-start lg:justify-end mt-10 lg:mt-0"
           >
             <div
-              className="liquid-glass-dark backdrop-blur-sm px-6 py-3 rounded-xl"
+              className="liquid-glass-dark refract backdrop-blur-sm px-6 py-3 rounded-xl"
               style={{ border: "1px solid rgb(255 255 255 / 0.2)" }}
             >
               <p className="text-lg md:text-xl lg:text-2xl font-light text-white m-0">

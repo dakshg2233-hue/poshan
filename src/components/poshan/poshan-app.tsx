@@ -19,6 +19,7 @@ import { Clinics } from "./clinics";
 import { HeroCinematic } from "./hero-cinematic";
 import { PaletteSwitcher } from "./palette-switcher";
 import { CursorPicker } from "./cursor-picker";
+import { GlassFilter } from "@/components/ui/glass-filter";
 import { MagneticCursor } from "@/components/ui/magnetic-cursor";
 import { Bands, Meals, Biomarkers, Testimonials, ClosingCta, Footer } from "./sections";
 import {
@@ -113,6 +114,8 @@ function PoshanAppInner({
       cursorColor="transparent"
       contrastBoost={1}
     >
+      {/* One copy for the document — filters are referenced by id. */}
+      <GlassFilter />
       <MotionLayer />
       <Nav />
       <main id="top" className="flex-1">

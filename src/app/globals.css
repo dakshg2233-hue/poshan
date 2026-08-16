@@ -542,6 +542,53 @@ section.on-panel,
 }
 
 /* ==================================================================
+   REFRACTION
+   Adds true edge lensing on top of the blur, via the SVG displacement
+   filter mounted by <GlassFilter />. Content behind a panel bends at
+   its edges rather than only frosting.
+
+   Everything here is behind @supports for two reasons, both real:
+     - Firefox does not support url() inside backdrop-filter at all.
+     - Safari applies SVG filters to the backdrop inconsistently.
+   Where it is unsupported the plain blur + hairline glass below is what
+   renders, which already looks correct. Nobody gets a broken panel.
+
+   The @supports test deliberately probes the exact thing being used —
+   url() in backdrop-filter — not merely backdrop-filter, which Firefox
+   does support and would therefore pass while still failing on url().
+   ================================================================== */
+@supports (backdrop-filter: url(#poshan-glass)) or
+          (-webkit-backdrop-filter: url(#poshan-glass)) {
+  .liquid-glass.refract {
+    -webkit-backdrop-filter: url(#poshan-glass-soft) blur(8px);
+    backdrop-filter: url(#poshan-glass-soft) blur(8px);
+  }
+
+  .liquid-glass-strong.refract {
+    -webkit-backdrop-filter: url(#poshan-glass) blur(20px);
+    backdrop-filter: url(#poshan-glass) blur(20px);
+  }
+
+  .liquid-glass-dark.refract {
+    -webkit-backdrop-filter: url(#poshan-glass) blur(10px);
+    backdrop-filter: url(#poshan-glass) blur(10px);
+  }
+
+  /* Refraction is a continuously-sampled backdrop effect and the most
+     expensive thing on the page. Off on small screens, where the GPU
+     budget is smallest and the panels are largest relative to the
+     viewport, and off for anyone who asked for reduced motion. */
+  @media (prefers-reduced-motion: reduce), (max-width: 900px) {
+    .liquid-glass.refract,
+    .liquid-glass-strong.refract,
+    .liquid-glass-dark.refract {
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+    }
+  }
+}
+
+/* ==================================================================
    DARK LIQUID GLASS
    The white-tinted .liquid-glass above needs a dark ground behind it.
    This is the inverse: a dark pane for use OVER photography, which is
