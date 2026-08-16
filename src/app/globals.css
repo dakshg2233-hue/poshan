@@ -751,6 +751,24 @@ section.on-panel,
   );
 }
 
+/* Second, horizontal scrim for the video hero.
+   The bottom ramp alone is not enough: the heading sits mid-frame over a lit
+   steel thali and measured 2.38:1, and the 70%-white subtitle measured 1.04:1
+   — against a *video* those numbers also change frame to frame, so no
+   per-element colour tweak can hold. Weighting left rather than darkening the
+   whole frame keeps the right two-thirds of the food completely clear, which
+   is the half of the brief's "no overlay" instruction actually worth keeping. */
+.hero-scrim-side {
+  background: linear-gradient(
+    to right,
+    rgb(12 8 6 / 0.82) 0%,
+    rgb(12 8 6 / 0.66) 26%,
+    rgb(12 8 6 / 0.34) 48%,
+    rgb(12 8 6 / 0.06) 72%,
+    transparent 100%
+  );
+}
+
 /* ==================================================================
    FOOD CURSORS
    A small library of mithai, each drawn entirely in CSS gradients —
@@ -968,6 +986,40 @@ section.on-panel,
 
 /* Depth on hover instead of a jump: the card lights up rather than moving.
    Replaces the hover:-translate-y-1 that six places shared. */
+/* Nav stows itself while the video hero owns the top of the frame.
+   It is never removed from the DOM and never made inert: the skip link lives
+   inside it, so a keyboard user pressing Tab on load must still reach it.
+   :focus-within brings the whole bar back for exactly that case. */
+.nav-slide {
+  /* Declared here rather than as a Tailwind `fixed` utility because
+     .liquid-glass-chrome sets position:relative for its ::before hairline,
+     is unlayered, and so beats any layered utility no matter what the class
+     attribute says. This rule is later in the file at equal specificity, so
+     it wins — and the stow behaviour needs out-of-flow positioning anyway. */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  transition:
+    opacity 0.4s var(--ease),
+    transform 0.4s var(--ease);
+}
+.nav-stowed {
+  opacity: 0;
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+.nav-stowed:focus-within {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-slide {
+    transition: none;
+  }
+}
+
 .lift {
   transition:
     border-color 0.35s ease,

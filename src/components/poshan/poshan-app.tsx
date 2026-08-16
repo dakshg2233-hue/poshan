@@ -16,7 +16,9 @@ import { Features } from "@/components/ui/features-8";
 import { Conditions } from "./conditions";
 import { MotionLayer } from "./motion-layer";
 import { Clinics } from "./clinics";
-import { HeroCinematic } from "./hero-cinematic";
+/* hero-cinematic.tsx is the previous photographic hero. It is kept, not
+   deleted — swapping these two imports and the tag below reverts the hero. */
+import { HeroVideo } from "./hero-video";
 import { PaletteSwitcher } from "./palette-switcher";
 import { CursorPicker } from "./cursor-picker";
 import { GlassFilter } from "@/components/ui/glass-filter";
@@ -121,7 +123,7 @@ function PoshanAppInner({
       <main id="top" className="flex-1">
         {/* Photographic opener. The BMI tool below is untouched — it is the
             core interaction and does not belong buried under a hero. */}
-        <HeroCinematic />
+        <HeroVideo />
         <Hero
           height={height}
           weight={weight}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useLang } from "./lang-provider";
 import { LangHint } from "./lang-hint";
 
@@ -13,12 +14,59 @@ const LINKS = [
 export function Nav() {
   const { lang, setLang, T } = useLang();
 
+  /* The video hero carries its own floating glass chrome, so this bar would
+     be a second nav stacked on the first. Stand down while the hero holds the
+     top of the frame, and return the moment it is scrolled past. Pages with
+     no #hero (login, profile, dashboard) never observe anything and so keep
+     the bar visible always, which is the correct default. */
+  /* Starts visible. If anything below fails to run, the bar simply stays
+     where it is — the failure mode of a permanently hidden nav is far worse
+     than a redundant one, so the safe state is the default. */
+  const [overHero, setOverHero] = useState(false);
+
+  useEffect(() => {
+    const hero = document.getElementById("hero");
+    if (!hero) return;
+
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      /* Stow while the hero still covers where the bar would sit. Measured
+         against the bar's own height, so it hands over exactly as the hero
+         clears rather than at some arbitrary scroll offset. */
+      setOverHero(hero.getBoundingClientRect().bottom > 66);
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+
+    /* Deferred rather than called inline: a setState in an effect body is a
+       cascading render and the React 19 compiler lint rejects it. */
+    const initial = setTimeout(update, 0);
+    addEventListener("scroll", onScroll, { passive: true });
+    addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      clearTimeout(initial);
+      if (raf) cancelAnimationFrame(raf);
+      removeEventListener("scroll", onScroll);
+      removeEventListener("resize", onScroll);
+    };
+  }, []);
+
   return (
     <header
       /* background and backdrop-filter come from .liquid-glass-chrome, not
          from here — an inline backdropFilter beats any stylesheet rule and
          would silently win over the refraction. */
-      className="liquid-glass-chrome refract sticky top-0 z-50 border-b"
+      /* Positioning lives in .nav-slide, not in a Tailwind utility here —
+         .liquid-glass-chrome sets position:relative and beats layered
+         utilities. Fixed rather than sticky: sticky keeps its 66px in normal
+         flow, which pushed the full-bleed hero down and left a band of page
+         ground above the video. Only this page uses this component —
+         /profile and /dashboard have their own <Navbar />. */
+      className={`liquid-glass-chrome refract z-50 border-b nav-slide${
+        overHero ? " nav-stowed" : ""
+      }`}
       style={{ borderColor: "var(--line)" }}
     >
       {/* Off-screen until focused, so a keyboard user's first Tab skips the nav. */}

@@ -2,20 +2,28 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 /**
- * Refreshes the Supabase session cookie, and makes the app open on sign-in.
+ * Refreshes the Supabase session cookie, and gates the private pages.
  *
  * Two jobs:
  *  1. Touching getUser() refreshes the access token, so a session does not
  *     silently expire mid-visit.
- *  2. A signed-out visitor landing on "/" is sent to /login. Signed in, "/"
- *     renders the full site as before.
+ *  2. A signed-out visitor asking for /profile or /dashboard is sent to
+ *     /login and returned to where they were headed afterwards.
  *
- * Note this does put the marketing page behind the login — nobody sees the
- * thali, the meal library or the pricing without an account. That is the
- * requested behaviour; to undo it, delete the redirect block below and
- * nothing else changes.
+ * The marketing page is open to everyone. It was briefly behind the login,
+ * which meant a first-time visitor was asked for an account before being
+ * shown a single reason to want one.
  */
-const PUBLIC_PATHS = ["/login", "/auth"];
+
+/**
+ * Sign-in required. Everything not listed here is public, including "/" —
+ * the marketing page has to sell the product before it can ask for an
+ * account, and a visitor who hits a wall before seeing the thali, the 38
+ * meals or the pricing has been given no reason to sign up.
+ *
+ * These two are the pages that show a person their own data.
+ */
+const PRIVATE_PREFIXES = ["/profile", "/dashboard"];
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -46,19 +54,17 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isPublic =
-    PUBLIC_PATHS.some((p) => path === p || path.startsWith(`${p}/`)) ||
-    path.startsWith("/api/");
 
-  /* Signed out and asking for a gated page: open on sign-in instead, keeping
-     where they were headed so they land back there afterwards. */
-  /* POSHAN_OPEN=1 lifts the login gate so the marketing page can be inspected
-     without a session. Hard-bound to non-production: if this ever reaches a
-     deploy, the env var does nothing and the gate holds. */
-  const gateOpen =
-    process.env.NODE_ENV !== "production" && process.env.POSHAN_OPEN === "1";
+  /* Allow-list flipped to a deny-list. Previously everything was gated except
+     a handful of paths, which meant any new page defaulted to private — and
+     put the whole marketing site behind sign-in. Now only the pages that show
+     a person their own data require it, and a new page is public by default,
+     which is the right default for a site whose job is to persuade. */
+  const isPrivate = PRIVATE_PREFIXES.some(
+    (p) => path === p || path.startsWith(`${p}/`)
+  );
 
-  if (!user && !isPublic && !gateOpen) {
+  if (!user && isPrivate) {
     const to = request.nextUrl.clone();
     to.pathname = "/login";
     if (path !== "/") to.searchParams.set("next", path);

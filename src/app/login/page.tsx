@@ -50,7 +50,10 @@ function LoginForm() {
     ? rawNext
     : "/";
   const [step, setStep] = useState<Step>("email");
-  const [email, setEmail] = useState("");
+  /* The hero's email field hands the address over in ?email so it does not
+     have to be typed twice. Seeded once at init, never synced afterwards —
+     the field is the user's to edit from that point on. */
+  const [email, setEmail] = useState(() => searchParams.get("email")?.slice(0, 254) ?? "");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
