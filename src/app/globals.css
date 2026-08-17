@@ -1173,6 +1173,79 @@ main section:not(#hero)::before {
    specificity, and this block is later in the file, so it wins.
    Both rules previously carried !important, which changed nothing: the same
    comparison decides between two !important declarations. */
+/* ==================================================================
+   SECTION RHYTHM — dark hero, then cream, olive, charcoal
+   The brief asks the page to move out of the hero's dark into warm cream,
+   olive and charcoal rather than running one ground the whole way down.
+   Every value is mixed from --brand-1/--brand-2, so the rhythm holds on all
+   ten palettes instead of being three hard-coded colours.
+   Specificity note: these use `main section#id` deliberately. A bare
+   `main #id` scores lower than `main section:not(#hero)` above, because
+   :not() carries its argument's specificity — that mismatch silently broke
+   the light meal sections once already.
+   ================================================================== */
+
+/* Olive — the mid tone between the dark bands and the cream ones. */
+main section#scan,
+main section#clinics {
+  --roti: color-mix(in srgb, var(--brand-2) 10%, #2a2f22);
+  --roti-2: color-mix(in srgb, var(--brand-2) 14%, #333927);
+  --wash-1: var(--roti);
+  --wash-2: var(--roti-2);
+  --ink: color-mix(in srgb, var(--brand-2) 8%, #f4f1e6);
+  --ink-soft: color-mix(in srgb, var(--brand-2) 12%, #c2c4ac);
+  --line: rgb(255 255 255 / 0.12);
+  --surface: rgb(255 255 255 / 0.07);
+  /* Olive sits lighter than the charcoal band, so the accent inherited from
+     it measured 2.9:1 on the section eyebrows. Lifted further for this ground. */
+  --kesar: color-mix(in srgb, var(--brand-1) 26%, #ffeadd);
+  --panel: var(--roti);
+  --panel-ink: var(--ink);
+  background-color: var(--roti);
+  background-image:
+    radial-gradient(circle at 10% 12%, color-mix(in srgb, var(--brand-2) 22%, transparent), transparent 28rem),
+    radial-gradient(circle at 90% 88%, color-mix(in srgb, var(--brand-1) 16%, transparent), transparent 30rem),
+    linear-gradient(150deg,
+      color-mix(in srgb, var(--brand-2) 9%, #262b20),
+      color-mix(in srgb, var(--brand-1) 6%, #30361f) 55%,
+      color-mix(in srgb, var(--brand-2) 7%, #232719));
+}
+
+/* Cream — the warmest band, for the sections that talk about food. */
+main section#conditions {
+  --roti: color-mix(in srgb, var(--brand-2) 9%, #f6f2e6);
+  --roti-2: color-mix(in srgb, var(--brand-2) 14%, #ece6d5);
+  --wash-1: var(--roti);
+  --wash-2: var(--roti-2);
+  --surface: rgb(255 255 255 / 0.74);
+  --ink: color-mix(in srgb, var(--brand-1) 14%, #171c15);
+  --ink-soft: color-mix(in srgb, var(--brand-1) 12%, #41503f);
+  --line: color-mix(in srgb, var(--brand-1) 20%, rgb(44 60 44 / 0.16));
+  --kesar: color-mix(in srgb, var(--brand-1) 30%, #2c1703);
+  --kesar-fill: color-mix(in srgb, var(--brand-1) 55%, #3f2405);
+  --haldi: color-mix(in srgb, var(--brand-2) 60%, #4a3208);
+  --haldi-ink: color-mix(in srgb, var(--brand-2) 40%, #402c06);
+  --panel: color-mix(in srgb, var(--brand-1) 14%, #152018);
+  --panel-ink: #f8f5ed;
+  /* Verdict labels ("Favour", "Limit") are TEXT, and they inherit the lifted
+     values from the dark block above. On this cream ground that put them at
+     1.4:1 — light text on light. They have to sink here, not lift. */
+  --mirch: #9c2b1c;
+  --elaichi: #2d6a44;
+  --elaichi-fill: #2d6a44;
+  --verdict-good: #2d6a44;
+  --verdict-caution: #6b4a10;
+  --verdict-avoid: #9c2b1c;
+  background-color: var(--roti);
+  background-image:
+    radial-gradient(circle at 6% 10%, color-mix(in srgb, var(--brand-2) 30%, transparent), transparent 26rem),
+    radial-gradient(circle at 94% 90%, color-mix(in srgb, var(--brand-1) 18%, transparent), transparent 28rem),
+    linear-gradient(150deg,
+      color-mix(in srgb, var(--brand-2) 7%, #f7f4ea),
+      color-mix(in srgb, var(--brand-1) 6%, #ece7d7) 55%,
+      color-mix(in srgb, var(--brand-2) 8%, #eef2e7));
+}
+
 main section#plate,
 main section#meals {
   /* Both brand colours, not just --brand-2: Jamun and Tulsi happen to share
