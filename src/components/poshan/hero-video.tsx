@@ -176,8 +176,8 @@ export function HeroVideo() {
         className="absolute inset-0 z-[1]"
         style={{
           background:
-            "radial-gradient(120% 100% at 18% 6%, rgba(10,11,10,.94), rgba(10,11,10,.6) 42%, rgba(10,11,10,.25) 70%, transparent 100%)," +
-            "linear-gradient(180deg, rgba(10,11,10,.78) 0%, rgba(10,11,10,.3) 46%, rgba(10,11,10,.84) 100%)",
+            "radial-gradient(105% 85% at 16% 4%, rgba(10,11,10,.88), rgba(10,11,10,.42) 38%, transparent 68%)," +
+            "linear-gradient(180deg, rgba(10,11,10,.55) 0%, transparent 34%, transparent 58%, rgba(10,11,10,.72) 100%)",
         }}
         aria-hidden="true"
       />
@@ -186,8 +186,21 @@ export function HeroVideo() {
         className="absolute inset-0 z-[1]"
         style={{
           background:
-            "radial-gradient(52% 42% at 78% 72%, rgba(196,132,58,.22), transparent 70%)," +
+            "radial-gradient(46% 36% at 82% 76%, rgba(196,132,58,.14), transparent 72%)," +
             `radial-gradient(38% 30% at 12% 82%, ${LEAF}1f, transparent 72%)`,
+        }}
+        aria-hidden="true"
+      />
+
+      {/* A scrim for the TEXT only, not the whole frame. Darkening everything
+          made the copy legible by hiding the food, which on a food site is the
+          wrong trade. This sits behind the centre column and falls away fast,
+          so the plate stays visible either side of it. */}
+      <div
+        className="absolute inset-0 z-[1]"
+        style={{
+          background:
+            "radial-gradient(46% 34% at 50% 50%, rgba(8,9,8,.72), rgba(8,9,8,.45) 55%, transparent 78%)",
         }}
         aria-hidden="true"
       />
