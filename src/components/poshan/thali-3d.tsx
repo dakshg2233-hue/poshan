@@ -7,6 +7,13 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 import { useLang } from "./lang-provider";
 import { usePrefersReducedMotion } from "@/lib/use-media-query";
 import type { Band, Plan } from "@/lib/poshan-data";
+import {
+  MAX_PORTION,
+  optionFor,
+  PLATE_SLOTS,
+  type PlateState,
+  type SlotId,
+} from "@/lib/plate";
 import { isDropped } from "@/lib/poshan-data";
 import { MaskedHeading } from "@/components/ui/masked-heading";
 
@@ -35,7 +42,9 @@ function cssColor(varName: string, fallback: string) {
   }
 }
 
-const KATORI_ANGLES = [200, 240, 300, 340].map((d) => (d * Math.PI) / 180);
+/* Five seats now, evenly spread around the back and sides of the plate so
+   the extra achar katori does not crowd the roti and rice at the front. */
+const KATORI_ANGLES = [186, 222, 258, 300, 342].map((d) => (d * Math.PI) / 180);
 const KATORI_R = 1.05;
 
 /**
@@ -63,21 +72,44 @@ function StudioEnvironment() {
   return <primitive attach="environment" object={texture} />;
 }
 
+/**
+ * One katori, editable.
+ *
+ * A single gesture carries both edits, which is what keeps the plate from
+ * needing a control panel bolted to it:
+ *   drag up/down  → how much is in the bowl (portion)
+ *   tap           → swap the dish for the next one that belongs in this slot
+ *
+ * The two are told apart by distance travelled, so a tap that wobbles by a
+ * pixel still counts as a tap. Pointer events stop here rather than bubbling,
+ * or dragging food would also spin the plate underneath it.
+ */
 function Katori({
   angle,
-  fill,
+  portion,
   color,
+  active,
+  onPortion,
+  onSwap,
+  onHover,
 }: {
   angle: number;
-  fill: number;
+  portion: number;
   color: THREE.Color;
+  active: boolean;
+  onPortion: (p: number) => void;
+  onSwap: () => void;
+  onHover: (over: boolean) => void;
 }) {
   const fillRef = useRef<THREE.Mesh>(null);
+  const drag = useRef<{ y: number; moved: number; from: number } | null>(null);
+  const { invalidate } = useThree();
   const x = Math.cos(angle) * KATORI_R;
   const z = Math.sin(angle) * KATORI_R;
-  const target = Math.max(0.04, fill);
+  /* Never fully empty visually — a bowl scaled to 0 disappears and there is
+     then nothing left to grab to put food back in. */
+  const target = Math.max(0.04, portion / MAX_PORTION);
 
-  /* Ease the food level toward the plan rather than snapping. */
   useFrame((_, dt) => {
     const m = fillRef.current;
     if (!m) return;
@@ -86,8 +118,42 @@ function Katori({
     m.position.y = 0.09 + (m.scale.y * 0.18) / 2;
   });
 
+  function down(e: ThreeEvent<PointerEvent>) {
+    e.stopPropagation();
+    drag.current = { y: e.clientY, moved: 0, from: portion };
+    (e.target as Element)?.setPointerCapture?.(e.pointerId);
+  }
+  function move(e: ThreeEvent<PointerEvent>) {
+    if (!drag.current) return;
+    e.stopPropagation();
+    const dy = drag.current.y - e.clientY;
+    drag.current.moved += Math.abs(e.movementY || 0);
+    /* 160px of travel spans the full range, so a portion is a deliberate
+       movement rather than something you set by accident. */
+    const next = Math.max(0, Math.min(MAX_PORTION, drag.current.from + (dy / 160) * MAX_PORTION));
+    onPortion(next);
+    invalidate();
+  }
+  function up(e: ThreeEvent<PointerEvent>) {
+    e.stopPropagation();
+    const d = drag.current;
+    drag.current = null;
+    if (d && d.moved < 4) onSwap();
+    invalidate();
+  }
+
   return (
-    <group position={[x, 0.1, z]}>
+    <group
+      position={[x, 0.1, z]}
+      onPointerDown={down}
+      onPointerMove={move}
+      onPointerUp={up}
+      onPointerOver={() => onHover(true)}
+      onPointerOut={() => {
+        onHover(false);
+        drag.current = null;
+      }}
+    >
       {/* steel bowl */}
       <mesh castShadow receiveShadow>
         <cylinderGeometry args={[0.42, 0.3, 0.22, 40, 1, true]} />
@@ -98,6 +164,18 @@ function Katori({
           side={THREE.DoubleSide}
         />
       </mesh>
+      {/* Rim light on hover, so it is discoverable that these can be touched. */}
+      {active && (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.115, 0]}>
+          <torusGeometry args={[0.42, 0.018, 12, 48]} />
+          <meshStandardMaterial
+            color="#FFD9A0"
+            emissive="#FFB861"
+            emissiveIntensity={1.4}
+            roughness={0.4}
+          />
+        </mesh>
+      )}
       {/* the food inside it */}
       <mesh ref={fillRef} position={[0, 0.15, 0]} scale={[1, 0.5, 1]}>
         <cylinderGeometry args={[0.37, 0.28, 0.18, 36]} />
@@ -107,24 +185,35 @@ function Katori({
   );
 }
 
-function ThaliMesh({ band, plan }: { band: Band; plan: Plan }) {
+function ThaliMesh({
+  band,
+  plate,
+  setSlot,
+  swapSlot,
+  onHover,
+}: {
+  band: Band;
+  plate: PlateState;
+  setSlot: (id: SlotId, portion: number) => void;
+  swapSlot: (id: SlotId) => void;
+  onHover: (id: SlotId | null) => void;
+}) {
   const group = useRef<THREE.Group>(null);
   const drag = useRef<{ x: number; y: number } | null>(null);
   /* The camera already supplies the three-quarter view, so the group starts
      level. Tipping it here as well put the plate edge-on. */
   const [rot, setRot] = useState({ x: 0, y: 0.5 });
+  const [hovered, setHovered] = useState<SlotId | null>(null);
   const { invalidate } = useThree();
 
-  const colors = useMemo(
-    () => ({
-      dal: cssColor("--haldi", "#E0A81C"),
-      sabzi: cssColor("--elaichi", "#4A7C4E"),
-      dahi: new THREE.Color("#E7EBEE"),
-      chutney: cssColor("--mirch", "#B33A20"),
-      band: cssColor(band.color.replace("var(", "").replace(")", ""), "#4A7C4E"),
-    }),
+  /* Dish colours now come from the plate, so swapping dal for rajma actually
+     changes what is in the bowl rather than only the label beside it. */
+  const bandColor = useMemo(
+    () => cssColor(band.color.replace("var(", "").replace(")", ""), "#4A7C4E"),
     [band.color]
   );
+  const dishColor = (id: SlotId) =>
+    new THREE.Color(optionFor(id, plate[id].dish).color);
 
   useFrame(() => {
     const g = group.current;
@@ -154,8 +243,11 @@ function ThaliMesh({ band, plan }: { band: Band; plan: Plan }) {
     drag.current = null;
   };
 
-  const fills = plan.fills;
-  const riceOff = isDropped(plan.qty.rice);
+  const riceOff = plate.rice.portion <= 0.02;
+  /* Five katoris now: achar has its own bowl rather than sharing with the
+     fresh chutney. It is a live lacto-ferment, which is a different thing
+     from a relish, and it belongs on the plate in its own right. */
+  const KATORI_SLOTS: SlotId[] = ["katori1", "katori2", "katori3", "katori4", "achar"];
 
   return (
     <group
@@ -171,8 +263,8 @@ function ThaliMesh({ band, plan }: { band: Band; plan: Plan }) {
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]}>
         <torusGeometry args={[2.02, 0.045, 16, 96]} />
         <meshStandardMaterial
-          color={colors.band}
-          emissive={colors.band}
+          color={bandColor}
+          emissive={bandColor}
           emissiveIntensity={0.75}
           roughness={0.4}
         />
@@ -189,13 +281,21 @@ function ThaliMesh({ band, plan }: { band: Band; plan: Plan }) {
         <meshStandardMaterial color="#AEB4BA" metalness={0.96} roughness={0.15} />
       </mesh>
 
-      <Katori angle={KATORI_ANGLES[0]} fill={fills[0]} color={colors.dal} />
-      <Katori angle={KATORI_ANGLES[1]} fill={fills[1]} color={colors.sabzi} />
-      <Katori angle={KATORI_ANGLES[2]} fill={fills[2]} color={colors.dahi} />
-      <Katori angle={KATORI_ANGLES[3]} fill={fills[3]} color={colors.chutney} />
+      {KATORI_SLOTS.map((id, i) => (
+        <Katori
+          key={id}
+          angle={KATORI_ANGLES[i]}
+          portion={plate[id].portion}
+          color={dishColor(id)}
+          active={hovered === id}
+          onPortion={(p) => setSlot(id, p)}
+          onSwap={() => swapSlot(id)}
+          onHover={(over) => onHover(over ? id : null)}
+        />
+      ))}
 
-      {/* roti stack — height follows the plan */}
-      {Array.from({ length: plan.rotis }).map((_, i) => (
+      {/* roti stack — height follows the portion you set */}
+      {Array.from({ length: Math.max(0, Math.round(plate.roti.portion * 4)) }).map((_, i) => (
         <mesh key={i} position={[-0.55, 0.1 + i * 0.055, 0.78]} castShadow>
           <cylinderGeometry args={[0.55, 0.55, 0.05, 48]} />
           <meshStandardMaterial
@@ -251,10 +351,33 @@ function useInView<T extends HTMLElement>() {
   return { ref: setNode, inView };
 }
 
-export default function Thali3D({ band, plan }: { band: Band; plan: Plan }) {
+export default function Thali3D({
+  band,
+  plan,
+  plate,
+  setPlate,
+}: {
+  band: Band;
+  plan: Plan;
+  plate: PlateState;
+  setPlate: (next: PlateState) => void;
+}) {
   const { T } = useLang();
   const calm = usePrefersReducedMotion();
   const { ref, inView } = useInView<HTMLDivElement>();
+  const [hovered, setHovered] = useState<SlotId | null>(null);
+
+  const setSlot = (id: SlotId, portion: number) =>
+    setPlate({ ...plate, [id]: { ...plate[id], portion } });
+
+  /* Tap cycles to the next dish that belongs in this slot, wrapping round. */
+  const swapSlot = (id: SlotId) => {
+    const slot = PLATE_SLOTS.find((s) => s.id === id);
+    if (!slot) return;
+    const i = slot.options.findIndex((o) => o.key === plate[id].dish);
+    const next = slot.options[(i + 1) % slot.options.length];
+    setPlate({ ...plate, [id]: { ...plate[id], dish: next.key } });
+  };
 
   return (
     <section className="py-14 md:py-24">
@@ -331,7 +454,13 @@ export default function Thali3D({ band, plan }: { band: Band; plan: Plan }) {
                     shadow-mapSize={[1024, 1024]}
                   />
                   <directionalLight position={[-4, 2, -3]} intensity={0.5} color="#E0A81C" />
-                  <ThaliMesh band={band} plan={plan} />
+                  <ThaliMesh
+                    band={band}
+                    plate={plate}
+                    setSlot={setSlot}
+                    swapSlot={swapSlot}
+                    onHover={setHovered}
+                  />
                 </Canvas>
               )}
 
