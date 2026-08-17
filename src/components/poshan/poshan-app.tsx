@@ -19,6 +19,7 @@ import { Clinics } from "./clinics";
 import { HeroVideo } from "./hero-video";
 import { CursorPicker } from "./cursor-picker";
 import { PaletteControl } from "./palette-control";
+import { PointerLight } from "./pointer-light";
 import { GlassFilter } from "@/components/ui/glass-filter";
 import { MagneticCursor } from "@/components/ui/magnetic-cursor";
 import { Bands, Meals, Biomarkers, Testimonials, ClosingCta, Footer } from "./sections";
@@ -145,6 +146,8 @@ function PoshanAppInner({
       {/* Fixed chrome, not nav furniture: the header stows over the hero,
           which used to take the only palette control off screen with it. */}
       <PaletteControl />
+      {/* The hero's pointer spotlight, carried down the whole page. */}
+      <PointerLight />
     </MagneticCursor>
   );
 }
