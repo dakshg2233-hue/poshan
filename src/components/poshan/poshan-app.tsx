@@ -6,20 +6,17 @@ import {
   useBodyState,
   type Body,
 } from "@/lib/use-body-profile";
-import dynamic from "next/dynamic";
 import { Nav } from "./nav";
 import { Hero } from "./hero";
 import { Premium } from "./premium";
 import { MealLibrary } from "./meal-library";
 import { FoodScanner } from "./food-scanner";
-import { Features } from "@/components/ui/features-8";
 import { Conditions } from "./conditions";
 import { MotionLayer } from "./motion-layer";
 import { Clinics } from "./clinics";
 /* hero-cinematic.tsx is the previous photographic hero. It is kept, not
    deleted — swapping these two imports and the tag below reverts the hero. */
 import { HeroVideo } from "./hero-video";
-import { PaletteSwitcher } from "./palette-switcher";
 import { CursorPicker } from "./cursor-picker";
 import { GlassFilter } from "@/components/ui/glass-filter";
 import { MagneticCursor } from "@/components/ui/magnetic-cursor";
@@ -31,22 +28,6 @@ import {
   type DietKey,
   type RegionKey,
 } from "@/lib/poshan-data";
-
-/* three.js is code-split and never server-rendered. The placeholder holds the
-   exact box height so nothing shifts when it arrives. */
-const Thali3D = dynamic(() => import("./thali-3d"), {
-  ssr: false,
-  loading: () => (
-    <section className="py-14 md:py-24">
-      <div className="w-[min(1180px,100%-2.5rem)] mx-auto">
-        <div
-          className="on-panel rounded-3xl h-[380px] md:h-[460px]"
-          style={{ background: "var(--panel)" }}
-        />
-      </div>
-    </section>
-  ),
-});
 
 /**
  * Resolves stored values first, then mounts the app seeded from them.
@@ -137,8 +118,6 @@ function PoshanAppInner({
         <Meals band={band} plan={plan} />
         <MealLibrary goal={goal} />
         <FoodScanner />
-        <Thali3D band={band} plan={plan} />
-        <Features />
         <Conditions />
         {/* diet and region now live here too, so all five values persist
             together rather than the customiser holding two of them privately. */}
@@ -162,8 +141,6 @@ function PoshanAppInner({
           from the footer — a cursor picker buried 23,000px down is a picker
           nobody finds. */}
       <CursorPicker />
-      {/* Decision tool while Daksh picks a palette — remove once chosen. */}
-      <PaletteSwitcher />
     </MagneticCursor>
   );
 }

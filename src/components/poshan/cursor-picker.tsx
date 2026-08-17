@@ -28,6 +28,8 @@ export const FOOD_CURSORS: FoodCursor[] = [
   { key: "gulab-jamun", name: { en: "Gulab jamun", hi: "गुलाब जामुन" } },
   { key: "barfi", name: { en: "Barfi", hi: "बर्फ़ी" } },
   { key: "rasgulla", name: { en: "Rasgulla", hi: "रसगुल्ला" } },
+  { key: "apple", name: { en: "Apple", hi: "सेब" } },
+  { key: "cucumber", name: { en: "Cucumber", hi: "खीरा" } },
 ];
 
 const STORAGE_KEY = "poshan-cursor";

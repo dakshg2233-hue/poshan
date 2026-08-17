@@ -1,286 +1,95 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { useLang } from "./lang-provider";
 
-/**
- * Full-viewport video hero, built to the supplied "Aurai" brief.
- *
- * The layout, the glass pill nav, the bottom-anchored content, the inline
- * email capture and the feature pills are all as specified. Five things had
- * to change to survive contact with this particular site:
- *
- *  1. BRAND. The brief is for a product called Aurai. This is Poshan, so the
- *     wordmark and the existing thali logo stay — a second, unrelated logo in
- *     the hero would contradict the one in the nav six pixels below it.
- *  2. TYPEFACE. "Askan Light" is served from a font CDN we cannot reach
- *     (font-src is 'self'), and it carries no Devanagari. This site sets its
- *     headings in Hindi and English from the same face; in Askan the हिं
- *     heading would silently fall back mid-word. Anek covers both, and is
- *     already loaded.
- *  3. VIDEO SOURCE. media-src is 'self', so the CloudFront URL is blocked by
- *     our own CSP. The file is served locally, with the thali photograph as
- *     the poster so the hero is never empty while it buffers.
- *  4. SCRIM. The brief says no overlay. Over a *video* the backdrop changes
- *     every frame, so no static contrast measurement can hold — the heading
- *     is legible on one frame and gone on the next. A light bottom-weighted
- *     scrim is the only fix that survives the whole loop; the top of frame is
- *     left completely clear, as intended.
- *  5. SUBMIT. The brief calls for alert(). Poshan has real email-OTP auth, so
- *     the field hands the address to /login instead of throwing a dialog.
- *
- * Reduced motion is honoured, which the brief does not mention: a looping
- * autoplaying video is precisely what that setting exists to suppress.
- */
+const BACKGROUND = "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260713_140344_79e1296a-86d7-43fd-9b5f-63ffe560f291.png&w=1280&q=85";
+const VIDEO = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260713_162101_0d7498c5-29bb-47bf-a99f-2773c0a880a9.mp4";
+const OVERLAY = "https://soft-zoom-63098134.figma.site/_assets/v11/3f10f1876e118f72a396e05a6c2d099569478272.png";
+
+const LINKS = [
+  { href: "#check", en: "BMI check", hi: "बीएमआई जाँचें" },
+  { href: "#plate", en: "Your plate", hi: "आपकी थाली" },
+  { href: "#bios", en: "Biomarkers", hi: "बायोमार्कर" },
+  { href: "#premium", en: "Plans", hi: "प्लान" },
+];
+
+/** Dark, editorial opener derived from the supplied Measured concept. */
 export function HeroVideo() {
-  const { T, lang, setLang } = useLang();
-  const router = useRouter();
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const { T } = useLang();
+  const sectionRef = useRef<HTMLElement>(null);
+  const gridRef = useRef<SVGSVGElement>(null);
+  const revealRef = useRef<HTMLDivElement>(null);
+  const target = useRef({ x: -600, y: -600 });
+  const smooth = useRef({ x: -600, y: -600 });
   const [menuOpen, setMenuOpen] = useState(false);
-  const [email, setEmail] = useState("");
+  const [reducedMotion, setReducedMotion] = useState(true);
 
-  /* Derived at init rather than set in an effect — a setState in an effect
-     body cascades a render and the React 19 compiler lint rejects it. */
-  const [stillVideo] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const setPreference = () => setReducedMotion(query.matches);
+    setPreference();
+    query.addEventListener("change", setPreference);
+    return () => query.removeEventListener("change", setPreference);
+  }, []);
 
-  const FEATURES = [
-    { en: "Asian-Indian BMI", hi: "एशियाई-भारतीय बीएमआई" },
-    { en: "38 real thalis", hi: "38 असली थालियाँ" },
-    { en: "Scan your plate", hi: "अपनी थाली स्कैन करें" },
-  ];
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [menuOpen]);
 
-  const LINKS = [
-    { href: "#check", en: "Check BMI", hi: "बीएमआई" },
-    { href: "#plate", en: "Your plate", hi: "आपकी थाली" },
-    { href: "#premium", en: "Pricing", hi: "मूल्य" },
-  ];
+  useEffect(() => {
+    if (reducedMotion) return;
+    let frame = 0;
+    const draw = () => {
+      smooth.current.x += (target.current.x - smooth.current.x) * 0.1;
+      smooth.current.y += (target.current.y - smooth.current.y) * 0.1;
+      const { x, y } = smooth.current;
+      const mask = `radial-gradient(260px circle at ${x}px ${y}px, #000 0%, #000 40%, rgb(0 0 0 / .75) 60%, rgb(0 0 0 / .4) 75%, rgb(0 0 0 / .12) 88%, transparent 100%)`;
+      if (revealRef.current) {
+        revealRef.current.style.webkitMaskImage = mask;
+        revealRef.current.style.maskImage = mask;
+      }
+      if (gridRef.current && sectionRef.current) {
+        const rect = sectionRef.current.getBoundingClientRect();
+        gridRef.current.style.transform = `translate(${((x - rect.width / 2) / rect.width) * 16}px, ${((y - rect.height / 2) / rect.height) * 16}px)`;
+      }
+      frame = requestAnimationFrame(draw);
+    };
+    frame = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(frame);
+  }, [reducedMotion]);
 
-  function submit(e: React.FormEvent) {
-    e.preventDefault();
-    const v = email.trim();
-    if (!v) return;
-    /* Hand off to the real auth flow rather than faking a waitlist. */
-    router.push(`/login?email=${encodeURIComponent(v)}`);
+  function moveSpotlight(event: React.PointerEvent<HTMLElement>) {
+    if (event.pointerType === "touch" || reducedMotion) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    target.current = { x: event.clientX - rect.left, y: event.clientY - rect.top };
   }
 
   return (
-    <section
-      id="hero"
-      className="relative h-[100svh] w-full overflow-hidden"
-      style={{ background: "#0c0806" }}
-    >
-      <video
-        ref={videoRef}
-        /* poster carries the hero until the video decodes, and remains the
-           whole hero if the file is absent — never a black rectangle. */
-        poster="/thali-hero.jpg"
-        autoPlay={!stillVideo}
-        loop
-        muted
-        playsInline
-        aria-hidden
-        className="absolute inset-0 h-full w-full object-cover [object-position:80%_center] md:[object-position:right_center] lg:[object-position:center_center]"
-      >
-        <source src="/hero.mp4" type="video/mp4" />
-      </video>
+    <section id="hero" ref={sectionRef} onPointerMove={moveSpotlight} onPointerLeave={() => { target.current = { x: -600, y: -600 }; }} className="relative isolate h-[100svh] min-h-[620px] w-full overflow-hidden bg-[#0a0a0a] text-white">
+      <svg ref={gridRef} className="absolute inset-[-32px] z-0 h-[calc(100%+64px)] w-[calc(100%+64px)] opacity-20 will-change-transform" aria-hidden="true">
+        <defs><pattern id="poshan-grid" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="#94a3b8" strokeWidth="0.6" /></pattern></defs>
+        <rect width="100%" height="100%" fill="url(#poshan-grid)" />
+      </svg>
+      <div className="absolute inset-0 z-10 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${BACKGROUND}), linear-gradient(rgb(10 10 10 / .18), rgb(10 10 10 / .5)), url('/thali-hero.jpg')` }} />
+      <div className="absolute inset-0 z-10 bg-black/35" aria-hidden="true" />
+      <h1 className="pointer-events-none absolute inset-x-3 top-20 z-20 text-center text-[clamp(4.5rem,19vw,16rem)] leading-[.78] tracking-[-.07em] text-white" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>POSHAN</h1>
+      <img src={OVERLAY} alt="" className="pointer-events-none absolute inset-0 z-25 h-full w-full object-cover opacity-70" />
 
-      {/* Legibility scrims. Bottom-weighted for the content band, plus a
-          left-weighted one for the text column — measured, not guessed: the
-          heading was 2.38:1 and the subtitle 1.04:1 with the bottom ramp
-          alone. The right of the frame stays clear. */}
-      <div className="absolute inset-0 hero-scrim" aria-hidden />
-      <div className="absolute inset-0 hero-scrim-side" aria-hidden />
+      {!reducedMotion && <div ref={revealRef} className="pointer-events-none absolute inset-0 z-30 hidden md:block" style={{ clipPath: "inset(40% 0 0 0)" }} aria-hidden="true"><video autoPlay loop muted playsInline className="h-full w-full object-cover" poster="/thali-hero.jpg"><source src={VIDEO} type="video/mp4" /></video></div>}
 
-      <div className="absolute inset-0 z-10 flex flex-col px-4 sm:px-10 lg:px-12 py-4 sm:py-8">
-        {/* ------------------------------------------------------------ nav */}
-        <nav className="flex items-center justify-between">
-          <div className="flex items-center bg-black/20 backdrop-blur-md rounded-2xl border border-white/10 px-4 py-2.5 sm:px-6 sm:py-4">
-            <a href="#top" className="flex items-center gap-2.5 no-underline" aria-label="Poshan">
-              {/* The site's own mark, not the brief's pinwheel — the nav
-                  directly below this uses it, and two logos is no logo. */}
-              <svg viewBox="0 0 40 40" aria-hidden className="w-5 h-5 sm:w-7 sm:h-7 shrink-0">
-                <circle cx={20} cy={20} r={18} fill="none" stroke="#fff" strokeWidth={2.5} />
-                <circle cx={20} cy={20} r={12.5} fill="none" stroke="#ffffff88" strokeWidth={1.5} />
-                <circle cx={14} cy={15} r={4.6} fill="var(--haldi)" />
-                <circle cx={26} cy={15} r={4.6} fill="var(--elaichi)" />
-                <ellipse cx={20} cy={27} rx={7.5} ry={4.4} fill="var(--kesar)" />
-              </svg>
-              <span
-                className="text-white text-base sm:text-xl tracking-wide"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                पोषण Poshan
-              </span>
-            </a>
+      <header className="absolute inset-x-0 top-0 z-[60] flex items-center justify-between p-4 sm:p-6">
+        <a href="#top" className="liquid-glass flex h-12 w-12 items-center justify-center rounded-full" aria-label="Poshan home"><svg viewBox="0 0 256 256" className="h-7 w-7" aria-hidden="true"><path fill="white" d="M256 64v64h-63.5L160 95l-32-31-32 31-32.5 33H64l64 64v64H64.5L32 223 0 192V64L64 0h128zm0 128v64h-63.5L160 223l-32-31v-64h64z" /></svg></a>
+        <nav className="liquid-glass absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 rounded-full p-1.5 md:flex" aria-label="Main">{LINKS.map((link) => <a key={link.href} href={link.href} className="rounded-full px-4 py-2 text-sm font-medium text-white/75 no-underline transition hover:bg-white/10 hover:text-white">{T(link)}</a>)}</nav>
+        <a href="#check" className="liquid-glass hidden items-center gap-2 rounded-full px-5 py-3 text-sm font-medium text-white no-underline md:flex"><span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />{T({ en: "Start your check", hi: "अपना चेक शुरू करें" })}</a>
+        <button type="button" onClick={() => setMenuOpen(true)} className="liquid-glass grid h-12 w-12 place-items-center rounded-full md:hidden" aria-label={T({ en: "Open menu", hi: "मेन्यू खोलें" })} aria-expanded={menuOpen}><Menu className="h-5 w-5" /></button>
+      </header>
 
-            <button
-              type="button"
-              onClick={() => setMenuOpen((o) => !o)}
-              aria-expanded={menuOpen}
-              aria-label={T({ en: "Menu", hi: "मेन्यू" })}
-              className="ml-4 sm:ml-32 md:ml-64 lg:ml-96 text-white cursor-pointer"
-            >
-              {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
+      <div className="absolute inset-x-0 bottom-0 z-40 p-5 pb-7 sm:p-10 sm:pb-12"><div className="max-w-xl"><p className="text-sm font-semibold uppercase tracking-[.22em] text-emerald-300">{T({ en: "Nutrition, measured for India", hi: "भारत के लिए मापा गया पोषण" })}</p><p className="mt-3 max-w-lg text-base leading-relaxed text-white/90 sm:text-lg">{T({ en: "Understand your body through Asian-Indian BMI ranges, then build a plate that feels like home.", hi: "एशियाई-भारतीय बीएमआई रेंज के साथ शरीर को समझें, फिर घर जैसी थाली बनाएँ।" })}</p><a href="#check" className="liquid-glass mt-6 inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-white no-underline transition hover:bg-white/10"><span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />{T({ en: "Check your BMI", hi: "बीएमआई जाँचें" })}</a></div></div>
 
-          <div className="hidden sm:flex items-center gap-3">
-            {/* Language stays reachable from the hero — this is the first
-                screen, and it is where a Hindi reader decides to stay. */}
-            <div className="flex rounded-full overflow-hidden border border-white/25" role="group" aria-label="Language / भाषा">
-              {(["en", "hi"] as const).map((l) => (
-                <button
-                  key={l}
-                  type="button"
-                  aria-pressed={lang === l}
-                  onClick={() => setLang(l)}
-                  className="px-3 py-2 text-[0.78rem] font-bold cursor-pointer transition-colors"
-                  style={
-                    lang === l
-                      ? { background: "#fff", color: "#111" }
-                      : { color: "#fff", background: "rgb(0 0 0 / 0.25)" }
-                  }
-                >
-                  {l === "en" ? "EN" : "हिं"}
-                </button>
-              ))}
-            </div>
-            <a
-              href="#check"
-              data-magnetic
-              className="bg-white text-gray-900 font-medium text-sm px-6 py-3 rounded-full no-underline"
-            >
-              {T({ en: "Check your BMI", hi: "बीएमआई जाँचें" })}
-            </a>
-          </div>
-        </nav>
-
-        {/* --------------------------------------------------- mobile menu */}
-        {menuOpen && (
-          <div className="sm:hidden absolute top-[4.5rem] left-4 right-4 bg-black/30 backdrop-blur-xl rounded-2xl p-5 border border-white/10 z-20">
-            <ul className="list-none p-0 m-0 grid gap-3">
-              {LINKS.map((l) => (
-                <li key={l.href}>
-                  <a
-                    href={l.href}
-                    onClick={() => setMenuOpen(false)}
-                    className="text-white no-underline text-[0.95rem]"
-                  >
-                    {T({ en: l.en, hi: l.hi })}
-                  </a>
-                </li>
-              ))}
-            </ul>
-            <div className="flex gap-2 mt-4">
-              {(["en", "hi"] as const).map((l) => (
-                <button
-                  key={l}
-                  type="button"
-                  aria-pressed={lang === l}
-                  onClick={() => setLang(l)}
-                  className="flex-1 py-2 rounded-full text-[0.8rem] font-bold cursor-pointer"
-                  style={
-                    lang === l
-                      ? { background: "#fff", color: "#111" }
-                      : { color: "#fff", border: "1px solid rgb(255 255 255 / 0.25)" }
-                  }
-                >
-                  {l === "en" ? "English" : "हिंदी"}
-                </button>
-              ))}
-            </div>
-            <a
-              href="#check"
-              onClick={() => setMenuOpen(false)}
-              className="block w-full text-center bg-white text-gray-900 font-medium text-sm px-6 py-3 rounded-full mt-3 no-underline"
-            >
-              {T({ en: "Check your BMI", hi: "बीएमआई जाँचें" })}
-            </a>
-          </div>
-        )}
-
-        {/* Pushes content to the bottom on mobile. */}
-        <div className="flex-1 sm:hidden" />
-
-        {/* -------------------------------------------------- main content */}
-        <div className="flex flex-col sm:flex-1 sm:flex-row sm:items-end pb-4 sm:pb-12 lg:pb-16 sm:mt-auto gap-6">
-          <div className="min-w-0">
-            <h1
-              className="text-white text-[2rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] leading-[1.05] tracking-tight max-w-[700px] font-normal"
-              style={{ fontFamily: "var(--font-display)" }}
-              lang={lang === "hi" ? "hi" : undefined}
-            >
-              {T({
-                en: "Know your body. Eat like home.",
-                hi: "अपना शरीर जानें। घर जैसा खाएँ।",
-              })}
-            </h1>
-
-            {/* /70 in the brief, /90 here: at 70% this measured 1.04:1 over
-                the plate — below the 1:1 floor of "visible at all". */}
-            <p className="text-white/90 text-xs sm:text-base md:text-lg max-w-[520px] leading-relaxed mt-4">
-              {T({
-                en: "Poshan reads your BMI on Asian-Indian cutoffs — where 23 already counts as overweight — then builds the plate you actually eat.",
-                hi: "पोषण आपका बीएमआई एशियाई-भारतीय कटऑफ़ पर पढ़ता है — जहाँ 23 पहले से ही अधिक वज़न है — और फिर वही थाली बनाता है जो आप सच में खाते हैं।",
-              })}
-            </p>
-
-            <form
-              onSubmit={submit}
-              className="relative mt-6 max-w-[440px] bg-black/30 backdrop-blur-md rounded-full border border-white/10"
-            >
-              <label htmlFor="hero-email" className="sr-only">
-                {T({ en: "Your email address", hi: "आपका ईमेल पता" })}
-              </label>
-              <input
-                id="hero-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={T({ en: "Your email address", hi: "आपका ईमेल पता" })}
-                className="w-full bg-transparent text-white placeholder:text-white/50 px-4 sm:px-6 py-3 sm:py-4 text-sm rounded-full outline-none pr-28 sm:pr-36"
-              />
-              <button
-                type="submit"
-                data-magnetic
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-white text-gray-900 text-xs sm:text-sm font-medium px-3 sm:px-6 py-2 sm:py-3 rounded-full cursor-pointer"
-              >
-                {T({ en: "Get started", hi: "शुरू करें" })}
-              </button>
-            </form>
-
-            {/* Feature pills — mobile */}
-            <ul className="flex sm:hidden flex-wrap gap-2 mt-4 list-none p-0">
-              {FEATURES.map((f) => (
-                <li
-                  key={f.en}
-                  className="bg-black/30 backdrop-blur-md text-white text-xs px-3 py-1.5 rounded-full border border-white/10"
-                >
-                  {T(f)}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Feature pills — desktop */}
-          <ul className="hidden sm:flex flex-col items-end gap-2 self-end ml-auto list-none p-0 m-0">
-            {FEATURES.map((f) => (
-              <li
-                key={f.en}
-                className="bg-black/30 backdrop-blur-md text-white text-xs sm:text-sm px-4 py-2 rounded-full border border-white/10 whitespace-nowrap"
-              >
-                {T(f)}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+      {menuOpen && <div className="fixed inset-0 z-[70] flex min-h-[100svh] flex-col bg-[#0a0a0a] p-5 text-white md:hidden"><button type="button" onClick={() => setMenuOpen(false)} className="liquid-glass ml-auto grid h-12 w-12 place-items-center rounded-full" aria-label={T({ en: "Close menu", hi: "मेन्यू बंद करें" })}><X className="h-5 w-5" /></button><nav className="my-auto grid gap-5 text-center" aria-label="Mobile menu">{LINKS.map((link, index) => <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)} className="animate-[poshan-menu-in_.5s_cubic-bezier(.77,0,.18,1)_both] text-3xl font-medium text-white/90 no-underline" style={{ animationDelay: `${100 + index * 60}ms` }}>{T(link)}</a>)}</nav><a href="#check" onClick={() => setMenuOpen(false)} className="liquid-glass mx-auto flex items-center gap-2 rounded-full px-6 py-4 text-sm font-medium text-white no-underline"><span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />{T({ en: "Start your check", hi: "अपना चेक शुरू करें" })}</a></div>}
     </section>
   );
 }

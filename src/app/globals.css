@@ -49,6 +49,22 @@
 }
 
 :root {
+  /* The palette's own two signature colours, captured at :root.
+   *
+   * These exist so the cinematic section theming below can tint itself with
+   * the ACTIVE palette. Sections override --kesar/--haldi for their own dark
+   * ground, so they cannot read those directly — but a custom property is
+   * resolved on the element that declares it, and these are declared only
+   * here. Each :root[data-palette="…"] block redefines --kesar/--haldi with
+   * higher specificity on this same element, so --brand-1/--brand-2 pick up
+   * the winning palette automatically and then inherit down as fixed values,
+   * immune to the section-level overrides.
+   *
+   * Add nothing per-palette here: all nine already define --kesar/--haldi. */
+  --brand-1: var(--kesar);
+  --brand-2: var(--haldi);
+  --tone-one: var(--brand-1);
+  --tone-two: var(--brand-2);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -769,6 +785,11 @@ section.on-panel,
   );
 }
 
+@keyframes poshan-menu-in {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* ==================================================================
    FOOD CURSORS
    A small library of mithai, each drawn entirely in CSS gradients —
@@ -856,6 +877,285 @@ section.on-panel,
   box-shadow:
     inset -2px -3px 6px rgb(140 140 125 / 0.35),
     0 2px 9px rgb(120 120 108 / 0.3);
+}
+
+/* --- Apple: rounded fruit with a stem and a small leaf. ---------------- */
+:root[data-cursor="apple"] .food-cursor,
+.food-swatch[data-swatch="apple"] {
+  background-image:
+    linear-gradient(55deg, transparent 45%, #4e3518 46% 56%, transparent 57%),
+    radial-gradient(ellipse at 70% 12%, #6f9e40 0 14%, transparent 15%),
+    radial-gradient(circle at 34% 28%, #ffb0a0 0 9%, transparent 10%),
+    radial-gradient(circle at 48% 55%, #ef4a39 0 48%, #b7191b 78%, #751113 100%);
+  box-shadow: inset -2px -3px 6px rgb(90 10 10 / .45), 0 3px 10px rgb(130 20 20 / .28);
+}
+
+/* --- Cucumber: deliberately long, cool green, with a pale seeded core. -- */
+:root[data-cursor="cucumber"] .food-cursor,
+.food-swatch[data-swatch="cucumber"] {
+  width: 11px;
+  height: 30px;
+  border-radius: 999px;
+  background-image:
+    repeating-linear-gradient(90deg, rgb(255 255 255 / .12) 0 1px, transparent 1px 4px),
+    linear-gradient(90deg, #2c6d39 0%, #76af58 24%, #c9dc83 48%, #5c9a4b 76%, #235f37 100%);
+  box-shadow: inset -2px 0 3px rgb(10 50 20 / .35), 0 3px 8px rgb(25 80 35 / .28);
+}
+
+/* The calculator uses a native range input: this is the same accessible
+   keyboard and touch behaviour as a slider primitive, with only the visual
+   track customised. */
+.estimate-range {
+  appearance: none;
+  height: 7px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #ff5656 var(--progress), #393939 var(--progress));
+  cursor: pointer;
+}
+.estimate-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #ff5656;
+  box-shadow: 0 3px 12px rgb(255 86 86 / .45);
+}
+.estimate-range::-moz-range-thumb {
+  width: 17px;
+  height: 17px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #ff5656;
+  box-shadow: 0 3px 12px rgb(255 86 86 / .45);
+}
+
+/* ==================================================================
+   HERO ECHO
+   The page below the opener carries the same cinematic material language:
+   inky grounds, coloured light, and raised translucent surfaces. A handful
+   of warm, light sections deliberately break the dark run so meal content
+   remains inviting rather than reading like a dashboard.
+   ================================================================== */
+/* Every colour below is mixed from --brand-1/--brand-2, never written as a
+   literal. That is the whole fix: the previous version restated all twenty
+   tokens as fixed hex here, so changing the palette at :root repainted
+   nothing below the hero — the sections simply overwrote it again. The dark
+   cinematic look is unchanged; it now takes its hue from the active palette,
+   so Neel goes inky blue, Jamun plum, Tulsi forest, and so on. */
+main {
+  background: color-mix(in srgb, var(--brand-1) 6%, #0b0a0d);
+}
+
+main section:not(#hero) {
+  --roti: color-mix(in srgb, var(--brand-1) 8%, #0f0e13);
+  --roti-2: color-mix(in srgb, var(--brand-1) 12%, #16151c);
+  --wash-1: var(--roti);
+  --wash-2: var(--roti-2);
+  --surface: rgb(255 255 255 / 0.075);
+  /* Near-white carrying a breath of the palette, so body copy is warm on
+     Sindoor and cool on Neel rather than the same grey on all nine. */
+  --ink: color-mix(in srgb, var(--brand-1) 6%, #fdfaf7);
+  --ink-soft: color-mix(in srgb, var(--brand-1) 14%, #c4bcc0);
+  --line: rgb(255 255 255 / 0.13);
+  --steel: color-mix(in srgb, var(--brand-1) 12%, #a49aa2);
+  --steel-lo: rgb(255 255 255 / 0.16);
+  /* Accents lifted toward the light end so they read on a dark ground —
+     most palette accents are mid-dark and would disappear here. */
+  --kesar: color-mix(in srgb, var(--brand-1) 52%, #ffe0cc);
+  /* Darkened, not lightened: this is a BUTTON FILL carrying white text.
+     Lifting it like the text accents put "See my thali" and "Open camera"
+     at 2.32:1. Fills and text accents have to move in opposite directions. */
+  --kesar-fill: color-mix(in srgb, var(--brand-1) 50%, #5a1e02);
+  /* --mirch is text ("Limit" on the condition cards) and was left at the
+     palette's dark red on a near-black ground — 2.5:1 in every palette. */
+  --mirch: color-mix(in srgb, var(--brand-1) 30%, #ff9f95);
+  /* Green stays green in all nine. It is the FSSAI vegetarian mark, not a
+     decorative accent — tinting it per palette would misinform. */
+  --elaichi: #8fdba0;
+  --elaichi-fill: #2f7d4f;
+  --haldi: color-mix(in srgb, var(--brand-2) 70%, #ffe1a8);
+  --haldi-ink: var(--haldi);
+  --imli: color-mix(in srgb, var(--brand-1) 30%, #e6c4aa);
+  --imli-fill: color-mix(in srgb, var(--brand-1) 70%, #6b3a20);
+  --panel: var(--roti);
+  --panel-ink: var(--ink);
+  isolation: isolate;
+  overflow: hidden;
+  /* No !important. It was defeating the token system it sat on top of, and
+     nothing here needs to outrank anything. */
+  background-color: var(--roti);
+  background-image:
+    radial-gradient(circle at 8% 12%, color-mix(in srgb, var(--tone-one) 26%, transparent), transparent 26rem),
+    radial-gradient(circle at 92% 84%, color-mix(in srgb, var(--tone-two) 20%, transparent), transparent 30rem),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--brand-1) 10%, #0a0b0c),
+      color-mix(in srgb, var(--brand-2) 8%, #131215) 52%,
+      color-mix(in srgb, var(--brand-1) 6%, #0a0d0c)
+    );
+  color: var(--ink);
+}
+
+.nav-cinematic {
+  /* The bar is dark now, so it needs the same lifted accents the dark
+     sections use. Without this the wordmark and links kept the palette's
+     mid-dark :root accent and measured 1.4–2.1:1 against the bar in all
+     nine palettes — the brand name itself was the worst text on the page. */
+  --kesar: color-mix(in srgb, var(--brand-1) 38%, #ffdcc6);
+  --haldi: color-mix(in srgb, var(--brand-2) 60%, #ffe6b8);
+  --ink: color-mix(in srgb, var(--brand-1) 6%, #fdfaf7);
+  --ink-soft: color-mix(in srgb, var(--brand-1) 14%, #cfc7cb);
+  --roti: color-mix(in srgb, var(--brand-1) 10%, #12110f);
+  /* Redefining --ink above is not enough: nothing in the bar sets `color`,
+     so "पोषण" inherited the page's dark body ink onto a dark bar (1.4:1). */
+  color: var(--ink);
+  background: color-mix(in srgb, var(--brand-1) 12%, rgb(10 12 10 / 0.86));
+  border-color: color-mix(in srgb, var(--brand-1) 26%, rgb(255 255 255 / 0.12));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .12), 0 12px 30px rgb(0 0 0 / .18);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+main section:not(#hero)::before {
+  content: "";
+  position: absolute;
+  inset: -25%;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.48;
+  /* The drifting ambient glow. Was a fixed green in every palette. */
+  background: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in srgb, var(--tone-one) 30%, transparent),
+    transparent 25%
+  );
+  filter: blur(14px);
+  animation: hero-echo-drift 14s ease-in-out infinite alternate;
+}
+
+/* Warm, colourful reset for the food library. It keeps the hero's depth and
+   glow, but lets actual food imagery feel fresh and appetising. */
+/* `main section#plate`, not `main #plate`.
+   :not() takes the specificity of its argument, so `main section:not(#hero)`
+   above scores (1 id, 0 class, 2 type) and outranks a plain `main #meals` at
+   (1, 0, 1) — the generic dark rule beat this specific light one, which is
+   why the meal library rendered dark. Adding the `section` type ties the
+   specificity, and this block is later in the file, so it wins.
+   Both rules previously carried !important, which changed nothing: the same
+   comparison decides between two !important declarations. */
+main section#plate,
+main section#meals {
+  /* Both brand colours, not just --brand-2: Jamun and Tulsi happen to share
+     the same --haldi, so a ground mixed from that alone came out identical
+     in the two. Folding in --brand-1 keeps all nine distinguishable. */
+  --roti: color-mix(in srgb, var(--brand-1) 5%, color-mix(in srgb, var(--brand-2) 12%, #f7f4ec));
+  --roti-2: color-mix(in srgb, var(--brand-1) 7%, color-mix(in srgb, var(--brand-2) 18%, #eae6d9));
+  --wash-1: var(--roti);
+  --wash-2: var(--roti-2);
+  --surface: rgb(255 255 255 / 0.72);
+  --ink: color-mix(in srgb, var(--brand-1) 14%, #131b16);
+  /* 12% of a darker base, not 22% of #55624f. Several palette accents are
+     LIGHT (Kaali's #ff8a5b), so a generous mix lightened the muted text
+     instead of tinting it — the meal-card tag pills fell to 3.7:1 on Kaali
+     and even Sindoor sat at 4.46, just under the 4.5 floor. */
+  --ink-soft: color-mix(in srgb, var(--brand-1) 12%, #41503f);
+  --line: color-mix(in srgb, var(--brand-1) 22%, rgb(44 76 48 / 0.16));
+  --steel: color-mix(in srgb, var(--brand-1) 14%, #71806e);
+  --steel-lo: color-mix(in srgb, var(--brand-2) 16%, #d6dccb);
+  /* Darkened rather than lightened: this run of sections is light, so the
+     accent has to go the other way to stay legible. */
+  /* 48%, not 76%. Kaali's accent (#ff8a5b) is already light, so a mix that
+     favours it stayed light on a white card — "How to cook it" measured
+     2.73:1 across all 38 meal cards. Weighting the dark base instead keeps
+     every palette's accent readable here. */
+  --kesar: color-mix(in srgb, var(--brand-1) 48%, #3a1f04);
+  /* Same reason as --kesar above: at 84% Kaali's light accent stayed light
+     and the white text on selected filter pills ("All") hit 3.0:1. Any fill
+     carrying white text has to be anchored to the dark end of the mix. */
+  --kesar-fill: color-mix(in srgb, var(--brand-1) 55%, #3f2405);
+  --elaichi: #2d6a44;
+  --elaichi-fill: #2d6a44;
+  --haldi: color-mix(in srgb, var(--brand-2) 82%, #6d4a10);
+  --haldi-ink: color-mix(in srgb, var(--brand-2) 55%, #5a3d0c);
+  --panel: color-mix(in srgb, var(--brand-1) 14%, #152018);
+  --panel-ink: #f8f5ed;
+  background-color: var(--roti);
+  background-image:
+    radial-gradient(circle at 5% 10%, color-mix(in srgb, var(--brand-2) 34%, transparent), transparent 26rem),
+    radial-gradient(circle at 95% 88%, color-mix(in srgb, var(--brand-1) 22%, transparent), transparent 28rem),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--brand-2) 8%, #f8f6ed),
+      color-mix(in srgb, var(--brand-1) 7%, #ece8d8) 55%,
+      color-mix(in srgb, var(--brand-2) 9%, #eef4e9)
+    );
+}
+
+main section#bios {
+  background-image:
+    radial-gradient(circle at 7% 15%, color-mix(in srgb, var(--brand-1) 26%, transparent), transparent 26rem),
+    radial-gradient(circle at 90% 90%, color-mix(in srgb, var(--brand-2) 20%, transparent), transparent 28rem),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--brand-1) 12%, #09110d),
+      color-mix(in srgb, var(--brand-2) 9%, #111a12) 58%,
+      color-mix(in srgb, var(--brand-1) 8%, #0d100d)
+    );
+}
+
+main section:not(#hero) .surface-card,
+main section:not(#hero) .lift {
+  /* Tinted with the palette rather than pure white, so cards on Neel read
+     cool and cards on Madhu read wine. Pure white alpha looked identical in
+     all nine, which is a large part of why the palettes seemed not to work. */
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--brand-1) 14%, rgb(255 255 255 / 0.16)),
+    color-mix(in srgb, var(--brand-2) 10%, rgb(255 255 255 / 0.06))
+  );
+  border-color: color-mix(in srgb, var(--line) 78%, #fff);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    inset 0 -1px 0 rgb(255 255 255 / 0.04),
+    0 20px 45px rgb(0 0 0 / 0.19);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: transform 260ms var(--ease), box-shadow 260ms var(--ease), border-color 260ms var(--ease);
+}
+
+main section#plate .surface-card,
+main section#plate .lift,
+main section#meals .surface-card,
+main section#meals .lift {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--brand-2) 6%, rgb(255 255 255 / 0.94)),
+    color-mix(in srgb, var(--brand-1) 7%, rgb(255 255 255 / 0.66))
+  );
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 18px 40px color-mix(in srgb, var(--brand-1) 40%, rgb(113 58 28 / 0.14));
+}
+
+@media (hover: hover) {
+  main section:not(#hero) .surface-card:hover,
+  main section:not(#hero) .lift:hover {
+    transform: translateY(-5px) rotateX(1deg);
+    border-color: color-mix(in srgb, var(--kesar) 55%, var(--line));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.28), 0 28px 54px rgb(0 0 0 / 0.28);
+  }
+}
+
+@keyframes hero-echo-drift {
+  from { transform: translate3d(-4%, -2%, 0) scale(1); }
+  to { transform: translate3d(5%, 4%, 0) scale(1.12); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main section:not(#hero)::before { animation: none; }
+  main section:not(#hero) .surface-card,
+  main section:not(#hero) .lift { transition: none; }
 }
 
 @theme inline {
