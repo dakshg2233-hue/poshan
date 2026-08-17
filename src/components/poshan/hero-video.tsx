@@ -228,7 +228,7 @@ export function HeroVideo() {
           Equal flexible outer tracks put it back on the true centre line while
           still reserving the CTA's room. */}
       <header className="absolute inset-x-0 top-0 z-50 grid grid-cols-[1fr_auto_1fr] items-start gap-4 p-5 sm:p-7">
-        <a href="#top" className="flex items-center gap-2.5 no-underline" aria-label="Poshan">
+        <a href="#top" className="flex w-fit items-center gap-2.5 justify-self-start no-underline" aria-label="Poshan">
           <Kernel className="h-7 w-7 text-white" />
           <span
             className="text-[1.35rem] italic leading-none text-white"
@@ -260,12 +260,14 @@ export function HeroVideo() {
 
         <a
           href="#check"
-          className="hidden items-center gap-2 rounded-full px-5 py-3 text-[0.82rem] font-medium no-underline transition-transform active:scale-[.97] md:flex"
+          /* Smaller than the spec's default pill. Only the header one shrinks —
+             the mobile-menu CTA stays large, since that is the touch target. */
+          className="hidden w-fit items-center gap-1.5 justify-self-end rounded-full px-3.5 py-2 text-[0.74rem] font-medium no-underline transition-transform active:scale-[.97] md:flex"
           style={{ background: LEAF, color: "#0a0b0a", fontFamily: "var(--font-ui), sans-serif" }}
         >
-          <span className="h-1.5 w-1.5 rounded-full bg-[#0a0b0a]" aria-hidden="true" />
+          <span className="h-1 w-1 rounded-full bg-[#0a0b0a]" aria-hidden="true" />
           {T({ en: "Find your blend", hi: "अपनी थाली पाएँ" })}
-          <ArrowUpRight className="h-4 w-4" />
+          <ArrowUpRight className="h-3.5 w-3.5" />
         </a>
 
         <button
