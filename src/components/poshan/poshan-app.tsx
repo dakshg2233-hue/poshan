@@ -20,6 +20,8 @@ import { HeroVideo } from "./hero-video";
 import { CursorPicker } from "./cursor-picker";
 import { PaletteControl } from "./palette-control";
 import { PointerLight } from "./pointer-light";
+import { StickyCta } from "./sticky-cta";
+import { Consent } from "./consent";
 import { GlassFilter } from "@/components/ui/glass-filter";
 import { MagneticCursor } from "@/components/ui/magnetic-cursor";
 import { Bands, Meals, Biomarkers, Testimonials, ClosingCta, Footer } from "./sections";
@@ -148,6 +150,9 @@ function PoshanAppInner({
       <PaletteControl />
       {/* The hero's pointer spotlight, carried down the whole page. */}
       <PointerLight />
+      <StickyCta />
+      {/* Nothing is loaded and no id is set until this is accepted. */}
+      <Consent />
     </MagneticCursor>
   );
 }
