@@ -17,10 +17,8 @@ import { useLang } from "./lang-provider";
  *    matte-charcoal jar. No such asset is in this repo and the spec ships none,
  *    so the site's own thali photograph stands in for the base and reveal
  *    layers. Drop files at the two paths below and they are picked up.
- *  - Nav LABELS are the spec's; the hrefs point at Poshan's real sections.
- *    "Ritual" and "Our blends" describe a supplements brand; pointing them at
- *    anchors that do not exist would ship five dead links, which is a bug I
- *    have already had to fix once on this page.
+ *  - Nav labels are conventional section names, not the spec's brand-speak,
+ *    and the whole group sits at the far right rather than centred.
  *  - Copy stays bilingual. The spec is English-only, but half this site's
  *    readers are not, and a hero that silently drops Hindi is a regression.
  */
@@ -32,12 +30,16 @@ const MOTION = "/thali-hero.jpg";
 /** Poshan Leaf — the only action and status colour in this design. */
 const LEAF = "#8FBF72";
 
+/* Conventional section names rather than brand-speak. "Ritual", "Our blends",
+   "The science" and "Journal" described a supplements company and told a
+   first-time visitor nothing about what is on the page. Every href is an
+   anchor that exists — verified — because this nav has shipped dead links
+   twice before. */
 const NAV = [
-  { href: "#check", en: "Ritual", hi: "दिनचर्या" },
-  { href: "#plate", en: "Our blends", hi: "हमारी थाली" },
-  { href: "#bios", en: "The science", hi: "विज्ञान" },
-  { href: "#meals", en: "Journal", hi: "जर्नल" },
-  { href: "#premium", en: "Reach us", hi: "संपर्क" },
+  { href: "#meals", en: "Meal plans", hi: "मील प्लान" },
+  { href: "#bios", en: "Biomarkers", hi: "बायोमार्कर" },
+  { href: "#premium", en: "Pricing", hi: "मूल्य" },
+  { href: "#clinics", en: "For clinics", hi: "क्लिनिक" },
 ];
 
 /**
@@ -224,14 +226,11 @@ export function HeroVideo() {
           space, so at 1100px the pill ran from 599 to 1031 and the CTA began
           at 898: a 133px overlap, with the pill sitting on top of "Find your
           blend". A grid gives the centre track its own room and lets it
-          shrink before it ever reaches the CTA.
-          1fr auto 1fr, not auto 1fr auto: with auto outer tracks the brand and
-          the CTA are different widths, so the middle track centres between
-          them rather than in the viewport — the pill sat 41px left of centre.
-          Equal flexible outer tracks put it back on the true centre line while
-          still reserving the CTA's room. */}
-      <header className="absolute inset-x-0 top-0 z-50 grid grid-cols-[1fr_auto_1fr] items-start gap-4 p-5 sm:p-7">
-        <a href="#top" className="flex w-fit items-center gap-2.5 justify-self-start no-underline" aria-label="Poshan">
+          shrink before it ever reaches the CTA. The pill now sits in that
+          right-hand group beside the CTA rather than centred, so all the
+          navigation reads as one block at the extreme right. */}
+      <header className="absolute inset-x-0 top-0 z-50 flex items-start justify-between gap-4 p-5 sm:p-7">
+        <a href="#top" className="flex w-fit items-center gap-2.5 no-underline" aria-label="Poshan">
           <Kernel className="h-7 w-7 text-white" />
           <span
             className="text-[1.35rem] italic leading-none text-white"
@@ -241,11 +240,12 @@ export function HeroVideo() {
           </span>
         </a>
 
-        <nav
+        <div className="flex items-center gap-3">
+          <nav
           /* justify-self-center keeps it optically centred in its own track
              instead of over the whole header, and min-w-0 lets it give way
              rather than push the CTA off the edge. */
-          className="liquid-glass hidden min-w-0 items-center justify-self-center whitespace-nowrap gap-0.5 rounded-full p-1.5 lg:flex"
+          className="liquid-glass hidden min-w-0 items-center whitespace-nowrap gap-0.5 rounded-full p-1.5 lg:flex"
           style={{ backdropFilter: "blur(7px)", WebkitBackdropFilter: "blur(7px)" }}
           aria-label="Main"
         >
@@ -259,13 +259,13 @@ export function HeroVideo() {
               {T(l)}
             </a>
           ))}
-        </nav>
+          </nav>
 
         <a
           href="#check"
           /* Smaller than the spec's default pill. Only the header one shrinks —
              the mobile-menu CTA stays large, since that is the touch target. */
-          className="hidden w-fit items-center gap-1.5 justify-self-end rounded-full px-3.5 py-2 text-[0.74rem] font-medium no-underline transition-transform active:scale-[.97] md:flex"
+          className="hidden w-fit items-center gap-1.5 rounded-full px-3.5 py-2 text-[0.74rem] font-medium no-underline transition-transform active:scale-[.97] md:flex"
           style={{ background: LEAF, color: "#0a0b0a", fontFamily: "var(--font-ui), sans-serif" }}
         >
           <span className="h-1 w-1 rounded-full bg-[#0a0b0a]" aria-hidden="true" />
@@ -281,8 +281,9 @@ export function HeroVideo() {
           aria-label={T({ en: "Open menu", hi: "मेन्यू खोलें" })}
           aria-expanded={menuOpen}
         >
-          <Menu className="h-5 w-5" />
-        </button>
+            <Menu className="h-5 w-5" />
+          </button>
+        </div>
       </header>
 
       {/* --------------------------------------------------------- centre */}
