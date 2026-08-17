@@ -1625,3 +1625,33 @@ html {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ==================================================================
+   404 — mobile behaviour, per the supplied spec's 640px rules.
+   Kept in CSS rather than inline so the media query is expressible at all.
+   ================================================================== */
+@media (max-width: 640px) {
+  .not-found-logo {
+    top: 32px !important;
+    transform: translateX(-50%) scale(0.75) !important;
+    transform-origin: top center;
+  }
+  .not-found-group {
+    width: min(100% - 40px, 360px) !important;
+    gap: 28px !important;
+  }
+  .not-found-numerals {
+    font-size: clamp(140px, 52vw, 200px) !important;
+    letter-spacing: -0.09em !important;
+    height: auto;
+    min-height: 0;
+    padding-bottom: 0.14em;
+  }
+  .not-found-rule {
+    width: 100% !important;
+  }
+  .not-found-message {
+    font-size: clamp(16px, 4.5vw, 20px) !important;
+    letter-spacing: -1.3px !important;
+  }
+}
