@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { useLang } from "./lang-provider";
-import { GlassJar } from "./glass-jar";
 
 
 const LINKS = [
@@ -74,9 +73,6 @@ export function HeroVideo() {
       {/* Our own photograph, self-hosted. The hosted terrarium that used to sit
           on top of this was full of Studio Ghibli characters. */}
       <div className="absolute inset-0 z-10 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "linear-gradient(rgb(10 10 10 / .35), rgb(10 10 10 / .6)), url('/thali-hero.jpg')" }} />
-      {/* The jar: same vessel, symbolic fill rather than a picture of food. */}
-      <GlassJar className="pointer-events-none absolute z-[15] left-1/2 top-[16%] h-[42%] w-[86%] -translate-x-1/2 sm:left-auto sm:right-[4%] sm:top-1/2 sm:h-[62%] sm:w-[46%] sm:translate-x-0 sm:-translate-y-1/2" />
-
       {/* Spotlight reveal, restored. This went out with the hotlinked video it
           used to unmask; the interaction was the hero's character, so it now
           reveals the same photograph in full colour through a cursor-tracked
