@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Anek_Devanagari, Mukta, IBM_Plex_Mono } from "next/font/google";
+import { Anek_Devanagari, Mukta, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { LangProvider } from "@/components/poshan/lang-provider";
 
@@ -11,6 +11,16 @@ import { LangProvider } from "@/components/poshan/lang-provider";
  * Anek keeps the one-face-two-scripts discipline and the Indian-type lineage
  * (Ek Type, same foundry as Mukta below) while being a contemporary variable
  * grotesque rather than a calligraphic serif. */
+/* The hero wordmark only. Latin-only face, which is fine because it sets
+   "POSHAN" and nothing in Devanagari. next/font self-hosts it at build time,
+   so font-src stays 'self' and no Google request goes out at runtime. */
+const wordmark = Instrument_Serif({
+  variable: "--font-wordmark",
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+});
+
 const display = Anek_Devanagari({
   variable: "--font-display",
   /* 300 added for the Seed theme, whose signature is whisper-light display
@@ -70,7 +80,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${display.variable} ${ui.variable} ${mono.variable} h-full antialiased`}
+      className={`${display.variable} ${wordmark.variable} ${ui.variable} ${mono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <LangProvider>{children}</LangProvider>

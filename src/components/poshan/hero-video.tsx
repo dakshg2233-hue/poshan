@@ -5,6 +5,8 @@ import { Menu, X } from "lucide-react";
 import { useLang } from "./lang-provider";
 
 
+const MARKS = ["ladoo", "jalebi", "modak", "barfi", "gulab-jamun"];
+
 const LINKS = [
   { href: "#check", en: "BMI check", hi: "बीएमआई जाँचें" },
   { href: "#plate", en: "Your plate", hi: "आपकी थाली" },
@@ -70,9 +72,26 @@ export function HeroVideo() {
         <defs><pattern id="poshan-grid" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="#94a3b8" strokeWidth="0.6" /></pattern></defs>
         <rect width="100%" height="100%" fill="url(#poshan-grid)" />
       </svg>
-      {/* Our own photograph, self-hosted. The hosted terrarium that used to sit
-          on top of this was full of Studio Ghibli characters. */}
-      <div className="absolute inset-0 z-10 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "linear-gradient(rgb(10 10 10 / .35), rgb(10 10 10 / .6)), url('/thali-hero.jpg')" }} />
+      {/* Ground: near-black carrying two washes drawn from the active palette,
+          so the hero changes with all nine rather than sitting on one photo. */}
+      <div
+        className="absolute inset-0 z-10"
+        style={{
+          background:
+            "radial-gradient(120% 90% at 12% 8%, color-mix(in srgb, var(--brand-1) 34%, transparent), transparent 60%)," +
+            "radial-gradient(110% 80% at 88% 92%, color-mix(in srgb, var(--brand-2) 26%, transparent), transparent 62%)," +
+            "linear-gradient(160deg, #0b0a0d, #121016 55%, #0a0c0b)",
+        }}
+        aria-hidden="true"
+      />
+      {/* The photograph, abstracted: blurred and graded until it reads as
+          texture rather than a picture, so it warms the ground without
+          competing with the wordmark. */}
+      <div
+        className="absolute inset-0 z-10 bg-cover bg-center opacity-40 mix-blend-soft-light"
+        style={{ backgroundImage: "url('/thali-hero.jpg')", filter: "blur(26px) saturate(1.5)" }}
+        aria-hidden="true"
+      />
       {/* Spotlight reveal, restored. This went out with the hotlinked video it
           used to unmask; the interaction was the hero's character, so it now
           reveals the same photograph in full colour through a cursor-tracked
@@ -85,12 +104,11 @@ export function HeroVideo() {
           aria-hidden="true"
         />
       )}
-      <div className="absolute inset-0 z-10 bg-black/35" aria-hidden="true" />
-      <h1 className="pointer-events-none absolute inset-x-3 top-20 z-20 text-center text-[clamp(4.5rem,19vw,16rem)] leading-[.78] tracking-[-.07em] text-white" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>POSHAN</h1>
+      <h1 className="pointer-events-none absolute inset-x-3 top-20 z-20 text-center text-[clamp(4.5rem,19vw,16rem)] leading-[.78] tracking-[-.07em] text-white" style={{ fontFamily: "var(--font-wordmark), Georgia, serif" }}>POSHAN</h1>
 
       <header className="absolute inset-x-0 top-0 z-[60] flex items-center justify-between p-4 sm:p-6">
         <a href="#top" className="liquid-glass flex h-12 w-12 items-center justify-center rounded-full" aria-label="Poshan home"><svg viewBox="0 0 256 256" className="h-7 w-7" aria-hidden="true"><path fill="white" d="M256 64v64h-63.5L160 95l-32-31-32 31-32.5 33H64l64 64v64H64.5L32 223 0 192V64L64 0h128zm0 128v64h-63.5L160 223l-32-31v-64h64z" /></svg></a>
-        <nav className="liquid-glass absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 rounded-full p-1.5 md:flex" aria-label="Main">{LINKS.map((link) => <a key={link.href} href={link.href} className="rounded-full px-4 py-2 text-sm font-medium text-white/75 no-underline transition hover:bg-white/10 hover:text-white">{T(link)}</a>)}</nav>
+        <nav className="liquid-glass absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 rounded-full p-1.5 md:flex" aria-label="Main"><span className="glass-orbit" aria-hidden="true">{/* Depth is carried by size, blur and opacity rather than translateZ. Inside a 44px pill at 260px perspective a Z offset moves a piece by about a pixel — invisible — and something in the cascade was resetting transform on these spans anyway. Atmospheric depth cues read at this scale; geometric ones do not. */}<span className="food-swatch glass-near" data-swatch="rasgulla" style={{ left: "7%", top: "16%" }} /><span className="food-swatch glass-far" data-swatch="ladoo" style={{ left: "58%", top: "44%" }} /><span className="food-swatch glass-mid" data-swatch="barfi" style={{ left: "33%", top: "64%" }} /></span>{LINKS.map((link, i) => <a key={link.href} href={link.href} className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-white/75 no-underline transition hover:bg-white/10 hover:text-white"><span className="food-swatch glass-mark" data-swatch={MARKS[i % MARKS.length]} aria-hidden="true" />{T(link)}</a>)}</nav>
         <a href="#check" className="liquid-glass hidden items-center gap-2 rounded-full px-5 py-3 text-sm font-medium text-white no-underline md:flex"><span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />{T({ en: "Start your check", hi: "अपना चेक शुरू करें" })}</a>
         <button type="button" onClick={() => setMenuOpen(true)} className="liquid-glass grid h-12 w-12 place-items-center rounded-full md:hidden" aria-label={T({ en: "Open menu", hi: "मेन्यू खोलें" })} aria-expanded={menuOpen}><Menu className="h-5 w-5" /></button>
       </header>

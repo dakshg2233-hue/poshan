@@ -534,6 +534,60 @@ section.on-panel,
    near-white page ground there is nothing to blur and no contrast for
    the highlight to catch — it would simply vanish.
    ================================================================== */
+/* ==================================================================
+   FOOD IN THE GLASS
+   Three treatments, all of them asked for, layered so they do not fight:
+     1. the panel is a WINDOW — transparent enough that whatever food is
+        behind it shows through, blurred and tinted, rather than a milky
+        rectangle sitting on top of the page;
+     2. small food marks ride inside the nav pills;
+     3. pieces drift SUSPENDED inside the glass, in real 3D.
+   (3) is CSS 3D, not a second WebGL canvas: this hero just had one removed,
+   and translateZ inside a preserve-3d parent gives genuine depth and
+   parallax for no GPU context and no extra bundle.
+   ================================================================== */
+
+/* Food suspended inside a glass panel. Clipped by the panel's own
+   overflow:hidden, so the pieces are contained by the glass, not floating
+   over the page. */
+.glass-orbit {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform-style: preserve-3d;
+  perspective: 260px;
+  /* Behind the panel's content, above its background. */
+  z-index: 0;
+}
+.glass-orbit > * {
+  position: absolute;
+  animation: glass-drift 18s ease-in-out infinite alternate;
+  will-change: translate;
+}
+/* Three depths, read the way depth actually reads at this size: nearer is
+   bigger, sharper and more opaque; further is smaller, softer and fainter. */
+.glass-near { width: 22px; height: 22px; opacity: 0.55; filter: blur(0.2px) saturate(1.2); animation-delay: -2s; }
+.glass-mid  { width: 16px; height: 16px; opacity: 0.42; filter: blur(0.7px) saturate(1.1); animation-delay: -12s; }
+.glass-far  { width: 11px; height: 11px; opacity: 0.3;  filter: blur(1.3px) saturate(1); animation-delay: -7s; }
+@keyframes glass-drift {
+  from { translate: 0 0; rotate: -6deg; }
+  to { translate: 6% -10%; rotate: 8deg; }
+}
+
+/* A mark riding inside a nav pill, next to its label. */
+.glass-mark {
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  flex: none;
+  vertical-align: -0.1em;
+  filter: saturate(1.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-orbit > * { animation: none; }
+}
+
 .liquid-glass {
   background: rgb(255 255 255 / 0.04);
   /* The blur comes from Tailwind's backdrop-blur-* utility in the markup, not
