@@ -30,6 +30,7 @@ export const FOOD_CURSORS: FoodCursor[] = [
   { key: "rasgulla", name: { en: "Rasgulla", hi: "रसगुल्ला" } },
   { key: "apple", name: { en: "Apple", hi: "सेब" } },
   { key: "cucumber", name: { en: "Cucumber", hi: "खीरा" } },
+  { key: "banana", name: { en: "Peeled banana", hi: "छिला केला" } },
 ];
 
 const STORAGE_KEY = "poshan-cursor";
