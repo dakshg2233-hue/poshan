@@ -15,10 +15,11 @@ import { usePrefersReducedMotion } from "@/lib/use-media-query";
  * the hero of a paid product, and copyrighted characters doing it. Built here
  * there is no request to make, nothing to expire, and nothing to license.
  *
- * The vessel is kept, as asked: same round-bellied jar, same held-in-light
- * feel. What is inside changes from figurines to the things an Indian kitchen
- * actually keeps in glass — layered grain and dal, whole spices, a curl of
- * curry leaf. Food, and the sentiment of feeding people, instead of anime.
+ * The vessel is kept, as asked. What is inside is deliberately NOT a picture
+ * of food: modelled grains, chillies and a curry-leaf sprig were tried first
+ * and read as a literal pantry jar. It is now three plain strata in the ICMR
+ * plate ratio — half vegetables, a quarter grain, a quarter protein — the
+ * argument the whole product makes, stood on its end. Symbolic, not scenic.
  */
 
 /* Real glass needs something to refract. RoomEnvironment is generated in
@@ -49,117 +50,94 @@ function cssColor(name: string, fallback: string) {
 }
 
 /**
- * A layer of loose grain. Rendered as one InstancedMesh rather than hundreds
- * of meshes — at ~260 grains a layer, separate draw calls would cost more
- * than the whole rest of the scene.
+ * A single stratum of the fill: a smooth disc of colour, not a heap of things.
+ *
+ * Slightly domed on top, because a dead-flat surface reads as a plastic
+ * layer-cake and a faint crown reads as something settled.
  */
-function GrainLayer({
-  count,
+function Stratum({
   color,
-  yBase,
-  ySpread,
+  y,
+  height,
   radius,
-  seed,
-  size,
 }: {
-  count: number;
   color: THREE.Color;
-  yBase: number;
-  ySpread: number;
+  y: number;
+  height: number;
   radius: number;
-  seed: number;
-  size: number;
 }) {
-  const ref = useRef<THREE.InstancedMesh>(null);
-
-  useEffect(() => {
-    const mesh = ref.current;
-    if (!mesh) return;
-    const m = new THREE.Matrix4();
-    const q = new THREE.Quaternion();
-    const e = new THREE.Euler();
-    const s = new THREE.Vector3();
-    /* Deterministic pseudo-random: the jar must look identical on the server
-       render and the client, or hydration paints two different jars. */
-    let n = seed;
-    const rnd = () => {
-      n = (n * 1664525 + 1013904223) % 4294967296;
-      return n / 4294967296;
-    };
-    for (let i = 0; i < count; i++) {
-      /* sqrt keeps the scatter even across the disc instead of clumping
-         everything at the centre. */
-      const r = Math.sqrt(rnd()) * radius;
-      const a = rnd() * Math.PI * 2;
-      e.set(rnd() * Math.PI, rnd() * Math.PI, rnd() * Math.PI);
-      q.setFromEuler(e);
-      const sc = size * (0.75 + rnd() * 0.5);
-      s.set(sc, sc * 0.62, sc);
-      m.compose(
-        new THREE.Vector3(Math.cos(a) * r, yBase + rnd() * ySpread, Math.sin(a) * r),
-        q,
-        s
-      );
-      mesh.setMatrixAt(i, m);
-    }
-    mesh.instanceMatrix.needsUpdate = true;
-  }, [count, yBase, ySpread, radius, seed, size]);
-
   return (
-    <instancedMesh ref={ref} args={[undefined, undefined, count]} castShadow>
-      <sphereGeometry args={[1, 7, 5]} />
-      <meshStandardMaterial color={color} roughness={0.88} metalness={0} />
-    </instancedMesh>
+    <group position={[0, y, 0]}>
+      <mesh>
+        <cylinderGeometry args={[radius, radius * 0.97, height, 64]} />
+        <meshStandardMaterial color={color} roughness={0.62} metalness={0} />
+      </mesh>
+      <mesh position={[0, height / 2, 0]} scale={[1, 0.18, 1]}>
+        <sphereGeometry args={[radius, 48, 24, 0, Math.PI * 2, 0, Math.PI / 2]} />
+        <meshStandardMaterial color={color} roughness={0.62} metalness={0} />
+      </mesh>
+    </group>
   );
 }
 
+/**
+ * The fill, as three strata rather than a depiction of food.
+ *
+ * The literal version — nine hundred modelled grains, whole chillies, a
+ * curry-leaf sprig — read as a picture of a pantry jar. This says the same
+ * thing with less: half the height is vegetables, a quarter grain, a quarter
+ * protein. That is the ICMR plate ratio the whole product argues for, stood
+ * on its end. Simple enough to read at a glance from across a hero, and it
+ * means something rather than just looking like food.
+ *
+ * It also costs three meshes instead of ~960 instanced grains.
+ */
 function JarContents() {
-  /* Read once. Palette changes remount the canvas via its key, so live
-     subscription here would be machinery for nothing. */
   const c = useMemo(
     () => ({
-      rice: new THREE.Color("#F3EEE2"),
-      dal: cssColor("--haldi", "#E0A81C"),
-      chana: new THREE.Color("#B07A2E"),
-      chilli: cssColor("--mirch", "#B3261E"),
-      leaf: cssColor("--elaichi", "#356B46"),
+      veg: cssColor("--elaichi", "#356B46"),
+      grain: new THREE.Color("#EFE7D6"),
+      protein: cssColor("--haldi", "#E0A81C"),
     }),
     []
   );
 
+  /* Proportions ARE the ratio: the fill spans FILL units and the bands take
+     exactly 1/4 grain, 1/4 protein, 1/2 vegetables. */
+  const R = 1.25;          // jar inner radius
+  const FILL = 1.55;
+  const base = -0.92;
+  const bands = [
+    { color: c.grain, frac: 0.25 },
+    { color: c.protein, frac: 0.25 },
+    { color: c.veg, frac: 0.5 },
+  ];
+
+  /* Radius is derived from the sphere's own profile, not hand-picked. A band
+     at height y can only be as wide as sqrt(R² - y²); constants looked right
+     at the middle and burst through the glass at the top, where the jar has
+     curved in. Measured at whichever end of the band is further from centre,
+     less a wall margin. */
+  const safeRadius = (y0: number, y1: number) => {
+    const yMax = Math.max(Math.abs(y0), Math.abs(y1));
+    return Math.max(0.2, Math.sqrt(Math.max(0, R * R - yMax * yMax)) - 0.09);
+  };
+
+  let y = base;
   return (
     <group>
-      {/* Layered like a kitchen jar filled over weeks: heaviest at the base. */}
-      <GrainLayer count={300} color={c.chana} yBase={-0.92} ySpread={0.3} radius={0.86} seed={11} size={0.055} />
-      <GrainLayer count={320} color={c.dal} yBase={-0.66} ySpread={0.34} radius={0.9} seed={29} size={0.045} />
-      <GrainLayer count={340} color={c.rice} yBase={-0.36} ySpread={0.38} radius={0.92} seed={47} size={0.036} />
-
-      {/* Whole dried chillies, resting on the top of the grain. */}
-      {[
-        [0.3, -0.02, 0.18, 0.5],
-        [-0.34, 0.01, -0.12, -1.1],
-        [0.05, 0.04, -0.36, 2.2],
-      ].map(([x, y, z, rot], i) => (
-        <mesh key={i} position={[x, y, z]} rotation={[Math.PI / 2.3, 0, rot]} castShadow>
-          <coneGeometry args={[0.05, 0.36, 10]} />
-          <meshStandardMaterial color={c.chilli} roughness={0.6} metalness={0.02} />
-        </mesh>
-      ))}
-
-      {/* A curry-leaf sprig laid over the top — the green that says kitchen. */}
-      <group position={[-0.1, 0.1, 0.22]} rotation={[0, 0.6, 0.12]}>
-        {[-0.26, -0.12, 0.02, 0.16, 0.3].map((z, i) => (
-          <mesh key={i} position={[i % 2 ? 0.07 : -0.07, 0, z]} rotation={[Math.PI / 2, 0, i % 2 ? 0.5 : -0.5]}>
-            <circleGeometry args={[0.09, 12]} />
-            <meshStandardMaterial
-              color={c.leaf}
-              roughness={0.7}
-              metalness={0}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-        ))}
-      </group>
+      {bands.map((b, i) => {
+        const h = FILL * b.frac;
+        const y0 = y;
+        const y1 = y + h;
+        /* The top band is crowned, so its dome has to fit too. */
+        const domeAllowance = i === bands.length - 1 ? 0.16 : 0;
+        const r = safeRadius(y0, y1 + domeAllowance);
+        y = y1;
+        return (
+          <Stratum key={i} color={b.color} y={(y0 + y1) / 2} height={h} radius={r} />
+        );
+      })}
     </group>
   );
 }

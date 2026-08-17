@@ -74,8 +74,21 @@ export function HeroVideo() {
       {/* Our own photograph, self-hosted. The hosted terrarium that used to sit
           on top of this was full of Studio Ghibli characters. */}
       <div className="absolute inset-0 z-10 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "linear-gradient(rgb(10 10 10 / .35), rgb(10 10 10 / .6)), url('/thali-hero.jpg')" }} />
-      {/* The jar, built in-house: same vessel, food inside instead of figurines. */}
+      {/* The jar: same vessel, symbolic fill rather than a picture of food. */}
       <GlassJar className="pointer-events-none absolute z-[15] left-1/2 top-[16%] h-[42%] w-[86%] -translate-x-1/2 sm:left-auto sm:right-[4%] sm:top-1/2 sm:h-[62%] sm:w-[46%] sm:translate-x-0 sm:-translate-y-1/2" />
+
+      {/* Spotlight reveal, restored. This went out with the hotlinked video it
+          used to unmask; the interaction was the hero's character, so it now
+          reveals the same photograph in full colour through a cursor-tracked
+          hole in the darkened plate above. No external asset involved. */}
+      {!reducedMotion && (
+        <div
+          ref={revealRef}
+          className="pointer-events-none absolute inset-0 z-20 hidden bg-cover bg-center md:block"
+          style={{ backgroundImage: "url('/thali-hero.jpg')" }}
+          aria-hidden="true"
+        />
+      )}
       <div className="absolute inset-0 z-10 bg-black/35" aria-hidden="true" />
       <h1 className="pointer-events-none absolute inset-x-3 top-20 z-20 text-center text-[clamp(4.5rem,19vw,16rem)] leading-[.78] tracking-[-.07em] text-white" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>POSHAN</h1>
 
