@@ -75,10 +75,17 @@ export default function Privacy() {
         </p>
 
         <h2 className="mt-6 text-[1.3rem]" style={{ fontFamily: "var(--font-display)" }}>Contact</h2>
-        <p style={{ color: "var(--ink-soft)" }}>
-          [TO CONFIRM: registered entity name, postal address and contact email.
-          Left blank deliberately — an invented address on a privacy policy is
-          worse than none.]
+        <p>
+          <strong>Poshan Limited</strong>
+          <br />
+          x Street, B Block
+          <br />
+          Email: <a href="mailto:dakshg2233@gmail.com" style={{ color: "var(--kesar)" }}>dakshg2233@gmail.com</a>
+          <br />
+          Phone: <a href="tel:+918595607565" style={{ color: "var(--kesar)" }}>+91 85956 07565</a>
+        </p>
+        <p className="text-[0.8rem]" style={{ color: "var(--ink-soft)" }}>
+          Data protection queries go to the same address.
         </p>
 
         <h2 className="mt-6 text-[1.3rem]" style={{ fontFamily: "var(--font-display)" }}>Not medical advice</h2>
