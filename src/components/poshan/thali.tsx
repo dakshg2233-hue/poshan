@@ -211,17 +211,47 @@ export function Thali({
 
         {/* rice mound — steps aside entirely on the tightest plan */}
         <g style={{ opacity: riceOff ? 0.18 : 1, transition: "opacity .5s ease" }}>
+          {/* Heaped rice.
+              The previous version was a single smooth arc with three dots in
+              it, which read as a bun or a pebble — the silhouette carried no
+              information that it was grain. A heap of rice is identifiable by
+              its EDGE: lumpy rather than drawn, because thousands of grains
+              never settle into a clean curve. Hence the scalloped contour and
+              the loose grains sitting proud of it. */}
           <path
-            d="M248 302 Q249 258 275 250 Q292 245 300 254 Q322 258 326 302 Z"
+            d="M246 303
+               C246 289 251 277 260 269
+               C265 264 269 267 273 263
+               C277 258 282 256 287 257
+               C291 253 297 252 301 256
+               C306 254 311 258 314 263
+               C319 267 323 275 325 283
+               C327 290 328 297 328 303
+               Z"
             fill="#F5F1E6"
             stroke="var(--steel)"
-            strokeWidth={2.5}
+            strokeWidth={2.2}
             strokeLinejoin="round"
           />
-          <path d="M248 302q39 9 78 0" fill="none" stroke="var(--steel-lo)" strokeWidth={2} />
-          <circle cx={278} cy={278} r={2.2} fill="var(--steel-lo)" />
-          <circle cx={298} cy={270} r={2.2} fill="var(--steel-lo)" />
-          <circle cx={290} cy={288} r={2.2} fill="var(--steel-lo)" />
+          {/* Where the heap meets the plate. */}
+          <path d="M246 303q41 8 82 0" fill="none" stroke="var(--steel-lo)" strokeWidth={2} />
+          {/* Individual grains: short ovals at mixed angles, a few breaking the
+              outline so the heap has loose grains rather than a sealed shell. */}
+          <g fill="none" stroke="var(--steel-lo)" strokeWidth={1.6} strokeLinecap="round">
+            <path d="M263 288l6-3" />
+            <path d="M276 279l7 2" />
+            <path d="M291 272l6-3" />
+            <path d="M305 281l6 3" />
+            <path d="M283 292l7-1" />
+            <path d="M300 293l6-2" />
+            <path d="M270 275l5 3" />
+            <path d="M312 272l5 4" />
+          </g>
+          <g fill="#F5F1E6" stroke="var(--steel)" strokeWidth={1.4}>
+            <ellipse cx={268} cy={261} rx={4} ry={2.2} transform="rotate(-28 268 261)" />
+            <ellipse cx={296} cy={250} rx={4.2} ry={2.2} transform="rotate(12 296 250)" />
+            <ellipse cx={318} cy={266} rx={4} ry={2.2} transform="rotate(42 318 266)" />
+          </g>
         </g>
       </svg>
     </div>
