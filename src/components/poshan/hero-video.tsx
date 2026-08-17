@@ -3,10 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { useLang } from "./lang-provider";
+import { GlassJar } from "./glass-jar";
 
-const BACKGROUND = "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260713_140344_79e1296a-86d7-43fd-9b5f-63ffe560f291.png&w=1280&q=85";
-const VIDEO = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260713_162101_0d7498c5-29bb-47bf-a99f-2773c0a880a9.mp4";
-const OVERLAY = "https://soft-zoom-63098134.figma.site/_assets/v11/3f10f1876e118f72a396e05a6c2d099569478272.png";
 
 const LINKS = [
   { href: "#check", en: "BMI check", hi: "बीएमआई जाँचें" },
@@ -73,12 +71,13 @@ export function HeroVideo() {
         <defs><pattern id="poshan-grid" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="#94a3b8" strokeWidth="0.6" /></pattern></defs>
         <rect width="100%" height="100%" fill="url(#poshan-grid)" />
       </svg>
-      <div className="absolute inset-0 z-10 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${BACKGROUND}), linear-gradient(rgb(10 10 10 / .18), rgb(10 10 10 / .5)), url('/thali-hero.jpg')` }} />
+      {/* Our own photograph, self-hosted. The hosted terrarium that used to sit
+          on top of this was full of Studio Ghibli characters. */}
+      <div className="absolute inset-0 z-10 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "linear-gradient(rgb(10 10 10 / .35), rgb(10 10 10 / .6)), url('/thali-hero.jpg')" }} />
+      {/* The jar, built in-house: same vessel, food inside instead of figurines. */}
+      <GlassJar className="pointer-events-none absolute z-[15] left-1/2 top-[16%] h-[42%] w-[86%] -translate-x-1/2 sm:left-auto sm:right-[4%] sm:top-1/2 sm:h-[62%] sm:w-[46%] sm:translate-x-0 sm:-translate-y-1/2" />
       <div className="absolute inset-0 z-10 bg-black/35" aria-hidden="true" />
       <h1 className="pointer-events-none absolute inset-x-3 top-20 z-20 text-center text-[clamp(4.5rem,19vw,16rem)] leading-[.78] tracking-[-.07em] text-white" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>POSHAN</h1>
-      <img src={OVERLAY} alt="" className="pointer-events-none absolute inset-0 z-25 h-full w-full object-cover opacity-70" />
-
-      {!reducedMotion && <div ref={revealRef} className="pointer-events-none absolute inset-0 z-30 hidden md:block" style={{ clipPath: "inset(40% 0 0 0)" }} aria-hidden="true"><video autoPlay loop muted playsInline className="h-full w-full object-cover" poster="/thali-hero.jpg"><source src={VIDEO} type="video/mp4" /></video></div>}
 
       <header className="absolute inset-x-0 top-0 z-[60] flex items-center justify-between p-4 sm:p-6">
         <a href="#top" className="liquid-glass flex h-12 w-12 items-center justify-center rounded-full" aria-label="Poshan home"><svg viewBox="0 0 256 256" className="h-7 w-7" aria-hidden="true"><path fill="white" d="M256 64v64h-63.5L160 95l-32-31-32 31-32.5 33H64l64 64v64H64.5L32 223 0 192V64L64 0h128zm0 128v64h-63.5L160 223l-32-31v-64h64z" /></svg></a>

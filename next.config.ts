@@ -14,13 +14,13 @@ const csp = [
   // unsafe-eval is needed for React dev mode debugging features.
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://*.razorpay.com",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://*.razorpay.com https://images.higgs.ai https://soft-zoom-63098134.figma.site",
+  "img-src 'self' data: blob: https://*.razorpay.com",
   "font-src 'self' data:",
   // Supabase and Razorpay APIs, plus the Gemini call is server-side only.
   "connect-src 'self' https://*.supabase.co https://*.razorpay.com wss://*.supabase.co",
   // Razorpay opens its payment window in an iframe.
   "frame-src https://*.razorpay.com https://api.razorpay.com",
-  "media-src 'self' blob: https://d8j0ntlcm91z4.cloudfront.net",
+  "media-src 'self' blob:",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
