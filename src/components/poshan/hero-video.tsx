@@ -1,121 +1,380 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { ArrowUpRight, Menu, X } from "lucide-react";
 import { useLang } from "./lang-provider";
 
+/**
+ * POSHAN — Quiet Vitality hero.
+ *
+ * Built to the supplied spec: 100dvh, dark botanical still-life, monumental
+ * Instrument Serif wordmark, frosted glass navigation, and a pointer-following
+ * spotlight that uncovers a second still-life in the lower 60% of the frame.
+ *
+ * Three departures, each forced rather than chosen:
+ *
+ *  - The brief describes a still-life of figs, leafy greens, amber liquid and a
+ *    matte-charcoal jar. No such asset is in this repo and the spec ships none,
+ *    so the site's own thali photograph stands in for the base and reveal
+ *    layers. Drop files at the two paths below and they are picked up.
+ *  - Nav LABELS are the spec's; the hrefs point at Poshan's real sections.
+ *    "Ritual" and "Our blends" describe a supplements brand; pointing them at
+ *    anchors that do not exist would ship five dead links, which is a bug I
+ *    have already had to fix once on this page.
+ *  - Copy stays bilingual. The spec is English-only, but half this site's
+ *    readers are not, and a hero that silently drops Hindi is a regression.
+ */
 
-const MARKS = ["ladoo", "jalebi", "modak", "barfi", "gulab-jamun"];
+/* Swap for real botanical stills when they exist. */
+const STILL = "/thali-hero.jpg";
+const MOTION = "/thali-hero.jpg";
 
-const LINKS = [
-  { href: "#check", en: "BMI check", hi: "बीएमआई जाँचें" },
-  { href: "#plate", en: "Your plate", hi: "आपकी थाली" },
-  { href: "#bios", en: "Biomarkers", hi: "बायोमार्कर" },
-  { href: "#premium", en: "Plans", hi: "प्लान" },
+/** Poshan Leaf — the only action and status colour in this design. */
+const LEAF = "#8FBF72";
+
+const NAV = [
+  { href: "#check", en: "Ritual", hi: "दिनचर्या" },
+  { href: "#plate", en: "Our blends", hi: "हमारी थाली" },
+  { href: "#bios", en: "The science", hi: "विज्ञान" },
+  { href: "#meals", en: "Journal", hi: "जर्नल" },
+  { href: "#premium", en: "Reach us", hi: "संपर्क" },
 ];
 
-/** Dark, editorial opener derived from the supplied Measured concept. */
+/**
+ * The four-part botanical kernel: an abstract seed of interlocking leaves that
+ * also reads as a plate seen from above. Text-free and white, as specified.
+ */
+function Kernel({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
+      <g fill="currentColor">
+        {[0, 90, 180, 270].map((deg) => (
+          <path
+            key={deg}
+            transform={`rotate(${deg} 16 16)`}
+            /* One leaf, rotated four times about the centre so the tips meet. */
+            d="M16 15.1c0-3.6 1.2-7.2 3.6-10.1 2.9 2.4 4.5 5.6 4.5 8.8 0 3.1-1.6 5.6-4.2 6.9-1.6.8-3 .9-3.9.9z"
+          />
+        ))}
+        <circle cx="16" cy="16" r="1.7" opacity="0.55" />
+      </g>
+    </svg>
+  );
+}
+
 export function HeroVideo() {
   const { T } = useLang();
-  const sectionRef = useRef<HTMLElement>(null);
-  const gridRef = useRef<SVGSVGElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
   const revealRef = useRef<HTMLDivElement>(null);
-  const target = useRef({ x: -600, y: -600 });
-  const smooth = useRef({ x: -600, y: -600 });
+  const gridRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const target = useRef({ x: -800, y: -800 });
+  const smooth = useRef({ x: -800, y: -800 });
+
   const [menuOpen, setMenuOpen] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(true);
+  /* True by default so nothing animates before the preference is known. */
+  const [calm, setCalm] = useState(true);
 
   useEffect(() => {
-    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const setPreference = () => setReducedMotion(query.matches);
-    setPreference();
-    query.addEventListener("change", setPreference);
-    return () => query.removeEventListener("change", setPreference);
+    const q = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const apply = () => setCalm(q.matches);
+    apply();
+    q.addEventListener("change", apply);
+    return () => q.removeEventListener("change", apply);
   }, []);
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [menuOpen]);
 
+  /* Spotlight and grid parallax. The mask is drawn into a hidden canvas and
+     handed to the reveal layer as a data URL, per the spec. */
   useEffect(() => {
-    if (reducedMotion) return;
+    if (calm) return;
+    const canvas = canvasRef.current;
+    const hero = heroRef.current;
+    if (!canvas || !hero) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
     let frame = 0;
+    const R = 260;
+
     const draw = () => {
+      const rect = hero.getBoundingClientRect();
+      /* Canvas matches the hero, so mask coordinates need no conversion. */
+      if (canvas.width !== Math.round(rect.width) || canvas.height !== Math.round(rect.height)) {
+        canvas.width = Math.max(1, Math.round(rect.width));
+        canvas.height = Math.max(1, Math.round(rect.height));
+      }
+
       smooth.current.x += (target.current.x - smooth.current.x) * 0.1;
       smooth.current.y += (target.current.y - smooth.current.y) * 0.1;
       const { x, y } = smooth.current;
-      const mask = `radial-gradient(260px circle at ${x}px ${y}px, #000 0%, #000 40%, rgb(0 0 0 / .75) 60%, rgb(0 0 0 / .4) 75%, rgb(0 0 0 / .12) 88%, transparent 100%)`;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const g = ctx.createRadialGradient(x, y, 0, x, y, R);
+      g.addColorStop(0, "rgba(0,0,0,1)");
+      g.addColorStop(0.4, "rgba(0,0,0,1)");
+      g.addColorStop(0.6, "rgba(0,0,0,0.75)");
+      g.addColorStop(0.75, "rgba(0,0,0,0.4)");
+      g.addColorStop(0.88, "rgba(0,0,0,0.12)");
+      g.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(x - R, y - R, R * 2, R * 2);
+
       if (revealRef.current) {
-        revealRef.current.style.webkitMaskImage = mask;
-        revealRef.current.style.maskImage = mask;
+        const url = `url(${canvas.toDataURL()})`;
+        revealRef.current.style.webkitMaskImage = url;
+        revealRef.current.style.maskImage = url;
       }
-      if (gridRef.current && sectionRef.current) {
-        const rect = sectionRef.current.getBoundingClientRect();
-        gridRef.current.style.transform = `translate(${((x - rect.width / 2) / rect.width) * 16}px, ${((y - rect.height / 2) / rect.height) * 16}px)`;
+      if (gridRef.current) {
+        /* ~16px of travel, eased. */
+        const dx = ((x - rect.width / 2) / rect.width) * 16;
+        const dy = ((y - rect.height / 2) / rect.height) * 16;
+        gridRef.current.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
       }
       frame = requestAnimationFrame(draw);
     };
+
     frame = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(frame);
-  }, [reducedMotion]);
+  }, [calm]);
 
-  function moveSpotlight(event: React.PointerEvent<HTMLElement>) {
-    if (event.pointerType === "touch" || reducedMotion) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    target.current = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+  function onMove(e: React.PointerEvent<HTMLElement>) {
+    if (e.pointerType === "touch" || calm) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    target.current = { x: e.clientX - r.left, y: e.clientY - r.top };
   }
 
   return (
-    <section id="hero" ref={sectionRef} onPointerMove={moveSpotlight} onPointerLeave={() => { target.current = { x: -600, y: -600 }; }} className="relative isolate h-[100svh] min-h-[620px] w-full overflow-hidden bg-[#0a0a0a] text-white">
-      <svg ref={gridRef} className="absolute inset-[-32px] z-0 h-[calc(100%+64px)] w-[calc(100%+64px)] opacity-20 will-change-transform" aria-hidden="true">
-        <defs><pattern id="poshan-grid" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="#94a3b8" strokeWidth="0.6" /></pattern></defs>
-        <rect width="100%" height="100%" fill="url(#poshan-grid)" />
-      </svg>
-      {/* Ground: near-black carrying two washes drawn from the active palette,
-          so the hero changes with all nine rather than sitting on one photo. */}
+    <section
+      id="hero"
+      ref={heroRef}
+      onPointerMove={onMove}
+      onPointerLeave={() => {
+        target.current = { x: -800, y: -800 };
+      }}
+      className="relative isolate w-full overflow-hidden text-white"
+      style={{ height: "100dvh", minHeight: 600, background: "#0a0b0a" }}
+    >
+      {/* 1 — the still-life */}
       <div
-        className="absolute inset-0 z-10"
+        className="absolute inset-0 z-0 bg-cover bg-center"
+        style={{ backgroundImage: `url('${STILL}')` }}
+        aria-hidden="true"
+      />
+
+      {/* 2 — warm dark-to-transparent overlay, weighted to the upper left,
+             which the spec asks to keep dark and spacious for the headline */}
+      <div
+        className="absolute inset-0 z-[1]"
         style={{
           background:
-            "radial-gradient(120% 90% at 12% 8%, color-mix(in srgb, var(--brand-1) 34%, transparent), transparent 60%)," +
-            "radial-gradient(110% 80% at 88% 92%, color-mix(in srgb, var(--brand-2) 26%, transparent), transparent 62%)," +
-            "linear-gradient(160deg, #0b0a0d, #121016 55%, #0a0c0b)",
+            "radial-gradient(120% 100% at 18% 6%, rgba(10,11,10,.94), rgba(10,11,10,.6) 42%, rgba(10,11,10,.25) 70%, transparent 100%)," +
+            "linear-gradient(180deg, rgba(10,11,10,.78) 0%, rgba(10,11,10,.3) 46%, rgba(10,11,10,.84) 100%)",
         }}
         aria-hidden="true"
       />
-      {/* The photograph, abstracted: blurred and graded until it reads as
-          texture rather than a picture, so it warms the ground without
-          competing with the wordmark. */}
+      {/* Warm amber bloom, plus one restrained botanical accent */}
       <div
-        className="absolute inset-0 z-10 bg-cover bg-center opacity-40 mix-blend-soft-light"
-        style={{ backgroundImage: "url('/thali-hero.jpg')", filter: "blur(26px) saturate(1.5)" }}
+        className="absolute inset-0 z-[1]"
+        style={{
+          background:
+            "radial-gradient(52% 42% at 78% 72%, rgba(196,132,58,.22), transparent 70%)," +
+            `radial-gradient(38% 30% at 12% 82%, ${LEAF}1f, transparent 72%)`,
+        }}
         aria-hidden="true"
       />
-      {/* Spotlight reveal, restored. This went out with the hotlinked video it
-          used to unmask; the interaction was the hero's character, so it now
-          reveals the same photograph in full colour through a cursor-tracked
-          hole in the darkened plate above. No external asset involved. */}
-      {!reducedMotion && (
+
+      {/* 3 — 48px technical grid, parallaxed */}
+      <div
+        ref={gridRef}
+        className="absolute inset-[-40px] z-[2] will-change-transform"
+        style={{
+          opacity: 0.09,
+          backgroundSize: "48px 48px",
+          backgroundImage:
+            "linear-gradient(to right, #cfd8cd 1px, transparent 1px)," +
+            "linear-gradient(to bottom, #cfd8cd 1px, transparent 1px)",
+        }}
+        aria-hidden="true"
+      />
+
+      {/* 5 — masked reveal, clipped to the lower 60% */}
+      <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
+      {!calm && (
         <div
           ref={revealRef}
-          className="pointer-events-none absolute inset-0 z-20 hidden bg-cover bg-center md:block"
-          style={{ backgroundImage: "url('/thali-hero.jpg')" }}
+          className="pointer-events-none absolute inset-0 z-[3] hidden bg-cover bg-center md:block"
+          style={{ backgroundImage: `url('${MOTION}')`, clipPath: "inset(40% 0 0 0)" }}
           aria-hidden="true"
         />
       )}
-      <h1 className="pointer-events-none absolute inset-x-3 top-20 z-20 text-center text-[clamp(4.5rem,19vw,16rem)] leading-[.78] tracking-[-.07em] text-white" style={{ fontFamily: "var(--font-wordmark), Georgia, serif" }}>POSHAN</h1>
 
-      <header className="absolute inset-x-0 top-0 z-[60] flex items-center justify-between p-4 sm:p-6">
-        <a href="#top" className="liquid-glass flex h-12 w-12 items-center justify-center rounded-full" aria-label="Poshan home"><svg viewBox="0 0 256 256" className="h-7 w-7" aria-hidden="true"><path fill="white" d="M256 64v64h-63.5L160 95l-32-31-32 31-32.5 33H64l64 64v64H64.5L32 223 0 192V64L64 0h128zm0 128v64h-63.5L160 223l-32-31v-64h64z" /></svg></a>
-        <nav className="liquid-glass absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 rounded-full p-1.5 md:flex" aria-label="Main"><span className="glass-orbit" aria-hidden="true">{/* Depth is carried by size, blur and opacity rather than translateZ. Inside a 44px pill at 260px perspective a Z offset moves a piece by about a pixel — invisible — and something in the cascade was resetting transform on these spans anyway. Atmospheric depth cues read at this scale; geometric ones do not. */}<span className="food-swatch glass-near" data-swatch="rasgulla" style={{ left: "7%", top: "16%" }} /><span className="food-swatch glass-far" data-swatch="ladoo" style={{ left: "58%", top: "44%" }} /><span className="food-swatch glass-mid" data-swatch="barfi" style={{ left: "33%", top: "64%" }} /></span>{LINKS.map((link, i) => <a key={link.href} href={link.href} className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-white/75 no-underline transition hover:bg-white/10 hover:text-white"><span className="food-swatch glass-mark" data-swatch={MARKS[i % MARKS.length]} aria-hidden="true" />{T(link)}</a>)}</nav>
-        <a href="#check" className="liquid-glass hidden items-center gap-2 rounded-full px-5 py-3 text-sm font-medium text-white no-underline md:flex"><span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />{T({ en: "Start your check", hi: "अपना चेक शुरू करें" })}</a>
-        <button type="button" onClick={() => setMenuOpen(true)} className="liquid-glass grid h-12 w-12 place-items-center rounded-full md:hidden" aria-label={T({ en: "Open menu", hi: "मेन्यू खोलें" })} aria-expanded={menuOpen}><Menu className="h-5 w-5" /></button>
+      {/* ----------------------------------------------------------- nav */}
+      <header className="absolute inset-x-0 top-0 z-50 flex items-start justify-between p-5 sm:p-7">
+        <a href="#top" className="flex items-center gap-2.5 no-underline" aria-label="Poshan">
+          <Kernel className="h-7 w-7 text-white" />
+          <span
+            className="text-[1.35rem] italic leading-none text-white"
+            style={{ fontFamily: "var(--font-wordmark), Georgia, serif" }}
+          >
+            Poshan
+          </span>
+        </a>
+
+        <nav
+          className="liquid-glass absolute left-1/2 hidden -translate-x-1/2 items-center gap-0.5 rounded-full p-1.5 md:flex"
+          style={{ backdropFilter: "blur(7px)", WebkitBackdropFilter: "blur(7px)" }}
+          aria-label="Main"
+        >
+          {NAV.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              className="rounded-full px-3.5 py-2 text-[0.82rem] no-underline transition-colors hover:text-white active:scale-[.97]"
+              style={{ color: "rgb(255 255 255 / .72)", fontFamily: "var(--font-ui), sans-serif" }}
+            >
+              {T(l)}
+            </a>
+          ))}
+        </nav>
+
+        <a
+          href="#check"
+          className="hidden items-center gap-2 rounded-full px-5 py-3 text-[0.82rem] font-medium no-underline transition-transform active:scale-[.97] md:flex"
+          style={{ background: LEAF, color: "#0a0b0a", fontFamily: "var(--font-ui), sans-serif" }}
+        >
+          <span className="h-1.5 w-1.5 rounded-full bg-[#0a0b0a]" aria-hidden="true" />
+          {T({ en: "Find your blend", hi: "अपनी थाली पाएँ" })}
+          <ArrowUpRight className="h-4 w-4" />
+        </a>
+
+        <button
+          type="button"
+          onClick={() => setMenuOpen(true)}
+          className="liquid-glass grid h-11 w-11 place-items-center rounded-full active:scale-[.97] md:hidden"
+          style={{ backdropFilter: "blur(7px)", WebkitBackdropFilter: "blur(7px)" }}
+          aria-label={T({ en: "Open menu", hi: "मेन्यू खोलें" })}
+          aria-expanded={menuOpen}
+        >
+          <Menu className="h-5 w-5" />
+        </button>
       </header>
 
-      <div className="absolute inset-x-0 bottom-0 z-40 p-5 pb-7 sm:p-10 sm:pb-12"><div className="max-w-xl"><p className="text-sm font-semibold uppercase tracking-[.22em] text-emerald-300">{T({ en: "Nutrition, measured for India", hi: "भारत के लिए मापा गया पोषण" })}</p><p className="mt-3 max-w-lg text-base leading-relaxed text-white/90 sm:text-lg">{T({ en: "Understand your body through Asian-Indian BMI ranges, then build a plate that feels like home.", hi: "एशियाई-भारतीय बीएमआई रेंज के साथ शरीर को समझें, फिर घर जैसी थाली बनाएँ।" })}</p><a href="#check" className="liquid-glass mt-6 inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-white no-underline transition hover:bg-white/10"><span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />{T({ en: "Check your BMI", hi: "बीएमआई जाँचें" })}</a></div></div>
+      {/* --------------------------------------------------------- centre */}
+      <div className="pointer-events-none absolute inset-x-0 top-1/2 z-10 -translate-y-1/2 px-5 text-center">
+        <p
+          className="mb-5 flex items-center justify-center gap-2 text-[0.68rem] uppercase"
+          style={{
+            letterSpacing: "0.24em",
+            color: "rgb(255 255 255 / .74)",
+            fontFamily: "var(--font-ui), sans-serif",
+          }}
+        >
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: LEAF }} aria-hidden="true" />
+          {T({ en: "Your daily nutrition ritual", hi: "आपकी रोज़ की पोषण दिनचर्या" })}
+        </p>
 
-      {menuOpen && <div className="fixed inset-0 z-[70] flex min-h-[100svh] flex-col bg-[#0a0a0a] p-5 text-white md:hidden"><button type="button" onClick={() => setMenuOpen(false)} className="liquid-glass ml-auto grid h-12 w-12 place-items-center rounded-full" aria-label={T({ en: "Close menu", hi: "मेन्यू बंद करें" })}><X className="h-5 w-5" /></button><nav className="my-auto grid gap-5 text-center" aria-label="Mobile menu">{LINKS.map((link, index) => <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)} className="animate-[poshan-menu-in_.5s_cubic-bezier(.77,0,.18,1)_both] text-3xl font-medium text-white/90 no-underline" style={{ animationDelay: `${100 + index * 60}ms` }}>{T(link)}</a>)}</nav><a href="#check" onClick={() => setMenuOpen(false)} className="liquid-glass mx-auto flex items-center gap-2 rounded-full px-6 py-4 text-sm font-medium text-white no-underline"><span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />{T({ en: "Start your check", hi: "अपना चेक शुरू करें" })}</a></div>}
+        <h1
+          className="uppercase text-white"
+          style={{
+            fontFamily: "var(--font-wordmark), Georgia, serif",
+            fontSize: "clamp(4rem, 17vw, 15rem)",
+            lineHeight: 0.78,
+            letterSpacing: "-0.045em",
+          }}
+        >
+          Poshan
+        </h1>
+
+        <p
+          className="mx-auto mt-6 max-w-[46ch] text-[0.95rem] sm:text-base"
+          style={{ color: "rgb(255 255 255 / .82)", fontFamily: "var(--font-ui), sans-serif" }}
+        >
+          {T({
+            en: "Nourishment, in your rhythm — consciously made.",
+            hi: "पोषण, आपकी अपनी लय में — सोच-समझकर बनाया गया।",
+          })}
+        </p>
+      </div>
+
+      {/* --------------------------------------------------------- footer */}
+      <div
+        className="absolute inset-x-0 bottom-0 z-10 flex items-center gap-4 px-5 pb-5 text-[0.68rem] sm:px-7 sm:pb-7"
+        style={{ color: "rgb(255 255 255 / .62)", fontFamily: "var(--font-ui), sans-serif" }}
+      >
+        <span className="shrink-0">
+          {T({ en: "Thoughtfully made for the everyday.", hi: "रोज़मर्रा के लिए, सोच के साथ बना।" })}
+        </span>
+        <span className="h-px flex-1" style={{ background: "rgb(255 255 255 / .18)" }} aria-hidden="true" />
+        <span className="shrink-0 tabular-nums">
+          01 <span style={{ color: LEAF }}>/</span> 01
+        </span>
+      </div>
+
+      {/* ---------------------------------------------------- mobile menu */}
+      {menuOpen && (
+        <div
+          className="fixed inset-0 z-[70] flex flex-col p-5 md:hidden"
+          style={{ background: "#0a0b0a", minHeight: "100dvh" }}
+        >
+          <div className="flex items-start justify-between">
+            <a href="#top" className="flex items-center gap-2.5 no-underline" aria-label="Poshan">
+              <Kernel className="h-7 w-7 text-white" />
+              <span
+                className="text-[1.35rem] italic leading-none text-white"
+                style={{ fontFamily: "var(--font-wordmark), Georgia, serif" }}
+              >
+                Poshan
+              </span>
+            </a>
+            <button
+              type="button"
+              onClick={() => setMenuOpen(false)}
+              className="liquid-glass grid h-11 w-11 place-items-center rounded-full active:scale-[.97]"
+              style={{ backdropFilter: "blur(7px)", WebkitBackdropFilter: "blur(7px)" }}
+              aria-label={T({ en: "Close menu", hi: "मेन्यू बंद करें" })}
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          <nav className="my-auto grid gap-6" aria-label="Mobile menu">
+            {NAV.map((l, i) => (
+              <a
+                key={l.href}
+                href={l.href}
+                onClick={() => setMenuOpen(false)}
+                className="text-4xl text-white/90 no-underline"
+                style={{
+                  fontFamily: "var(--font-wordmark), Georgia, serif",
+                  animation: calm
+                    ? undefined
+                    : `poshan-menu-in .5s cubic-bezier(.77,0,.18,1) ${100 + i * 60}ms both`,
+                }}
+              >
+                {T(l)}
+              </a>
+            ))}
+          </nav>
+
+          <a
+            href="#check"
+            onClick={() => setMenuOpen(false)}
+            className="flex items-center justify-center gap-2 rounded-full px-6 py-4 text-sm font-medium no-underline active:scale-[.97]"
+            style={{ background: LEAF, color: "#0a0b0a", fontFamily: "var(--font-ui), sans-serif" }}
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-[#0a0b0a]" aria-hidden="true" />
+            {T({ en: "Find your blend", hi: "अपनी थाली पाएँ" })}
+            <ArrowUpRight className="h-4 w-4" />
+          </a>
+        </div>
+      )}
     </section>
   );
 }
