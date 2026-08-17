@@ -204,13 +204,16 @@ export function HeroVideo() {
         aria-hidden="true"
       />
 
-      {/* 5 — masked reveal, clipped to the lower 60% */}
+      {/* 5 — masked reveal, across the whole frame.
+             The spec clipped this to inset(40% 0 0 0) so the spotlight only
+             worked in the lower 60%; hovering the top of the hero did nothing.
+             Unclipped on request, so the reveal follows the pointer anywhere. */}
       <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
       {!calm && (
         <div
           ref={revealRef}
           className="pointer-events-none absolute inset-0 z-[3] hidden bg-cover bg-center md:block"
-          style={{ backgroundImage: `url('${MOTION}')`, clipPath: "inset(40% 0 0 0)" }}
+          style={{ backgroundImage: `url('${MOTION}')` }}
           aria-hidden="true"
         />
       )}
