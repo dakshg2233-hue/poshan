@@ -216,7 +216,18 @@ export function HeroVideo() {
       )}
 
       {/* ----------------------------------------------------------- nav */}
-      <header className="absolute inset-x-0 top-0 z-50 flex items-start justify-between p-5 sm:p-7">
+      {/* Three tracks — brand | pill | CTA — rather than a flex row with the
+          pill absolutely centred over it. Absolute positioning reserved no
+          space, so at 1100px the pill ran from 599 to 1031 and the CTA began
+          at 898: a 133px overlap, with the pill sitting on top of "Find your
+          blend". A grid gives the centre track its own room and lets it
+          shrink before it ever reaches the CTA.
+          1fr auto 1fr, not auto 1fr auto: with auto outer tracks the brand and
+          the CTA are different widths, so the middle track centres between
+          them rather than in the viewport — the pill sat 41px left of centre.
+          Equal flexible outer tracks put it back on the true centre line while
+          still reserving the CTA's room. */}
+      <header className="absolute inset-x-0 top-0 z-50 grid grid-cols-[1fr_auto_1fr] items-start gap-4 p-5 sm:p-7">
         <a href="#top" className="flex items-center gap-2.5 no-underline" aria-label="Poshan">
           <Kernel className="h-7 w-7 text-white" />
           <span
@@ -228,7 +239,10 @@ export function HeroVideo() {
         </a>
 
         <nav
-          className="liquid-glass absolute left-1/2 hidden -translate-x-1/2 items-center gap-0.5 rounded-full p-1.5 md:flex"
+          /* justify-self-center keeps it optically centred in its own track
+             instead of over the whole header, and min-w-0 lets it give way
+             rather than push the CTA off the edge. */
+          className="liquid-glass hidden min-w-0 items-center justify-self-center whitespace-nowrap gap-0.5 rounded-full p-1.5 lg:flex"
           style={{ backdropFilter: "blur(7px)", WebkitBackdropFilter: "blur(7px)" }}
           aria-label="Main"
         >
