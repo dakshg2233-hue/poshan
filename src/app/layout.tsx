@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Anek_Devanagari, Mukta, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
+import { Anek_Devanagari, Mukta, IBM_Plex_Mono, Instrument_Serif, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { LangProvider } from "@/components/poshan/lang-provider";
 
@@ -14,6 +14,16 @@ import { LangProvider } from "@/components/poshan/lang-provider";
 /* The hero wordmark only. Latin-only face, which is fine because it sets
    "POSHAN" and nothing in Devanagari. next/font self-hosts it at build time,
    so font-src stays 'self' and no Google request goes out at runtime. */
+/* DM Sans for labels, navigation and supporting copy, per the Quiet Vitality
+   spec. Latin-only, so it is exposed as its own variable rather than replacing
+   Mukta — the Hindi half of this bilingual site still needs Devanagari, which
+   DM Sans does not carry. Self-hosted by next/font, so font-src stays 'self'. */
+const uiSans = DM_Sans({
+  variable: "--font-ui",
+  subsets: ["latin"],
+  display: "swap",
+});
+
 const wordmark = Instrument_Serif({
   variable: "--font-wordmark",
   weight: "400",
@@ -80,7 +90,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${display.variable} ${wordmark.variable} ${ui.variable} ${mono.variable} h-full antialiased`}
+      className={`${display.variable} ${wordmark.variable} ${uiSans.variable} ${uiSans.variable} ${mono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <LangProvider>{children}</LangProvider>

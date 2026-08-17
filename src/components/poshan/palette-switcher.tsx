@@ -15,7 +15,7 @@ import { useState, useEffect } from "react";
  */
 
 export type PaletteKey =
-  | "sindoor" | "seed" | "kaali" | "neel" | "madhu" | "tulsi" | "kesari" | "kaajal" | "jamun";
+  | "sindoor" | "seed" | "kaali" | "patta" | "neel" | "madhu" | "tulsi" | "kesari" | "kaajal" | "jamun";
 
 export const PALETTES: {
   key: PaletteKey;
@@ -40,6 +40,12 @@ export const PALETTES: {
     name: "Kaali",
     note: "Matte black. Not #000 — pure black clips shadow detail on OLED and makes every border vanish. The only dark palette here, and the one glass looks best on.",
     swatch: ["#0E0E0E", "#FF8A5B", "#F0B055"],
+  },
+  {
+    key: "patta",
+    name: "Patta",
+    note: "Charcoal and Poshan Leaf, from the Quiet Vitality spec. The only palette built on a light, new-growth green rather than a deep one — cool and clinical where the rest run warm.",
+    swatch: ["#090A09", "#8FBF72", "#D8C98A"],
   },
   {
     key: "neel",

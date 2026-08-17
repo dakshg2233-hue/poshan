@@ -216,6 +216,54 @@
        - --kesar-fill sits under hardcoded white button labels, so it
          stays dark even though everything around it is darker still.
        ------------------------------------------------------------------ */
+/* Patta — the "Quiet Vitality" direction from the supplied Poshan spec.
+ *
+ * Charcoal ground (#090a09) with Poshan Leaf (#8FBF72) as the single action
+ * and status accent, exactly as that document specifies. It is the only
+ * palette here built around a LIGHT green rather than a deep one — Tulsi is
+ * forest, this is new growth — so it reads cool and clinical where the
+ * others read warm.
+ *
+ * Brought in as a palette rather than as a rebuild: the spec is a colour and
+ * type system, and this is where colour systems live in Poshan. */
+:root[data-palette="patta"] {
+  --roti: #090a09;
+  --roti-2: #101210;
+  --surface: #161816;
+  --ink: #f7f4ed;
+  --ink-soft: #a8ada4;
+  --line: #262a26;
+  --steel: #6c736a;
+  --steel-lo: #262a26;
+
+  /* Poshan Leaf is the accent. On charcoal it needs no lifting — it is
+     already light — but the FILL beneath white text has to go the other way,
+     the same split every dark palette here needs. */
+  --kesar: #8fbf72;
+  --kesar-fill: #33502a;
+
+  --haldi: #d8c98a;
+  --haldi-ink: #d8c98a;
+
+  --elaichi: #8fbf72;
+  --elaichi-fill: #33502a;
+  --imli: #b6a98d;
+  --imli-fill: #4a4232;
+  --mirch: #e08a72;
+
+  --panel: #161816;
+  --panel-ink: #f7f4ed;
+
+  --verdict-good: #33502a;
+  --verdict-caution: #6b5a10;
+  --verdict-avoid: #8a3326;
+}
+:root[data-palette="patta"] body::before,
+:root[data-palette="patta"] ~ body::before {
+  mix-blend-mode: screen;
+  opacity: 0.05;
+}
+
 :root[data-palette="kaali"] {
   --roti: #0e0e0e;
   --roti-2: #151515;
