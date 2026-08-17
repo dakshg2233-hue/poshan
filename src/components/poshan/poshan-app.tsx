@@ -18,6 +18,7 @@ import { Clinics } from "./clinics";
    deleted — swapping these two imports and the tag below reverts the hero. */
 import { HeroVideo } from "./hero-video";
 import { CursorPicker } from "./cursor-picker";
+import { PaletteControl } from "./palette-control";
 import { GlassFilter } from "@/components/ui/glass-filter";
 import { MagneticCursor } from "@/components/ui/magnetic-cursor";
 import { Bands, Meals, Biomarkers, Testimonials, ClosingCta, Footer } from "./sections";
@@ -141,6 +142,9 @@ function PoshanAppInner({
           from the footer — a cursor picker buried 23,000px down is a picker
           nobody finds. */}
       <CursorPicker />
+      {/* Fixed chrome, not nav furniture: the header stows over the hero,
+          which used to take the only palette control off screen with it. */}
+      <PaletteControl />
     </MagneticCursor>
   );
 }

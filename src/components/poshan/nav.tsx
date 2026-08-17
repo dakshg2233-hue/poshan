@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useLang } from "./lang-provider";
 import { LangHint } from "./lang-hint";
-import { PALETTES as POSHAN_PALETTES } from "./palette-switcher";
 
 const LINKS = [
   { href: "#check", en: "Check your BMI", hi: "बीएमआई जाँचें" },
@@ -12,20 +11,6 @@ const LINKS = [
   { href: "#premium", en: "Poshan Home", hi: "पोषण घर" },
 ];
 
-/* The real palettes, imported rather than restated.
- *
- * This picker previously carried its own four-name list and wrote
- * data-poshan-palette, which only two background glows ever read — so
- * choosing a palette here visibly did nothing. The site's actual theming
- * runs off data-palette with these nine, so the control now drives that. */
-const PALETTES = POSHAN_PALETTES.map((p) => ({
-  key: p.key,
-  name: p.name,
-  colors: p.swatch,
-}));
-
-/* Shared with palette-switcher.tsx so the two controls cannot disagree. */
-const PALETTE_STORAGE_KEY = "poshan-palette";
 
 export function Nav() {
   const { lang, setLang, T } = useLang();
@@ -39,39 +24,6 @@ export function Nav() {
      where it is — the failure mode of a permanently hidden nav is far worse
      than a redundant one, so the safe state is the default. */
   const [overHero, setOverHero] = useState(false);
-  const [paletteOpen, setPaletteOpen] = useState(false);
-  const [palette, setPalette] = useState("sindoor");
-
-  function choosePalette(key: string) {
-    setPalette(key);
-    setPaletteOpen(false);
-    /* setAttribute, not `dataset.x = …`: assigning to a property of a value
-       from outside the component trips the React 19 immutability lint, while
-       the equivalent method call does not. Sindoor is the bare :root, so it
-       is the absence of the attribute — same convention as the other picker. */
-    if (key === "sindoor") document.documentElement.removeAttribute("data-palette");
-    else document.documentElement.setAttribute("data-palette", key);
-    try {
-      localStorage.setItem(PALETTE_STORAGE_KEY, key);
-    } catch {
-      /* Private mode or blocked storage: the palette still applies for this
-         visit, it just will not be remembered. Not worth failing over. */
-    }
-  }
-
-  /* Reflect whatever palette is already applied, so the tick in this menu
-     matches the page after a refresh or a change made from the other picker. */
-  useEffect(() => {
-    /* Deferred: a setState in an effect body is a cascading render and the
-       React 19 compiler lint rejects it. */
-    const t = setTimeout(() => {
-      const saved = localStorage.getItem(PALETTE_STORAGE_KEY);
-      const active =
-        document.documentElement.getAttribute("data-palette") ?? saved ?? "sindoor";
-      if (PALETTES.some((p) => p.key === active)) setPalette(active);
-    }, 0);
-    return () => clearTimeout(t);
-  }, []);
 
   useEffect(() => {
     const hero = document.getElementById("hero");
@@ -156,12 +108,6 @@ export function Nav() {
         {/* Hint sits immediately left of the toggle it is pointing at. */}
         <div className="lg:ml-0 ml-auto flex items-center gap-2 shrink-0 relative">
           <div className="hidden xl:block"><LangHint /></div>
-          <div className="relative">
-            <button type="button" onClick={() => setPaletteOpen((open) => !open)} aria-expanded={paletteOpen} aria-label="Choose colour palette" className="flex h-9 items-center gap-1.5 rounded-full border border-white/20 bg-white/[.06] px-2.5 cursor-pointer">
-              {(PALETTES.find((item) => item.key === palette) ?? PALETTES[0]).colors.map((color) => <span key={color} className="h-3 w-3 rounded-full" style={{ background: color }} />)}
-            </button>
-            {paletteOpen && <div className="absolute right-0 top-11 w-44 rounded-2xl border border-white/15 bg-[#111411]/95 p-2 shadow-2xl backdrop-blur-xl">{PALETTES.map((item) => <button key={item.key} type="button" onClick={() => choosePalette(item.key)} className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-xs font-semibold text-white/85 hover:bg-white/10 cursor-pointer" aria-pressed={palette === item.key}><span>{item.name}</span><span className="flex gap-1">{item.colors.map((color) => <span key={color} className="h-2.5 w-2.5 rounded-full" style={{ background: color }} />)}</span></button>)}</div>}
-          </div>
           <div
             className="flex rounded-full overflow-hidden"
             style={{ border: "1px solid rgb(255 255 255 / .28)" }}
