@@ -793,7 +793,7 @@ export const EXPANDED_MEAL_LIBRARY: MealPlanItem[] = [
     ];
     const name = names[i % names.length];
     return {
-      id: `meal-north-${i}`,
+      id: `north-var-${i}-${time}-${category}`,
       region: region as any,
       time: time as any,
       category: category as any,
