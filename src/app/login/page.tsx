@@ -57,6 +57,7 @@ function LoginForm() {
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
   const otpRef = useRef<HTMLInputElement>(null);
 
@@ -104,7 +105,21 @@ function LoginForm() {
       setError(err.message);
       return;
     }
+
+    // Send email notification (non-blocking)
+    try {
+      await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, isNewUser: false }),
+      });
+    } catch (emailErr) {
+      console.error("Email notification failed:", emailErr);
+      // Don't block sign-in if email fails
+    }
+
     setCooldown(RESEND_SECONDS);
+    setSuccess("Code sent! Check your email.");
     setStep("otp");
   }
 
@@ -202,6 +217,8 @@ function LoginForm() {
 
         {step === "otp" && (
           <form onSubmit={verifyCode} className="grid gap-5" noValidate>
+            {success && <SuccessNote>{success}</SuccessNote>}
+
             <div>
               <label
                 htmlFor="otp"
@@ -301,6 +318,22 @@ function ErrorNote({ children }: { children: React.ReactNode }) {
       }}
     >
       {children}
+    </p>
+  );
+}
+
+function SuccessNote({ children }: { children: React.ReactNode }) {
+  return (
+    <p
+      role="status"
+      className="text-[0.85rem] rounded-xl p-3"
+      style={{
+        background: "color-mix(in srgb, #22c55e 10%, var(--surface))",
+        border: "1px solid #22c55e",
+        color: "var(--ink)",
+      }}
+    >
+      ✓ {children}
     </p>
   );
 }
