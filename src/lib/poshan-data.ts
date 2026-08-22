@@ -4,7 +4,6 @@
  * bodies, where overweight begins at 23.0 rather than the European 25.0.
  */
 
-import { EXPANDED_MEAL_LIBRARY } from "./poshan-meals";
 
 export type Lang = "en" | "hi";
 export type Bi = { en: string; hi: string };
@@ -1386,8 +1385,6 @@ export const MEAL_LIBRARY: MealPlanItem[] = [
     name: { en: "Roasted cauliflower curry", hi: "भुनी फूलगोभी की करी" }, kcal: 280,
     macros: { protein: 8, carbohydrate: 36, fat: 11, fibre: 7 },
     note: { en: "Charred florets in spice.", hi: "मसाले में जले हुए फूल।" } },
-
-  ...EXPANDED_MEAL_LIBRARY,
 ];
 
 /**

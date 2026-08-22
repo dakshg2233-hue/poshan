@@ -54,6 +54,11 @@ export function useReveal<T extends HTMLElement>() {
       ref.classList.add("in");
       return;
     }
+
+    // Check if element is already visible (e.g., just mounted in active tab)
+    const rect = ref.getBoundingClientRect();
+    const isVisibleOnMount = rect.top < window.innerHeight && rect.bottom > 0;
+
     const io = new IntersectionObserver(
       ([e]) => {
         if (e.isIntersecting) {
@@ -64,6 +69,13 @@ export function useReveal<T extends HTMLElement>() {
       { rootMargin: "0px 0px -12% 0px", threshold: 0.08 }
     );
     io.observe(ref);
+
+    // Immediately trigger if visible on mount (handles freshly mounted tab content)
+    if (isVisibleOnMount) {
+      ref.classList.add("in");
+      io.disconnect();
+    }
+
     return () => io.disconnect();
   }, [ref]);
 

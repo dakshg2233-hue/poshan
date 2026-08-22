@@ -59,7 +59,7 @@ export function MealsShowcase({
       <FoodScanner isPremium={isPremium} />
 
       {/* Filters */}
-      <div style={{ marginBottom: "32px", padding: "20px", background: "var(--surface-2)", borderRadius: "12px" }}>
+      <div style={{ marginBottom: "32px", padding: "20px", background: "var(--surface)", borderRadius: "12px" }}>
         {/* Search */}
         <div style={{ marginBottom: "20px" }}>
           <input
@@ -173,7 +173,7 @@ export function MealsShowcase({
             key={meal.id}
             style={{
               padding: "16px",
-              background: "var(--surface-2)",
+              background: "var(--surface)",
               borderRadius: "8px",
               border: "1px solid var(--line)",
               transition: "all 0.2s",
