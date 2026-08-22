@@ -152,17 +152,22 @@ function LoginForm() {
     setStep("done");
 
     // Check if user is new (just signed up) and needs onboarding
-    const supabase = browserClient();
-    if (supabase) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("onboarding_completed")
-        .eq("user_id", data.user.id)
-        .single();
+    const sb = browserClient();
+    if (sb) {
+      const { data: { user } } = await sb.auth.getUser();
+      if (user) {
+        const { data: profile } = await sb
+          .from("profiles")
+          .select("onboarding_completed")
+          .eq("user_id", user.id)
+          .single();
 
-      // If onboarding not completed, send to onboarding page
-      if (!profile?.onboarding_completed) {
-        router.push("/onboarding");
+        // If onboarding not completed, send to onboarding page
+        if (!profile?.onboarding_completed) {
+          router.push("/onboarding");
+        } else {
+          router.push(next);
+        }
       } else {
         router.push(next);
       }
