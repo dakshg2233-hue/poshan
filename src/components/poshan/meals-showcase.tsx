@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { useLang } from "./lang-provider";
 import { FoodScanner } from "./food-scanner";
-import { MEAL_LIBRARY, REGIONS, DIETS, filterMeals, type RegionKey, type DietKey, type GoalKey } from "@/lib/poshan-data";
+import { MEAL_LIBRARY, REGIONS, DIETS, filterMeals, mealsByTier, type RegionKey, type DietKey, type GoalKey } from "@/lib/poshan-data";
 
 export function MealsShowcase({
   isPremium,
@@ -18,21 +18,42 @@ export function MealsShowcase({
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredMeals = useMemo(() => {
+    // First filter by subscription tier
+    const tierMeals = mealsByTier(isPremium ? "premium" : "free");
+
+    // Then apply other filters
+    const mealIds = new Set(tierMeals.map(m => m.id));
+
     return filterMeals({
       region: selectedRegion,
       category: selectedDiet === "vegan" || selectedDiet === "jain" ? "veg" : selectedDiet ? (selectedDiet as any) : null,
       goal: goal,
     }).filter((m) => {
+      // Only show meals available in user's tier
+      if (!mealIds.has(m.id)) return false;
+
       if (!searchTerm) return true;
       return m.name.en.toLowerCase().includes(searchTerm.toLowerCase());
     });
-  }, [selectedRegion, selectedDiet, searchTerm, goal]);
+  }, [selectedRegion, selectedDiet, searchTerm, goal, isPremium]);
 
   return (
     <div style={{ maxWidth: "100%", padding: "24px" }}>
-      <h1 style={{ fontSize: "2rem", fontWeight: 700, margin: "0 0 24px 0" }}>
-        {T({ en: "🍛 Meal Library (130+ Dishes)", hi: "🍛 भोजन पुस्तकालय (130+ व्यंजन)" })}
-      </h1>
+      <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "24px" }}>
+        <h1 style={{ fontSize: "2rem", fontWeight: 700, margin: 0 }}>
+          {T({ en: `🍛 Meal Library (${isPremium ? "1363+" : "101"} Dishes)`, hi: `🍛 भोजन पुस्तकालय (${isPremium ? "1363+" : "101"} व्यंजन)` })}
+        </h1>
+        <span style={{
+          padding: "6px 12px",
+          borderRadius: "20px",
+          fontSize: "12px",
+          fontWeight: 600,
+          background: isPremium ? "var(--kesar)" : "var(--elaichi)",
+          color: "white"
+        }}>
+          {isPremium ? "POSHAN HOME" : "FREE"}
+        </span>
+      </div>
 
       {/* Food Scanner */}
       <FoodScanner isPremium={isPremium} />
