@@ -1,0 +1,608 @@
+[
+  {
+    "name": "Paneer tikka bowl",
+    "serving": "200 g paneer, vegetables & 1/2 cup brown rice",
+    "protein": 43,
+    "carbs": 39
+  },
+  {
+    "name": "Tofu stir-fry with edamame",
+    "serving": "200 g tofu, 1 cup edamame & vegetables",
+    "protein": 42,
+    "carbs": 35
+  },
+  {
+    "name": "Lentil and quinoa power bowl",
+    "serving": "1 cup lentils, 3/4 cup quinoa & vegetables",
+    "protein": 29,
+    "carbs": 73
+  },
+  {
+    "name": "Greek yogurt berry parfait",
+    "serving": "300 g Greek yogurt, berries & chia",
+    "protein": 34,
+    "carbs": 35
+  },
+  {
+    "name": "Cottage cheese chaat",
+    "serving": "250 g low-fat cottage cheese, chickpeas & salad",
+    "protein": 39,
+    "carbs": 38
+  },
+  {
+    "name": "Chickpea and paneer salad",
+    "serving": "1 cup chickpeas, 100 g paneer & greens",
+    "protein": 32,
+    "carbs": 53
+  },
+  {
+    "name": "Soy chunk masala with roti",
+    "serving": "50 g dry soy chunks, 2 whole-wheat rotis",
+    "protein": 33,
+    "carbs": 53
+  },
+  {
+    "name": "Moong dal chilla with paneer",
+    "serving": "3 moong chillas filled with 100 g paneer",
+    "protein": 35,
+    "carbs": 48
+  },
+  {
+    "name": "Tofu bhurji with multigrain toast",
+    "serving": "200 g tofu and 2 slices toast",
+    "protein": 30,
+    "carbs": 36
+  },
+  {
+    "name": "Rajma quinoa bowl",
+    "serving": "1 cup kidney beans, 3/4 cup quinoa & salsa",
+    "protein": 24,
+    "carbs": 75
+  },
+  {
+    "name": "Black bean burrito bowl",
+    "serving": "1 cup black beans, rice, corn & Greek yogurt",
+    "protein": 27,
+    "carbs": 78
+  },
+  {
+    "name": "Tempeh peanut noodle bowl",
+    "serving": "150 g tempeh, soba noodles & vegetables",
+    "protein": 35,
+    "carbs": 61
+  },
+  {
+    "name": "Seitan vegetable stir-fry",
+    "serving": "150 g seitan, vegetables & 1/2 cup rice",
+    "protein": 42,
+    "carbs": 48
+  },
+  {
+    "name": "Paneer and spinach curry",
+    "serving": "180 g paneer with spinach & 2 rotis",
+    "protein": 41,
+    "carbs": 44
+  },
+  {
+    "name": "oats, Greek yogurt, milk, whey & berries",
+    "serving": "41 g",
+    "protein": 57,
+    "carbs": 10
+  },
+  {
+    "name": "oats, soy granules, peas & yogurt",
+    "serving": "30 g",
+    "protein": 49,
+    "carbs": 12
+  },
+  {
+    "name": "Masoor dal with brown rice",
+    "serving": "1.5 cups masoor dal and 3/4 cup rice",
+    "protein": 27,
+    "carbs": 83
+  },
+  {
+    "name": "Chole with Greek yogurt",
+    "serving": "1 cup chickpeas, 250 g Greek yogurt & salad",
+    "protein": 36,
+    "carbs": 58
+  },
+  {
+    "name": "Edamame quinoa salad",
+    "serving": "1.5 cups edamame, quinoa & vegetables",
+    "protein": 31,
+    "carbs": 53
+  },
+  {
+    "name": "Tofu coconut curry",
+    "serving": "250 g tofu, vegetables & 1/2 cup rice",
+    "protein": 32,
+    "carbs": 45
+  },
+  {
+    "name": "Paneer lettuce wraps",
+    "serving": "180 g paneer with hummus and vegetables",
+    "protein": 39,
+    "carbs": 28
+  },
+  {
+    "name": "beans, lentils, TVP and vegetables",
+    "serving": "34 g",
+    "protein": 65,
+    "carbs": 6
+  },
+  {
+    "name": "Lentil pasta primavera",
+    "serving": "85 g lentil pasta, Greek yogurt sauce & vegetables",
+    "protein": 31,
+    "carbs": 65
+  },
+  {
+    "name": "Tofu scramble breakfast plate",
+    "serving": "250 g tofu, black beans, vegetables & toast",
+    "protein": 37,
+    "carbs": 46
+  },
+  {
+    "name": "Cottage cheese stuffed peppers",
+    "serving": "250 g cottage cheese, quinoa & peppers",
+    "protein": 36,
+    "carbs": 46
+  },
+  {
+    "name": "Palak tofu with roti",
+    "serving": "250 g tofu, spinach gravy & 2 rotis",
+    "protein": 34,
+    "carbs": 49
+  },
+  {
+    "name": "Soya keema pav",
+    "serving": "50 g dry soy granules, 2 whole-wheat buns & salad",
+    "protein": 31,
+    "carbs": 58
+  },
+  {
+    "name": "Besan chilla with Greek yogurt",
+    "serving": "3 besan chillas, 250 g Greek yogurt",
+    "protein": 35,
+    "carbs": 47
+  },
+  {
+    "name": "Tofu tikka wrap",
+    "serving": "200 g tofu in 2 whole-wheat wraps with salad",
+    "protein": 32,
+    "carbs": 54
+  },
+  {
+    "name": "Paneer quinoa pulao",
+    "serving": "150 g paneer, quinoa, peas & vegetables",
+    "protein": 35,
+    "carbs": 57
+  },
+  {
+    "name": "Dal makhani light with rice",
+    "serving": "1.5 cups lentils, yogurt and 1/2 cup rice",
+    "protein": 27,
+    "carbs": 68
+  },
+  {
+    "name": "Kidney bean tofu tacos",
+    "serving": "1 cup kidney beans, 150 g tofu & 3 corn tortillas",
+    "protein": 31,
+    "carbs": 66
+  },
+  {
+    "name": "Miso tofu soba soup",
+    "serving": "200 g tofu, edamame, soba and vegetables",
+    "protein": 34,
+    "carbs": 58
+  },
+  {
+    "name": "Halloumi and lentil salad",
+    "serving": "100 g halloumi, 1 cup lentils & vegetables",
+    "protein": 32,
+    "carbs": 48
+  },
+  {
+    "name": "Greek yogurt, whey, milk, banana & chia",
+    "serving": "42 g",
+    "protein": 43,
+    "carbs": 9
+  },
+  {
+    "name": "Skyr with peanut butter oats",
+    "serving": "300 g skyr, oats, peanut butter & berries",
+    "protein": 38,
+    "carbs": 48
+  },
+  {
+    "name": "Tofu Thai basil rice bowl",
+    "serving": "250 g tofu, vegetables and 3/4 cup rice",
+    "protein": 34,
+    "carbs": 56
+  },
+  {
+    "name": "White bean shakshuka style",
+    "serving": "1.5 cups white beans, feta & tomato sauce",
+    "protein": 29,
+    "carbs": 65
+  },
+  {
+    "name": "lentils, soy mince, vegetables & potato mash",
+    "serving": "31 g",
+    "protein": 63,
+    "carbs": 10
+  },
+  {
+    "name": "Black lentil dal with paneer",
+    "serving": "1 cup black lentils, 100 g paneer & 1 roti",
+    "protein": 34,
+    "carbs": 51
+  },
+  {
+    "name": "Mushroom seitan fajitas",
+    "serving": "150 g seitan, peppers & 2 tortillas",
+    "protein": 40,
+    "carbs": 49
+  },
+  {
+    "name": "Tofu sesame broccoli bowl",
+    "serving": "250 g tofu, edamame, broccoli & quinoa",
+    "protein": 42,
+    "carbs": 47
+  },
+  {
+    "name": "Chickpea pasta with paneer",
+    "serving": "85 g chickpea pasta, 100 g paneer & sauce",
+    "protein": 36,
+    "carbs": 62
+  },
+  {
+    "name": "Soybean pulao with raita",
+    "serving": "1.5 cups soybeans, rice & Greek-yogurt raita",
+    "protein": 34,
+    "carbs": 68
+  },
+  {
+    "name": "soy mince, edamame & vegetables",
+    "serving": "34 g",
+    "protein": 31,
+    "carbs": 13
+  },
+  {
+    "name": "Baked tofu grain bowl",
+    "serving": "250 g tofu, farro, chickpeas & vegetables",
+    "protein": 38,
+    "carbs": 66
+  },
+  {
+    "name": "Paneer bhurji with millet toast",
+    "serving": "180 g paneer and 2 millet toasts",
+    "protein": 40,
+    "carbs": 39
+  },
+  {
+    "name": "Peanut tempeh Buddha bowl",
+    "serving": "150 g tempeh, brown rice, edamame & vegetables",
+    "protein": 39,
+    "carbs": 64
+  },
+  {
+    "name": "Red lentil pasta bolognese",
+    "serving": "85 g red lentil pasta, TVP tomato sauce",
+    "protein": 36,
+    "carbs": 65
+  },
+  {
+    "name": "low-fat ricotta, lentils, spinach & marinara",
+    "serving": "34 g",
+    "protein": 50,
+    "carbs": 12
+  },
+  {
+    "name": "Tofu and black bean enchiladas",
+    "serving": "200 g tofu, black beans, tortillas & salsa",
+    "protein": 38,
+    "carbs": 62
+  },
+  {
+    "name": "Tandoori chicken with brown rice",
+    "serving": "170 g chicken breast, brown rice & vegetables",
+    "protein": 57,
+    "carbs": 48
+  },
+  {
+    "name": "Chicken tikka with quinoa salad",
+    "serving": "180 g chicken tikka, quinoa & kachumber",
+    "protein": 58,
+    "carbs": 43
+  },
+  {
+    "name": "Chicken bhurji with soya chunks",
+    "serving": "170 g chicken, soy chunks & vegetables",
+    "protein": 63,
+    "carbs": 31
+  },
+  {
+    "name": "Chicken rajma masala",
+    "serving": "170 g chicken, kidney beans & vegetables",
+    "protein": 54,
+    "carbs": 43
+  },
+  {
+    "name": "Tandoori salmon with sweet potato",
+    "serving": "170 g salmon, sweet potato & broccoli",
+    "protein": 43,
+    "carbs": 48
+  },
+  {
+    "name": "Tuna chana chaat",
+    "serving": "150 g tuna, chickpeas & greens",
+    "protein": 48,
+    "carbs": 43
+  },
+  {
+    "name": "Prawn quinoa pulao",
+    "serving": "180 g prawns, quinoa & vegetables",
+    "protein": 49,
+    "carbs": 48
+  },
+  {
+    "name": "Egg-white masala omelette",
+    "serving": "300 g egg whites, 2 eggs, vegetables & toast",
+    "protein": 48,
+    "carbs": 32
+  },
+  {
+    "name": "Chicken tikka whole-wheat wraps",
+    "serving": "170 g chicken, peppers and 2 rotis",
+    "protein": 57,
+    "carbs": 54
+  },
+  {
+    "name": "Chicken broccoli stir-fry",
+    "serving": "170 g chicken, broccoli and 1/2 cup rice",
+    "protein": 51,
+    "carbs": 39
+  },
+  {
+    "name": "Chicken masoor dal soup",
+    "serving": "170 g chicken, 1 cup lentils & vegetables",
+    "protein": 62,
+    "carbs": 52
+  },
+  {
+    "name": "Chicken kofta with dalia",
+    "serving": "170 g chicken kofta, cracked wheat & vegetables",
+    "protein": 55,
+    "carbs": 62
+  },
+  {
+    "name": "Baked fish with white-bean chaat",
+    "serving": "200 g cod, white beans & vegetables",
+    "protein": 53,
+    "carbs": 42
+  },
+  {
+    "name": "Chicken saag with roti",
+    "serving": "180 g chicken, spinach gravy & 2 rotis",
+    "protein": 55,
+    "carbs": 44
+  },
+  {
+    "name": "Egg curry with chickpea rice",
+    "serving": "4 eggs, chickpeas, rice & tomato gravy",
+    "protein": 34,
+    "carbs": 70
+  },
+  {
+    "name": "Tandoori chicken salad",
+    "serving": "200 g chicken, yogurt dressing & vegetables",
+    "protein": 66,
+    "carbs": 20
+  },
+  {
+    "name": "Tuna masala with whole-wheat roti",
+    "serving": "150 g tuna, 3 rotis & tomato sauce",
+    "protein": 51,
+    "carbs": 62
+  },
+  {
+    "name": "Prawn coconut curry with rice",
+    "serving": "200 g prawns, light coconut curry & rice",
+    "protein": 48,
+    "carbs": 54
+  },
+  {
+    "name": "Chicken and black chana bowl",
+    "serving": "170 g chicken, black chana, rice & salsa",
+    "protein": 62,
+    "carbs": 68
+  },
+  {
+    "name": "Chicken keema with peas and roti",
+    "serving": "170 g chicken keema, peas & 2 rotis",
+    "protein": 48,
+    "carbs": 47
+  },
+  {
+    "name": "Chicken lettuce wraps",
+    "serving": "180 g chicken, vegetables & peanut sauce",
+    "protein": 49,
+    "carbs": 22
+  },
+  {
+    "name": "Chicken shawarma-style quinoa bowl",
+    "serving": "170 g chicken, quinoa, hummus & vegetables",
+    "protein": 59,
+    "carbs": 51
+  },
+  {
+    "name": "Grilled fish with dal",
+    "serving": "180 g white fish, 1 cup dal & vegetables",
+    "protein": 55,
+    "carbs": 43
+  },
+  {
+    "name": "Chicken chana salad",
+    "serving": "170 g chicken, chickpeas, mint chutney & vegetables",
+    "protein": 62,
+    "carbs": 42
+  },
+  {
+    "name": "Tuna avocado roti roll",
+    "serving": "150 g tuna, 2 rotis & avocado",
+    "protein": 45,
+    "carbs": 42
+  },
+  {
+    "name": "Chicken yakhni soup with rice",
+    "serving": "170 g chicken, rice & vegetables",
+    "protein": 51,
+    "carbs": 58
+  },
+  {
+    "name": "Salmon masoor dal salad",
+    "serving": "170 g salmon, 1 cup lentils & greens",
+    "protein": 53,
+    "carbs": 46
+  },
+  {
+    "name": "Chicken and egg breakfast hash",
+    "serving": "150 g chicken, 2 eggs, potato & vegetables",
+    "protein": 49,
+    "carbs": 40
+  },
+  {
+    "name": "Chicken vegetable sevai bowl",
+    "serving": "170 g chicken, whole-wheat sevai & vegetables",
+    "protein": 55,
+    "carbs": 64
+  },
+  {
+    "name": "Prawn and edamame fried rice",
+    "serving": "180 g prawns, edamame, rice & vegetables",
+    "protein": 52,
+    "carbs": 61
+  },
+  {
+    "name": "Chicken paneer roti roll",
+    "serving": "170 g chicken, roti, beans & paneer",
+    "protein": 58,
+    "carbs": 53
+  },
+  {
+    "name": "Chicken black-chana salad bowl",
+    "serving": "170 g chicken, black chana, corn & salad",
+    "protein": 50,
+    "carbs": 48
+  },
+  {
+    "name": "Egg bhurji with paneer and roti",
+    "serving": "3 eggs, 100 g paneer & 2 rotis",
+    "protein": 42,
+    "carbs": 45
+  },
+  {
+    "name": "Chicken and kidney bean masala",
+    "serving": "170 g chicken, kidney beans & vegetables",
+    "protein": 59,
+    "carbs": 49
+  },
+  {
+    "name": "chicken, cottage cheese and cracked wheat",
+    "serving": "48 g",
+    "protein": 50,
+    "carbs": 14
+  },
+  {
+    "name": "Seared tuna rice bowl",
+    "serving": "170 g tuna, rice, edamame & vegetables",
+    "protein": 54,
+    "carbs": 60
+  },
+  {
+    "name": "Chicken Greek-yogurt curry",
+    "serving": "180 g chicken, yogurt curry and 1/2 cup rice",
+    "protein": 60,
+    "carbs": 42
+  },
+  {
+    "name": "Fish tikka with black chana",
+    "serving": "180 g white fish, black chana and 3 rotis",
+    "protein": 52,
+    "carbs": 57
+  },
+  {
+    "name": "Chicken quinoa kachumber salad",
+    "serving": "170 g chicken, quinoa, yogurt and greens",
+    "protein": 58,
+    "carbs": 42
+  },
+  {
+    "name": "Chicken patty with sweet potato",
+    "serving": "170 g chicken patty, bun, sweet potato & salad",
+    "protein": 48,
+    "carbs": 61
+  },
+  {
+    "name": "Prawn and chickpea masala",
+    "serving": "200 g prawns, chickpeas and tomato gravy",
+    "protein": 52,
+    "carbs": 48
+  },
+  {
+    "name": "Chicken peanut masala bowl",
+    "serving": "170 g chicken, brown rice, vegetables & peanut sauce",
+    "protein": 56,
+    "carbs": 58
+  },
+  {
+    "name": "Chicken and lentil stew",
+    "serving": "170 g chicken, 1 cup lentils & vegetables",
+    "protein": 55,
+    "carbs": 51
+  },
+  {
+    "name": "Chicken egg-fried cauliflower rice",
+    "serving": "170 g chicken, 2 eggs, edamame & vegetables",
+    "protein": 62,
+    "carbs": 25
+  },
+  {
+    "name": "Salmon pulao bowl",
+    "serving": "170 g salmon, rice, edamame, avocado & vegetables",
+    "protein": 47,
+    "carbs": 59
+  },
+  {
+    "name": "Chicken tikka masala light",
+    "serving": "180 g chicken, light sauce and 3/4 cup rice",
+    "protein": 57,
+    "carbs": 55
+  },
+  {
+    "name": "Chicken-stuffed sweet potato",
+    "serving": "170 g chicken, black chana and baked sweet potato",
+    "protein": 51,
+    "carbs": 56
+  },
+  {
+    "name": "Egg and smoked salmon roti roll",
+    "serving": "2 eggs, 100 g smoked salmon, rotis & greens",
+    "protein": 43,
+    "carbs": 54
+  },
+  {
+    "name": "Chicken vegetable soup with beans",
+    "serving": "170 g chicken, beans, millet & vegetables",
+    "protein": 55,
+    "carbs": 58
+  },
+  {
+    "name": "Indian mackerel quinoa salad",
+    "serving": "150 g mackerel, quinoa, chickpeas & greens",
+    "protein": 40,
+    "carbs": 50
+  }
+]
