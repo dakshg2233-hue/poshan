@@ -1,0 +1,47 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": {
+      "required": true,
+      "description": "Supabase project URL for authentication and database"
+    },
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": {
+      "required": true,
+      "description": "Supabase anonymous key for client-side API access"
+    },
+    "SUPABASE_SERVICE_ROLE_KEY": {
+      "required": true,
+      "description": "Supabase service role key for server-side operations (keep secret)"
+    },
+    "RESEND_API_KEY": {
+      "required": true,
+      "description": "Resend API key for sending transactional emails"
+    },
+    "RAZORPAY_KEY_ID": {
+      "required": false,
+      "description": "Razorpay public key for payment processing"
+    },
+    "RAZORPAY_KEY_SECRET": {
+      "required": false,
+      "description": "Razorpay secret key (keep secret)"
+    },
+    "RAZORPAY_WEBHOOK_SECRET": {
+      "required": false,
+      "description": "Razorpay webhook secret for payment verification"
+    },
+    "NEXT_PUBLIC_SITE_URL": {
+      "required": true,
+      "description": "Production domain URL (e.g., https://poshan.app)"
+    },
+    "NEXT_PUBLIC_ANALYTICS_ID": {
+      "required": false,
+      "description": "Analytics tracking ID (optional)"
+    }
+  },
+  "regions": ["iad1"],
+  "public": []
+}

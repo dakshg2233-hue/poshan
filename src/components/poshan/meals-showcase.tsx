@@ -20,7 +20,7 @@ export function MealsShowcase({
   const filteredMeals = useMemo(() => {
     return filterMeals({
       region: selectedRegion,
-      category: selectedDiet === "vegan" || selectedDiet === "jain" ? "veg" : selectedDiet === "egg" ? "nonveg" : null,
+      category: selectedDiet === "vegan" || selectedDiet === "jain" ? "veg" : selectedDiet ? (selectedDiet as any) : null,
       goal: goal,
     }).filter((m) => {
       if (!searchTerm) return true;

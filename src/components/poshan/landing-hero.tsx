@@ -71,7 +71,7 @@ const FadingVideo = ({
   className: string;
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const rafIdRef = useRef<number>();
+  const rafIdRef = useRef<number | undefined>(undefined);
   const fadingOutRef = useRef(false);
   const FADE_MS = 500;
   const FADE_OUT_LEAD = 0.55;

@@ -12,6 +12,8 @@ export interface Profile {
   region: "north" | "south" | "east" | "west" | null;
   diet: "veg" | "nonveg" | "vegan" | "jain" | null;
   goal: "loss" | "muscle" | "diabetes" | "pcos" | "thyroid" | null;
+  tdee: number | null;
+  onboarding_completed: boolean;
   lang: "en" | "hi";
   created_at: string;
   updated_at: string;
