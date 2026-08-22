@@ -8,7 +8,7 @@
 }
 
 /* The measure layer holds real, selectable, screen-reader-visible text. It is
-   transparent only when media is actually masking through it — see
+   transparent only when media is actually masking through it, see
    .masked-heading[data-masked="false"], which restores colour so the heading
    still reads before any photograph exists. */
 .masked-heading__measure {

@@ -1,12 +1,12 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Poshan — Know your body. Eat like home.";
+export const alt = "Poshan: Know your body. Eat like home.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 /**
  * Generated at build time, so there is no image asset to ship or keep in sync.
- * Drawn with the same masala palette and steel thali as the site — a shared
+ * Drawn with the same masala palette and steel thali as the site, a shared
  * link should look like the product, not like a default card.
  *
  * Uses plain inline styles: ImageResponse runs Satori, which supports only a

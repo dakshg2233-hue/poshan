@@ -1,10 +1,10 @@
-# Poshan — Reference-Led Design Specification
+# Poshan, Reference-Led Design Specification
 
 ## Ground-Truth Reference
 
 The supplied template defines a **single, full-viewport wellness-product hero**: a moody image-led canvas, huge elegant wordmark, understated frosted navigation, a subtle technical grid, and a lower-screen cursor spotlight which reveals product motion. Poshan will preserve this visual hierarchy and interaction language, while shifting the story from a wearable device to an intelligent daily nutrition companion.
 
-## Chosen Approach — Quiet Vitality
+## Chosen Approach, Quiet Vitality
 
 ### Design Movement
 
@@ -16,7 +16,7 @@ The product image remains the emotional centre. Typography is monumental yet res
 
 ### Color Philosophy
 
-Charcoal-black creates visual quiet and lets warm, nourishing tones—fig brown, papaya, saffron, and leaf green—feel vivid but natural. White typography is used sparingly for crystalline legibility. **Poshan Leaf**, a fresh muted green, is the signature signal for availability and action.
+Charcoal-black creates visual quiet and lets warm, nourishing tones (fig brown, papaya, saffron, and leaf green) feel vivid but natural. White typography is used sparingly for crystalline legibility. **Poshan Leaf**, a fresh muted green, is the signature signal for availability and action.
 
 ### Layout Paradigm
 
@@ -52,7 +52,7 @@ The wordmark is rendered as a poised editorial monogram. The icon is a bold, tex
 
 ### Signature Brand Color
 
-**Poshan Leaf — #8FBF72**
+**Poshan Leaf, #8FBF72**
 
 ## Style Decisions
 

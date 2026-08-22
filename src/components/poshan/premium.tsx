@@ -59,13 +59,13 @@ export function Premium({
           >
             {T({ en: "Poshan Home", hi: "पोषण घर" })}{" "}
             <em style={{ color: "var(--kesar)", fontStyle: "italic" }}>
-              {T({ en: "— the plan that knows your kitchen", hi: "— वह प्लान जो आपकी रसोई जानता है" })}
+              {T({ en: "the plan that knows your kitchen", hi: "वह प्लान जो आपकी रसोई जानता है" })}
             </em>
           </h2>
           <p className="mt-4 text-[1.02rem]" style={{ color: "var(--ink-soft)" }}>
             {T({
-              en: "The free plan reads your body. Poshan Home cooks for it — a plan rebuilt around your goal, your diet and the food your region actually makes.",
-              hi: "मुफ़्त प्लान आपका शरीर पढ़ता है। पोषण घर उसके लिए पकाता है — आपके लक्ष्य, आपके आहार और आपके क्षेत्र के असली खाने के हिसाब से बना प्लान।",
+              en: "The free plan reads your body. Poshan Home cooks for it: a plan rebuilt around your goal, your diet and the food your region actually makes.",
+              hi: "मुफ़्त प्लान आपका शरीर पढ़ता है। पोषण घर उसके लिए पकाता है: आपके लक्ष्य, आपके आहार और आपके क्षेत्र के असली खाने के हिसाब से बना प्लान।",
             })}
           </p>
         </div>
@@ -76,7 +76,7 @@ export function Premium({
           style={{ background: "var(--panel)", color: "var(--panel-ink)" }}
         >
           {/* Cursor-tracked light. Dark surfaces are where this reads as
-              expensive rather than busy — it does nothing on the warm ground. */}
+              expensive rather than busy: it does nothing on the warm ground. */}
           <Spotlight className="from-amber-100 via-amber-200 to-transparent" size={320} />
           <p
             className="text-[0.72rem] font-extrabold uppercase mb-6 relative"
@@ -86,7 +86,7 @@ export function Premium({
           </p>
 
           {/* Says where the choices are being kept. Signed out they still
-              survive a refresh, via localStorage — worth saying so, because
+              survive a refresh, via localStorage: worth saying so, because
               "you must make an account to keep this" is the assumption most
               people arrive with. */}
           <p
@@ -99,8 +99,8 @@ export function Premium({
                   hi: "आपके खाते में सहेजा गया।",
                 })
               : T({
-                  en: "Kept on this device — sign in to carry it across devices.",
-                  hi: "इसी डिवाइस पर सुरक्षित — दूसरे डिवाइस पर ले जाने के लिए साइन इन करें।",
+                  en: "Kept on this device: sign in to carry it across devices.",
+                  hi: "इसी डिवाइस पर सुरक्षित: दूसरे डिवाइस पर ले जाने के लिए साइन इन करें।",
                 })}
           </p>
 
@@ -277,8 +277,8 @@ export function Premium({
             <p className="mt-2 text-[0.82rem] min-h-[1.2rem]" style={{ color: "var(--haldi)" }}>
               {yearly
                 ? T({
-                    en: `Works out to ₹${Math.round(PREMIUM.yearly / 12)} a month — you keep ₹${PREMIUM.saved.toLocaleString("en-IN")}, about ${PREMIUM.savedPercent}% off.`,
-                    hi: `यानी ₹${Math.round(PREMIUM.yearly / 12)} प्रति माह — आप ₹${PREMIUM.saved.toLocaleString("en-IN")} बचाते हैं, लगभग ${PREMIUM.savedPercent}% की छूट।`,
+                    en: `Works out to ₹${Math.round(PREMIUM.yearly / 12)} a month, you keep ₹${PREMIUM.saved.toLocaleString("en-IN")}, about ${PREMIUM.savedPercent}% off.`,
+                    hi: `यानी ₹${Math.round(PREMIUM.yearly / 12)} प्रति माह, आप ₹${PREMIUM.saved.toLocaleString("en-IN")} बचाते हैं, लगभग ${PREMIUM.savedPercent}% की छूट।`,
                   })
                 : T({
                     en: `Switch to yearly and keep ₹${PREMIUM.saved.toLocaleString("en-IN")}.`,
@@ -370,7 +370,7 @@ export function Premium({
  * Cancelling is the thing people are actually nervous about, so it gets a
  * real control rather than a line of small print. It discloses how
  * cancellation works instead of pretending to cancel a subscription that
- * does not exist yet — there is no account system behind this page.
+ * does not exist yet: there is no account system behind this page.
  */
 function CancelAnytime() {
   const { T } = useLang();
@@ -389,7 +389,7 @@ function CancelAnytime() {
           color: "var(--roti)",
         }}
       >
-        {T({ en: "Cancel anytime — here's how", hi: "कभी भी रद्द करें — ऐसे" })}
+        {T({ en: "Cancel anytime, here's how", hi: "कभी भी रद्द करें, ऐसे" })}
         <svg
           viewBox="0 0 16 16"
           aria-hidden

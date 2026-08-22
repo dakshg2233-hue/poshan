@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy — Poshan",
+  title: "Privacy, Poshan",
   description:
     "What Poshan stores, why, and how to have it deleted. Covers health inputs, account data and payments.",
 };
@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 /**
  * Privacy policy.
  *
- * Written from what this codebase ACTUALLY does — the tables in
- * supabase/schema.sql, Supabase email-OTP auth, and Razorpay checkout — rather
+ * Written from what this codebase ACTUALLY does, the tables in
+ * supabase/schema.sql, Supabase email-OTP auth, and Razorpay checkout, rather
  * than from a template. Everything marked [TO CONFIRM] needs a decision or a
  * legal detail only Daksh can supply; I have not invented an entity name,
  * address, jurisdiction or retention period, because a privacy policy that
@@ -58,8 +58,8 @@ export default function Privacy() {
 
         <h2 className="mt-6 text-[1.3rem]" style={{ fontFamily: "var(--font-display)" }}>Processors</h2>
         <ul className="ml-5 list-disc grid gap-1">
-          <li><strong>Supabase</strong> — database, authentication and storage.</li>
-          <li><strong>Razorpay</strong> — payments. Card details go to Razorpay directly; we never see or store them.</li>
+          <li><strong>Supabase</strong>: database, authentication and storage.</li>
+          <li><strong>Razorpay</strong>: payments. Card details go to Razorpay directly; we never see or store them.</li>
         </ul>
 
         <h2 className="mt-6 text-[1.3rem]" style={{ fontFamily: "var(--font-display)" }}>Meal photos</h2>

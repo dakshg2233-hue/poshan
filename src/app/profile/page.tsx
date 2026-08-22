@@ -72,7 +72,7 @@ function ProfileForm({
   profile: Profile | null
   updateProfile: (updates: Partial<Profile>) => Promise<unknown>
 }) {
-  /* Safe to seed from props here — this component only mounts after the parent
+  /* Safe to seed from props here: this component only mounts after the parent
      has finished loading, so `profile` is already settled. */
   const [formData, setFormData] = useState<FormState>(() =>
     profile
@@ -115,7 +115,7 @@ function ProfileForm({
       if (formData.goal !== profile?.goal) patch.goal = formData.goal
 
       if (Object.keys(patch).length === 0) {
-        setMessage("Nothing to save — no changes.")
+        setMessage("Nothing to save, no changes.")
         setSaving(false)
         setTimeout(() => setMessage(""), 3000)
         return

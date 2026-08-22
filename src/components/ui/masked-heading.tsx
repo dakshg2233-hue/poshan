@@ -21,7 +21,7 @@ import "./masked-heading.css";
  * matter on a page this long:
  *
  *  1. The rAF loop is now gated on visibility. The original started a frame
- *     loop on mount and never stopped it — on an ~18,000px page that is a
+ *     loop on mount and never stopped it: on an ~18,000px page that is a
  *     permanent render loop for a heading nobody is looking at.
  *  2. prefers-reduced-motion now also disables the idle drift and pointer
  *     parallax. The original honoured it for the entrance tween only, so a
@@ -103,7 +103,7 @@ export function MaskedHeading({
      masked, so a 404 or a decode error would leave an invisible heading. If
      the media cannot load we fall back to plain text rather than nothing. */
   /* Stores WHICH src failed rather than a boolean. A new src is then
-     automatically un-failed, with no resetting effect — and setState in an
+     automatically un-failed, with no resetting effect, and setState in an
      effect body is a React 19 compiler lint error anyway. */
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
   const masked = Boolean(src) && failedSrc !== src;
@@ -119,7 +119,7 @@ export function MaskedHeading({
   });
   /* Kept fresh in an effect with no dep array, so it runs after every render.
      The original assigned to the ref during render, which React 19's compiler
-     lint rejects — a ref write during render is not safe under concurrent
+     lint rejects: a ref write during render is not safe under concurrent
      rendering, where a render can be thrown away. */
   useEffect(() => {
     settingsRef.current = {
@@ -135,7 +135,7 @@ export function MaskedHeading({
 
   /* Drop refs beyond the current word count so a shorter heading cannot leave
      detached nodes behind for sync() to measure. Done in an effect, not during
-     render — touching a ref while rendering is a React 19 compiler lint error. */
+     render: touching a ref while rendering is a React 19 compiler lint error. */
   useEffect(() => {
     wordRefs.current.length = words.length;
     baseRefs.current.length = words.length;
@@ -405,7 +405,7 @@ export function MaskedHeading({
           >
             {/* Real space in the DOM, not a CSS ::after. The original spaced
                 words with a pseudo-element, so textContent came out as
-                "Turntheplateover." — unselectable, uncopyable, and not
+                "Turntheplateover.": unselectable, uncopyable, and not
                 dependably announced by screen readers. white-space: pre on
                 this span preserves the trailing space, and word offsetLeft
                 is unaffected because the space widens this box, not its own

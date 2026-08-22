@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
  * is also not consent.
  *
  * ANALYTICS_ID is read from env. With no id configured this component still
- * works — it simply has nothing to load, which is the correct behaviour for a
+ * works: it simply has nothing to load, which is the correct behaviour for a
  * site that has not chosen a provider yet.
  */
 const KEY = "poshan-consent";
@@ -28,7 +28,7 @@ function loadAnalytics() {
   w.dataLayer = w.dataLayer || [];
   function gtag(...args: unknown[]) { w.dataLayer!.push(args); }
   gtag("js", new Date());
-  /* IP anonymised, and no ad signals — this measures usage, not people. */
+  /* IP anonymised, and no ad signals: this measures usage, not people. */
   gtag("config", ANALYTICS_ID, { anonymize_ip: true, allow_google_signals: false });
 }
 

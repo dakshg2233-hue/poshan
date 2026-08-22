@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useLang, useReveal } from "./lang-provider";
+import { FoodScanner } from "./food-scanner";
 import { RecipePanel } from "./recipe-panel";
 import {
   MEAL_LIBRARY,
@@ -59,13 +60,26 @@ export function MealLibrary({ goal }: { goal: GoalKey }) {
   const [region, setRegion] = useState<RegionKey | null>(null);
   const [time, setTime] = useState<MealTime | null>(null);
   const [byGoal, setByGoal] = useState(false);
+  const [query, setQuery] = useState("");
 
   const goalLabel = GOALS.find((g) => g.key === goal)!.label;
 
   const meals = useMemo(() => {
-    const base = filterMeals({ category, region, time, goal: byGoal ? goal : null });
+    const filtered = filterMeals({ category, region, time, goal: byGoal ? goal : null });
+    /* Name and note, both languages regardless of which is on screen: Indian
+       dish names get typed in either script, and someone reading the English
+       copy still searches "पनीर". Applied after the filters so the count the
+       filters report stays truthful. */
+    const term = query.trim().toLowerCase();
+    const base = term
+      ? filtered.filter((m) =>
+          `${m.name.en} ${m.name.hi} ${m.note.en} ${m.note.hi}`
+            .toLowerCase()
+            .includes(term)
+        )
+      : filtered;
     if (!byGoal) return base;
-    /* Richest match first, then most protein — so "high protein" is an
+    /* Richest match first, then most protein, so "high protein" is an
        ordering, not just a label. */
     const wanted = GOAL_TAGS[goal];
     return [...base].sort(
@@ -74,7 +88,7 @@ export function MealLibrary({ goal }: { goal: GoalKey }) {
           a.tags.filter((t) => wanted.includes(t)).length ||
         b.macros.protein - a.macros.protein
     );
-  }, [category, region, time, byGoal, goal]);
+  }, [category, region, time, byGoal, goal, query]);
 
   const counts = countByCategory();
 
@@ -92,10 +106,66 @@ export function MealLibrary({ goal }: { goal: GoalKey }) {
             </h2>
             <p className="mt-4 text-[1.02rem]" style={{ color: "var(--ink-soft)" }}>
               {T({
-                en: `${MEAL_LIBRARY.length} plans — ${counts.veg} vegetarian, ${counts.nonveg} non-vegetarian. Marked with the same green circle and brown triangle you read on every packet in an Indian shop.`,
-                hi: `${MEAL_LIBRARY.length} प्लान — ${counts.veg} शाकाहारी, ${counts.nonveg} मांसाहारी। वही हरा गोला और भूरा त्रिकोण जो आप भारतीय दुकान के हर पैकेट पर पढ़ते हैं।`,
+                en: `${MEAL_LIBRARY.length} plans: ${counts.veg} vegetarian, ${counts.nonveg} non-vegetarian. Marked with the same green circle and brown triangle you read on every packet in an Indian shop.`,
+                hi: `${MEAL_LIBRARY.length} प्लान: ${counts.veg} शाकाहारी, ${counts.nonveg} मांसाहारी। वही हरा गोला और भूरा त्रिकोण जो आप भारतीय दुकान के हर पैकेट पर पढ़ते हैं।`,
               })}
             </p>
+          </div>
+
+          {/* ---------- food scanner (free feature) ---------- */}
+          <div className="mb-8">
+            <FoodScanner isPremium={false} />
+          </div>
+
+          {/* ---------- search ---------- */}
+          {/* Above the filters, because it cuts across all of them: typing a
+              dish name should find it whatever the region and meal chips are
+              set to. Clearing is a real button rather than the browser's own
+              search affordance, which Safari draws and Firefox does not. */}
+          <div className="relative mb-4">
+            <svg
+              viewBox="0 0 20 20"
+              aria-hidden
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[17px] h-[17px] pointer-events-none"
+              style={{ color: "var(--ink-soft)" }}
+            >
+              <circle cx={9} cy={9} r={6} fill="none" stroke="currentColor" strokeWidth={2} />
+              <path d="M13.5 13.5 17.5 17.5" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
+            </svg>
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={T({
+                en: "Search plans by name",
+                hi: "नाम से प्लान खोजें",
+              })}
+              aria-label={T({ en: "Search meal plans", hi: "भोजन प्लान खोजें" })}
+              className="w-full pl-11 pr-11 min-h-12 rounded-2xl text-[0.95rem] outline-none transition-colors"
+              style={{
+                background: "var(--surface)",
+                border: "1px solid var(--line)",
+                color: "var(--ink)",
+              }}
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label={T({ en: "Clear search", hi: "खोज साफ़ करें" })}
+                className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full cursor-pointer transition-colors"
+                style={{ color: "var(--ink-soft)" }}
+              >
+                <svg viewBox="0 0 16 16" aria-hidden className="w-3.5 h-3.5">
+                  <path
+                    d="M3 3 13 13M13 3 3 13"
+                    stroke="currentColor"
+                    strokeWidth={2.2}
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            )}
           </div>
 
           {/* ---------- primary axis: veg / non-veg ---------- */}
@@ -146,8 +216,8 @@ export function MealLibrary({ goal }: { goal: GoalKey }) {
               />
             </svg>
             {T({
-              en: `For your goal — ${goalLabel.en.toLowerCase()}`,
-              hi: `आपके लक्ष्य के लिए — ${goalLabel.hi}`,
+              en: `For your goal, ${goalLabel.en.toLowerCase()}`,
+              hi: `आपके लक्ष्य के लिए, ${goalLabel.hi}`,
             })}
             <span className="text-[0.74rem] font-medium tabular-nums" style={{ fontFamily: "var(--font-data)", opacity: 0.75 }}>
               {filterMeals({ goal }).length}
@@ -201,7 +271,7 @@ export function MealLibrary({ goal }: { goal: GoalKey }) {
                 <li
                   key={m.id}
                   /* Fill, border and depth all come from .surface-card. No
-                     inline background here — an inline style beats the
+                     inline background here: an inline style beats the
                      stylesheet and would flatten the card back out. */
                   className="surface-card lift rounded-2xl p-5 flex flex-col"
                 >

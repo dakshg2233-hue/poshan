@@ -9,7 +9,7 @@ import { clientIp, rateLimit, tooMany, readJsonCapped } from "@/lib/rate-limit";
  * speaks the Anthropic Messages API at /v1/messages.
  *
  * Only `oc/mimo-v2.5-free` is both vision-capable and has live credentials on
- * the current OmniRoute instance — the anthropic and openai providers have no
+ * the current OmniRoute instance: the anthropic and openai providers have no
  * credentials configured, and the `aug/*` models need the Auggie CLI.
  *
  * If OmniRoute is unreachable or unconfigured this returns 503 and the client
@@ -23,7 +23,7 @@ const MODEL = process.env.OMNIROUTE_VISION_MODEL ?? "oc/mimo-v2.5-free";
 
 export async function POST(request: Request) {
   /* Each scan costs a model call, so this is the endpoint most worth
-     protecting — an unthrottled loop bills you, not the attacker. */
+     protecting: an unthrottled loop bills you, not the attacker. */
   const gate = rateLimit(`scan:${clientIp(request)}`, { limit: 12, windowMs: 60_000 });
   if (!gate.ok) return tooMany(gate.retryAfter);
 
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
       {
         configured: false,
         reason:
-          "OMNIROUTE_API_KEY is not set on the server, so automatic recognition is off. Identify the dishes by hand — the calorie count is exact either way.",
+          "OMNIROUTE_API_KEY is not set on the server, so automatic recognition is off. Identify the dishes by hand: the calorie count is exact either way.",
       },
       { status: 503 }
     );
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
   if (!image) {
     return Response.json({ error: "No image supplied." }, { status: 400 });
   }
-  /* Only accept image types we asked for — do not forward arbitrary strings
+  /* Only accept image types we asked for: do not forward arbitrary strings
      into the upstream request. */
   if (!["image/jpeg", "image/png", "image/webp"].includes(mimeType)) {
     return Response.json({ error: "Unsupported image type." }, { status: 400 });
@@ -106,7 +106,7 @@ Do not include any dish that is not on the list. Do not add commentary.`;
             configured: true,
             retryable: true,
             reason:
-              "The vision model is rate limited right now. Wait a moment and take the photo again, or just tap the dishes — the calorie count is exact either way.",
+              "The vision model is rate limited right now. Wait a moment and take the photo again, or just tap the dishes: the calorie count is exact either way.",
           },
           { status: 429, headers: { "Retry-After": "30" } }
         );

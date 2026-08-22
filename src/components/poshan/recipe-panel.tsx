@@ -5,7 +5,7 @@ import { useLang } from "./lang-provider";
 import { recipeFor, NUTRIENT_ORDER, NUTRIENT_META } from "@/lib/recipes";
 
 /**
- * Recipe disclosure. Deliberately not a modal — it keeps the recipe beside the
+ * Recipe disclosure. Deliberately not a modal: it keeps the recipe beside the
  * meal it belongs to, avoids focus trapping, and leaves the veg/non-veg filters
  * usable while a recipe is open.
  */
@@ -87,7 +87,7 @@ export function RecipePanel({ mealId }: { mealId: string }) {
             >
               {T({ en: "Method", hi: "विधि" })}
             </h4>
-            {/* Numbered because the order genuinely matters here — this is a
+            {/* Numbered because the order genuinely matters here, this is a
                 sequence, not a decorative list. */}
             <ol className="grid gap-2.5 list-none p-0 m-0 counter-reset">
               {recipe.steps.map((step, i) => (
@@ -159,8 +159,8 @@ export function RecipePanel({ mealId }: { mealId: string }) {
             </dl>
             <p className="text-[0.72rem] mt-2.5" style={{ color: "var(--ink-soft)" }}>
               {T({
-                en: "Bars show the share of an adult daily reference. Values follow IFCT 2017 conventions for home portions — good for planning, not a lab assay.",
-                hi: "पट्टियाँ वयस्क दैनिक संदर्भ का हिस्सा दिखाती हैं। मान घरेलू मात्रा के लिए IFCT 2017 के अनुसार — योजना के लिए ठीक, प्रयोगशाला जाँच नहीं।",
+                en: "Bars show the share of an adult daily reference. Values follow IFCT 2017 conventions for home portions: good for planning, not a lab assay.",
+                hi: "पट्टियाँ वयस्क दैनिक संदर्भ का हिस्सा दिखाती हैं। मान घरेलू मात्रा के लिए IFCT 2017 के अनुसार: योजना के लिए ठीक, प्रयोगशाला जाँच नहीं।",
               })}
             </p>
           </div>

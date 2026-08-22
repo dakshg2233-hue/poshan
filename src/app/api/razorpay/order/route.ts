@@ -36,7 +36,7 @@ export async function POST(request: Request) {
   if (!parsed.ok) return parsed.response;
 
   const plan = parsed.data.plan === "yearly" ? "yearly" : "monthly";
-  /* Amount is decided here, never taken from the client — otherwise a caller
+  /* Amount is decided here, never taken from the client, otherwise a caller
      could set their own price. */
   const rupees = plan === "yearly" ? PREMIUM.yearly : PREMIUM.monthly;
 

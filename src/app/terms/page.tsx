@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Terms — Poshan",
+  title: "Terms, Poshan",
   description: "The terms you agree to when using Poshan, including subscriptions and cancellation.",
 };
 
 /**
  * Terms of use. Same principle as the privacy page: written from what the app
  * actually does, with [TO CONFIRM] wherever a legal fact is required that I
- * cannot invent — entity, jurisdiction, refund window.
+ * cannot invent: entity, jurisdiction, refund window.
  */
 export default function Terms() {
   return (

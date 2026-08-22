@@ -5,14 +5,14 @@ import { clientIp, rateLimit, tooMany, readJsonCapped } from "@/lib/rate-limit";
 /**
  * Verifies a completed Razorpay payment.
  *
- * The client cannot be trusted to report its own success — anyone can POST
+ * The client cannot be trusted to report its own success, anyone can POST
  * "payment done". Razorpay signs `order_id|payment_id` with the key secret
  * and only the server can recompute that.
  *
  * Three protections beyond the signature itself:
  *  1. Rate limited, so the signature cannot be brute-forced.
  *  2. Constant-time compare, so it cannot be probed byte by byte.
- *  3. Replay protection — a valid payment id is recorded once and reused
+ *  3. Replay protection: a valid payment id is recorded once and reused
  *     attempts are rejected, otherwise the same successful payment could be
  *     submitted repeatedly to extend a subscription for free.
  *
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
         { onConflict: "razorpay_payment_id", ignoreDuplicates: true }
       );
     }
-    /* Deliberately vague — do not tell a prober which field was wrong. */
+    /* Deliberately vague: do not tell a prober which field was wrong. */
     return Response.json({ verified: false, error: "Verification failed." }, { status: 400 });
   }
 

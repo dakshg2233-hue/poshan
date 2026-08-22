@@ -5,7 +5,7 @@ import { useLang } from "./lang-provider";
 import { PREMIUM } from "@/lib/poshan-data";
 
 /* Razorpay's checkout script is loaded from their domain only when the
-   visitor actually starts a payment — the page itself still makes zero
+   visitor actually starts a payment: the page itself still makes zero
    external requests on load. */
 const CHECKOUT_SRC = "https://checkout.razorpay.com/v1/checkout.js";
 
@@ -51,8 +51,8 @@ export function CheckoutButton({ yearly }: { yearly: boolean }) {
       if (res.status === 503) {
         setStatus(
           T({
-            en: "Checkout isn't connected yet — add your Razorpay keys on the server and this button goes live.",
-            hi: "चेकआउट अभी जुड़ा नहीं है — सर्वर पर अपनी रेज़रपे कुंजियाँ जोड़ें और यह बटन चालू हो जाएगा।",
+            en: "Checkout isn't connected yet: add your Razorpay keys on the server and this button goes live.",
+            hi: "चेकआउट अभी जुड़ा नहीं है: सर्वर पर अपनी रेज़रपे कुंजियाँ जोड़ें और यह बटन चालू हो जाएगा।",
           })
         );
         return;
@@ -74,7 +74,7 @@ export function CheckoutButton({ yearly }: { yearly: boolean }) {
         amount: data.amount,
         currency: data.currency,
         name: "Poshan",
-        description: yearly ? "Poshan Home — yearly" : "Poshan Home — monthly",
+        description: yearly ? "Poshan Home, yearly" : "Poshan Home, monthly",
         theme: { color: "#A8500A" },
         /* Razorpay collects card, UPI and netbanking details inside their own
            window. Nothing sensitive passes through this app. */
@@ -88,7 +88,7 @@ export function CheckoutButton({ yearly }: { yearly: boolean }) {
           setStatus(
             vd.verified
               ? T({ en: "Payment confirmed. Poshan Home is active.", hi: "भुगतान पुष्ट। पोषण घर सक्रिय है।" })
-              : T({ en: "We could not verify that payment. Nothing has been charged twice — contact support.", hi: "हम उस भुगतान की पुष्टि नहीं कर सके। दोबारा शुल्क नहीं लिया गया — सहायता से संपर्क करें।" })
+              : T({ en: "We could not verify that payment. Nothing has been charged twice, contact support.", hi: "हम उस भुगतान की पुष्टि नहीं कर सके। दोबारा शुल्क नहीं लिया गया: सहायता से संपर्क करें।" })
           );
         },
         modal: {

@@ -1,9 +1,27 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+/**
+ * Built on first use, not at module scope. `new Resend(undefined)` throws
+ * "Missing API key" during module evaluation, which takes down every route
+ * that imports this file before its handler can run: the throw happens at
+ * import time, so a try/catch inside the handler never sees it. Constructing
+ * lazily keeps an unset key a handled condition, the way Supabase, Razorpay
+ * and Omniroute already degrade.
+ */
+let client: Resend | null = null;
+
+/** True when RESEND_API_KEY is set. Callers should check before sending. */
+export function emailReady() {
+  return Boolean(process.env.RESEND_API_KEY);
+}
+
+function resendClient() {
+  if (!client) client = new Resend(process.env.RESEND_API_KEY);
+  return client;
+}
 
 export async function sendOtpEmail(email: string, otp: string) {
-  return resend.emails.send({
+  return resendClient().emails.send({
     from: "Poshan <auth@poshan.health>",
     to: email,
     subject: "Your Poshan Login Code",
@@ -36,7 +54,7 @@ export async function sendOtpEmail(email: string, otp: string) {
 
 export async function sendWelcomeEmail(email: string, name?: string) {
   const userName = name || "Friend";
-  return resend.emails.send({
+  return resendClient().emails.send({
     from: "Poshan <hello@poshan.health>",
     to: email,
     subject: "Welcome to Poshan! 🌾",
@@ -57,7 +75,7 @@ export async function sendWelcomeEmail(email: string, name?: string) {
             </ul>
           </div>
 
-          <p style="color: #666; font-size: 16px; margin: 20px 0;">Our meal plans are 100% authentic Indian recipes, calibrated for Indian bodies using Asian-Indian BMI cutoffs — because you're not a European body, and your nutrition shouldn't be either.</p>
+          <p style="color: #666; font-size: 16px; margin: 20px 0;">Our meal plans are 100% authentic Indian recipes, calibrated for Indian bodies using Asian-Indian BMI cutoffs, because you're not a European body, and your nutrition shouldn't be either.</p>
 
           <p style="color: #666; font-size: 14px; margin: 20px 0;">Questions? We're here to help. Reply to this email anytime.</p>
 
@@ -71,7 +89,7 @@ export async function sendWelcomeEmail(email: string, name?: string) {
 }
 
 export async function sendConfirmationEmail(email: string) {
-  return resend.emails.send({
+  return resendClient().emails.send({
     from: "Poshan <auth@poshan.health>",
     to: email,
     subject: "Account Confirmed ✅",

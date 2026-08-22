@@ -5,7 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * Browser Supabase client. Uses the publishable anon key, so every query it
- * makes is filtered by Row Level Security — see supabase/schema.sql, where
+ * makes is filtered by Row Level Security, see supabase/schema.sql, where
  * every table denies by default and grants only rows the signed-in user owns.
  *
  * Returns null when Supabase is not configured, so the site keeps working

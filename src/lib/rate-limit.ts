@@ -3,7 +3,7 @@
  *
  * Good enough for a single instance. On serverless or multi-instance hosting
  * this resets per instance, so move the counter to Upstash Redis or Supabase
- * before relying on it in production — noted rather than pretended.
+ * before relying on it in production: noted rather than pretended.
  */
 
 type Bucket = { count: number; resetAt: number };
@@ -43,7 +43,7 @@ export function tooMany(retryAfter: number) {
 
 /**
  * Reject oversized bodies before parsing them. Without this a single 50MB
- * base64 payload can pin the process — the scan endpoint is the obvious
+ * base64 payload can pin the process: the scan endpoint is the obvious
  * target since it legitimately accepts an image.
  */
 export async function readJsonCapped<T>(

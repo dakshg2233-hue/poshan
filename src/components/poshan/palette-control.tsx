@@ -9,7 +9,7 @@ import { PALETTES, type PaletteKey } from "./palette-switcher";
  *
  * It used to live inside <header>. The header stows itself while the
  * full-height hero holds the top of the frame, which took the only palette
- * control off screen with it — at the top of the page there was no way to
+ * control off screen with it: at the top of the page there was no way to
  * change the colours at all, and you had to scroll a whole viewport to find
  * one. Mounted here it is reachable everywhere, including over the hero.
  *

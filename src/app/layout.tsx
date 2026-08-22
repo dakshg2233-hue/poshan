@@ -6,7 +6,7 @@ import { LangProvider } from "@/components/poshan/lang-provider";
 /* One face covering Latin and Devanagari, so the two scripts share a single
    design intent instead of being bolted together.
  *
- * Was Tiro Devanagari Hindi — a calligraphic serif. It set the tone well but
+ * Was Tiro Devanagari Hindi: a calligraphic serif. It set the tone well but
  * read traditional, which is the single strongest "dated" signal on the page.
  * Anek keeps the one-face-two-scripts discipline and the Indian-type lineage
  * (Ek Type, same foundry as Mukta below) while being a contemporary variable
@@ -16,7 +16,7 @@ import { LangProvider } from "@/components/poshan/lang-provider";
    so font-src stays 'self' and no Google request goes out at runtime. */
 /* DM Sans for labels, navigation and supporting copy, per the Quiet Vitality
    spec. Latin-only, so it is exposed as its own variable rather than replacing
-   Mukta — the Hindi half of this bilingual site still needs Devanagari, which
+   Mukta: the Hindi half of this bilingual site still needs Devanagari, which
    DM Sans does not carry. Self-hosted by next/font, so font-src stays 'self'. */
 const uiSans = DM_Sans({
   variable: "--font-ui",
@@ -41,7 +41,7 @@ const display = Anek_Devanagari({
   display: "swap",
 });
 
-/* Mukta is by Ek Type, Mumbai — drawn for Indian screens. */
+/* Mukta is by Ek Type, Mumbai: drawn for Indian screens. */
 const ui = Mukta({
   variable: "--font-ui",
   weight: ["400", "600", "800"],
@@ -60,7 +60,7 @@ const DESCRIPTION =
   "Poshan reads your Body Mass Index on Asian-Indian cutoffs, tracks the biomarkers that actually fail in India, and builds the thali you already eat.";
 
 export const metadata: Metadata = {
-  title: "Poshan — पोषण · Know your body. Eat like home.",
+  title: "Poshan: पोषण · Know your body. Eat like home.",
   description: DESCRIPTION,
   applicationName: "Poshan",
   keywords: [
@@ -68,19 +68,19 @@ export const metadata: Metadata = {
     "vegetarian", "non-vegetarian", "biomarkers", "thali", "पोषण",
   ],
   authors: [{ name: "Daksh" }],
-  /* Without these the link previews as a bare URL on WhatsApp — which is how
+  /* Without these the link previews as a bare URL on WhatsApp, which is how
      most of this audience would ever share it. */
   openGraph: {
     type: "website",
     siteName: "Poshan",
-    title: "Poshan — Know your body. Eat like home.",
+    title: "Poshan: Know your body. Eat like home.",
     description: DESCRIPTION,
     locale: "en_IN",
     alternateLocale: "hi_IN",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Poshan — Know your body. Eat like home.",
+    title: "Poshan: Know your body. Eat like home.",
     description: DESCRIPTION,
   },
   robots: { index: true, follow: true },

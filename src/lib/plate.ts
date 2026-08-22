@@ -3,7 +3,7 @@ import type { Bi, Macros } from "./poshan-data";
 /**
  * The editable thali.
  *
- * Six slots — four katoris, the roti stack, the rice mound — each holding one
+ * Six slots: four katoris, the roti stack, the rice mound, each holding one
  * dish at some portion. Dragging a katori's contents up or down changes the
  * portion; tapping it swaps the dish for another that belongs in that slot.
  *
@@ -98,7 +98,7 @@ export const PLATE_SLOTS: PlateSlot[] = [
   },
   {
     /* Achar gets its own katori rather than sharing with chutney. Traditional
-       Indian pickle is a live lacto-ferment — the brine carries Lactobacillus
+       Indian pickle is a live lacto-ferment: the brine carries Lactobacillus
        and related species, which is a different thing from a fresh chutney
        and worth its own place on the plate.
        Two honesty constraints come with that, and both are enforced below:
@@ -150,7 +150,7 @@ export const PLATE_SLOTS: PlateSlot[] = [
 
 export type PlateState = Record<SlotId, { dish: string; portion: number }>;
 
-/** Portion runs 0 to 1.5 — an empty katori through a generous double helping. */
+/** Portion runs 0 to 1.5: an empty katori through a generous double helping. */
 export const MAX_PORTION = 1.5;
 
 export const DEFAULT_PLATE: PlateState = {
@@ -171,8 +171,8 @@ export function optionFor(slotId: SlotId, dishKey: string): PlateOption {
 }
 
 /**
- * Atwater factors. Fibre is counted at 2 kcal/g rather than 4 — it is only
- * partly fermented to short-chain fatty acids — and subtracted out of the
+ * Atwater factors. Fibre is counted at 2 kcal/g rather than 4, it is only
+ * partly fermented to short-chain fatty acids, and subtracted out of the
  * carbohydrate figure so it is not also counted there.
  */
 export function kcalOf(m: Macros): number {
@@ -205,7 +205,7 @@ export function plateTotals(state: PlateState): {
  * ICMR "My Plate for the Day" targets roughly half the plate as vegetables and
  * fruit, a quarter as cereals and millets, and a quarter as pulses, dairy and
  * other protein. Judged here by served weight, which is what a person can
- * actually see on a thali — condiments are excluded from the denominator
+ * actually see on a thali: condiments are excluded from the denominator
  * because a spoon of achaar should not count against the balance.
  */
 export const ICMR_TARGET = { veg: 0.5, grain: 0.25, protein: 0.25 } as const;
@@ -242,7 +242,7 @@ export function plateBalance(state: PlateState): PlateBalance {
   return { veg: v, grain: g, protein: p, score: Math.max(0, 1 - dev / 1.5) };
 }
 
-/** Compact form for storage — {slotId: "dish:portion"} keeps the row small. */
+/** Compact form for storage, {slotId: "dish:portion"} keeps the row small. */
 export function encodePlate(state: PlateState): string {
   return PLATE_SLOTS.map((s) => `${s.id}=${state[s.id].dish}:${state[s.id].portion.toFixed(2)}`).join(",");
 }

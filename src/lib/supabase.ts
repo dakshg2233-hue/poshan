@@ -3,7 +3,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 /**
  * Two clients, deliberately separated.
  *
- * `anonClient` uses the publishable anon key and is safe in the browser —
+ * `anonClient` uses the publishable anon key and is safe in the browser:
  * every query it makes is filtered by Row Level Security.
  *
  * `serviceClient` uses the service-role key, which BYPASSES RLS entirely.

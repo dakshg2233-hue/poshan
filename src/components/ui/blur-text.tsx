@@ -10,7 +10,7 @@ import { usePrefersReducedMotion } from "@/lib/use-media-query";
  * Three departures from the reference implementation, each for a reason:
  *
  *  1. Under prefers-reduced-motion the text renders as plain markup with no
- *     motion elements at all — not a zero-duration animation. There is no
+ *     motion elements at all: not a zero-duration animation. There is no
  *     reason to mount 8 animating spans for someone who asked for stillness.
  *  2. Words carry a real trailing space rather than `marginRight`, so the
  *     heading stays selectable and copies as a sentence. The reference used a

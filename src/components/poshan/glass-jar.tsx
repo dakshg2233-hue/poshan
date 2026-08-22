@@ -10,7 +10,7 @@ import { usePrefersReducedMotion } from "@/lib/use-media-query";
  * The glass jar, built rather than borrowed.
  *
  * It replaces a hosted image of a terrarium full of Studio Ghibli characters
- * — Totoro, the Catbus, the soot sprites. That was three external hosts
+ *: Totoro, the Catbus, the soot sprites. That was three external hosts
  * (images.higgs.ai, a stranger's Figma site, a CloudFront bucket) holding up
  * the hero of a paid product, and copyrighted characters doing it. Built here
  * there is no request to make, nothing to expire, and nothing to license.
@@ -18,12 +18,12 @@ import { usePrefersReducedMotion } from "@/lib/use-media-query";
  * The vessel is kept, as asked. What is inside is deliberately NOT a picture
  * of food: modelled grains, chillies and a curry-leaf sprig were tried first
  * and read as a literal pantry jar. It is now three plain strata in the ICMR
- * plate ratio — half vegetables, a quarter grain, a quarter protein — the
+ * plate ratio: half vegetables, a quarter grain, a quarter protein, the
  * argument the whole product makes, stood on its end. Symbolic, not scenic.
  */
 
 /* Real glass needs something to refract. RoomEnvironment is generated in
-   memory, so this costs no download — the same trick the thali scene uses. */
+   memory, so this costs no download: the same trick the thali scene uses. */
 function StudioEnvironment() {
   const gl = useThree((s) => s.gl);
   const texture = useMemo(() => {
@@ -83,8 +83,8 @@ function Stratum({
 /**
  * The fill, as three strata rather than a depiction of food.
  *
- * The literal version — nine hundred modelled grains, whole chillies, a
- * curry-leaf sprig — read as a picture of a pantry jar. This says the same
+ * The literal version: nine hundred modelled grains, whole chillies, a
+ * curry-leaf sprig: read as a picture of a pantry jar. This says the same
  * thing with less: half the height is vegetables, a quarter grain, a quarter
  * protein. That is the ICMR plate ratio the whole product argues for, stood
  * on its end. Simple enough to read at a glance from across a hero, and it
@@ -147,7 +147,7 @@ function JarContents() {
  *
  * A fixed camera distance is only correct at one aspect ratio. On a tall
  * phone the horizontal field of view collapses and the jar is cropped to a
- * wall of grain — which is exactly what it did at 560×1522. Distance is
+ * wall of grain, which is exactly what it did at 560×1522. Distance is
  * therefore derived from the aspect, and the jar is nudged up slightly on
  * portrait so it sits above the headline rather than behind it.
  */
@@ -182,7 +182,7 @@ function Jar({ spin }: { spin: boolean }) {
   return (
     <group ref={group}>
       {/* The jar body. transmission (not opacity) is what makes this read as
-          glass — it refracts what is behind it, so the grain inside distorts
+          glass: it refracts what is behind it, so the grain inside distorts
           through the wall the way it does in a real jar. */}
       <mesh>
         <sphereGeometry args={[1.25, 64, 48]} />
@@ -220,7 +220,7 @@ function Jar({ spin }: { spin: boolean }) {
 }
 
 /**
- * Mounted only while on screen, and never at all under reduced motion —
+ * Mounted only while on screen, and never at all under reduced motion:
  * where a still, cheap fallback stands in instead of a live canvas.
  */
 export function GlassJar({ className = "" }: { className?: string }) {
@@ -229,7 +229,7 @@ export function GlassJar({ className = "" }: { className?: string }) {
   const supported = typeof IntersectionObserver !== "undefined";
   /* Starts true. Gating the mount on the observer firing means that wherever
      IntersectionObserver is throttled or delayed, the hero renders with no
-     jar at all — which is what happened here. The observer's job is to stand
+     jar at all, which is what happened here. The observer's job is to stand
      the canvas DOWN once you scroll away, not to grant permission to appear. */
   const [inView, setInView] = useState(true);
 

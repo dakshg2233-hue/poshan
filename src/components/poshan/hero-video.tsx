@@ -5,7 +5,7 @@ import { ArrowUpRight, Menu, X } from "lucide-react";
 import { useLang } from "./lang-provider";
 
 /**
- * POSHAN — Quiet Vitality hero.
+ * POSHAN, Quiet Vitality hero.
  *
  * Built to the supplied spec: 100dvh, dark botanical still-life, monumental
  * Instrument Serif wordmark, frosted glass navigation, and a pointer-following
@@ -27,13 +27,13 @@ import { useLang } from "./lang-provider";
 const STILL = "/thali-hero.jpg";
 const MOTION = "/thali-hero.jpg";
 
-/** Poshan Leaf — the only action and status colour in this design. */
+/** Poshan Leaf: the only action and status colour in this design. */
 const LEAF = "#8FBF72";
 
 /* Conventional section names rather than brand-speak. "Ritual", "Our blends",
    "The science" and "Journal" described a supplements company and told a
    first-time visitor nothing about what is on the page. Every href is an
-   anchor that exists — verified — because this nav has shipped dead links
+   anchor that exists: verified, because this nav has shipped dead links
    twice before. */
 const NAV = [
   { href: "#meals", en: "Meal plans", hi: "मील प्लान" },
@@ -163,14 +163,14 @@ export function HeroVideo() {
       className="relative isolate w-full overflow-hidden text-white"
       style={{ height: "100dvh", minHeight: 600, background: "#0a0b0a" }}
     >
-      {/* 1 — the still-life */}
+      {/* 1, the still-life */}
       <div
         className="absolute inset-0 z-0 bg-cover bg-center"
         style={{ backgroundImage: `url('${STILL}')` }}
         aria-hidden="true"
       />
 
-      {/* 2 — warm dark-to-transparent overlay, weighted to the upper left,
+      {/* 2: warm dark-to-transparent overlay, weighted to the upper left,
              which the spec asks to keep dark and spacious for the headline */}
       <div
         className="absolute inset-0 z-[1]"
@@ -205,7 +205,7 @@ export function HeroVideo() {
         aria-hidden="true"
       />
 
-      {/* 3 — 48px technical grid, parallaxed */}
+      {/* 3: 48px technical grid, parallaxed */}
       <div
         ref={gridRef}
         className="absolute inset-[-40px] z-[2] will-change-transform"
@@ -219,7 +219,7 @@ export function HeroVideo() {
         aria-hidden="true"
       />
 
-      {/* 5 — masked reveal, across the whole frame.
+      {/* 5: masked reveal, across the whole frame.
              The spec clipped this to inset(40% 0 0 0) so the spotlight only
              worked in the lower 60%; hovering the top of the hero did nothing.
              Unclipped on request, so the reveal follows the pointer anywhere. */}
@@ -234,7 +234,7 @@ export function HeroVideo() {
       )}
 
       {/* ----------------------------------------------------------- nav */}
-      {/* Three tracks — brand | pill | CTA — rather than a flex row with the
+      {/* Three tracks: brand | pill | CTA: rather than a flex row with the
           pill absolutely centred over it. Absolute positioning reserved no
           space, so at 1100px the pill ran from 599 to 1031 and the CTA began
           at 898: a 133px overlap, with the pill sitting on top of "Find your
@@ -276,7 +276,7 @@ export function HeroVideo() {
 
         <a
           href="#check"
-          /* Smaller than the spec's default pill. Only the header one shrinks —
+          /* Smaller than the spec's default pill. Only the header one shrinks:
              the mobile-menu CTA stays large, since that is the touch target. */
           className="hidden w-fit items-center gap-1.5 rounded-full px-3.5 py-2 text-[0.74rem] font-medium no-underline transition-transform active:scale-[.97] md:flex"
           style={{ background: LEAF, color: "#0a0b0a", fontFamily: "var(--font-ui), sans-serif" }}
@@ -330,8 +330,8 @@ export function HeroVideo() {
           style={{ color: "rgb(255 255 255 / .82)", fontFamily: "var(--font-ui), sans-serif" }}
         >
           {T({
-            en: "Nourishment, in your rhythm — consciously made.",
-            hi: "पोषण, आपकी अपनी लय में — सोच-समझकर बनाया गया।",
+            en: "Nourishment, in your rhythm, consciously made.",
+            hi: "पोषण, आपकी अपनी लय में, सोच-समझकर बनाया गया।",
           })}
         </p>
       </div>

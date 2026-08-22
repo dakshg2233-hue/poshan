@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
 
   /* Only these columns may be written from a client. RLS already confines the
      update to the caller's own row, and the DB CHECKs reject bad enum values,
-     so this is defence in depth rather than the only guard — but passing the
+     so this is defence in depth rather than the only guard, but passing the
      raw body to .update() would let a caller try `id` or `created_at`, and
      there is no reason to accept fields the form does not own. */
   const WRITABLE = [

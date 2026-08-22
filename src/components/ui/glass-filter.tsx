@@ -12,9 +12,9 @@
  * second copy would be dead weight and an id collision.
  *
  * Support is genuinely uneven and this is not a detoration:
- *   Chromium/Edge — backdrop-filter: url() works.
- *   Safari       — applies SVG filters to backdrop inconsistently by version.
- *   Firefox      — does not support url() in backdrop-filter at all.
+ *   Chromium/Edge, backdrop-filter: url() works.
+ *   Safari      : applies SVG filters to backdrop inconsistently by version.
+ *   Firefox     : does not support url() in backdrop-filter at all.
  * So every rule using it is wrapped in @supports, and the plain blur +
  * hairline glass remains the fallback. Non-Chromium users get the quieter
  * version rather than a broken one.

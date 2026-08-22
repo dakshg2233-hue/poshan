@@ -2,6 +2,7 @@
 
 import { useLang, useReveal } from "./lang-provider";
 import { DishArt } from "./dish-art";
+import { TabLink } from "./tabs";
 import {
   BANDS,
   DISHES,
@@ -69,8 +70,8 @@ export function Bands() {
               style={{ borderTop: "1px solid var(--line)", color: "var(--ink-soft)" }}
             >
               {T({
-                en: "A Western calculator calls a Body Mass Index of 24 perfectly normal. On Asian-Indian cutoffs it is overweight — and that gap is where a decade of undiagnosed pre-diabetes hides.",
-                hi: "कोई पश्चिमी कैलकुलेटर 24 बॉडी मास इंडेक्स को बिल्कुल सामान्य बताएगा। एशियाई-भारतीय मानकों पर वह अधिक वज़न है — और इसी अंतर में एक दशक की बिना पहचानी प्री-डायबिटीज़ छिपी रहती है।",
+                en: "A Western calculator calls a Body Mass Index of 24 perfectly normal. On Asian-Indian cutoffs it is overweight, and that gap is where a decade of undiagnosed pre-diabetes hides.",
+                hi: "कोई पश्चिमी कैलकुलेटर 24 बॉडी मास इंडेक्स को बिल्कुल सामान्य बताएगा। एशियाई-भारतीय मानकों पर वह अधिक वज़न है: और इसी अंतर में एक दशक की बिना पहचानी प्री-डायबिटीज़ छिपी रहती है।",
               })}
             </p>
           </div>
@@ -96,13 +97,13 @@ export function Meals({ band, plan }: { band: Band; plan: Plan }) {
               className="text-[clamp(1.9rem,4.4vw,2.85rem)] leading-tight"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              {T({ en: "Today's plate, for", hi: "आज की थाली —" })}{" "}
+              {T({ en: "Today's plate, for", hi: "आज की थाली," })}{" "}
               <em style={{ color: "var(--kesar)", fontStyle: "italic" }}>{T(band.name)}</em>
             </h2>
             <p className="mt-4 text-[1.02rem]" style={{ color: "var(--ink-soft)" }}>
               {T({
-                en: `About ${plan.kcal.toLocaleString("en-IN")} kilocalories a day, split across three meals. Same kitchen, same food — measured properly.`,
-                hi: `लगभग ${plan.kcal.toLocaleString("en-IN")} किलोकैलोरी प्रतिदिन, तीन बार में बँटी। वही रसोई, वही खाना — बस सही अनुपात में।`,
+                en: `About ${plan.kcal.toLocaleString("en-IN")} kilocalories a day, split across three meals. Same kitchen, same food, measured properly.`,
+                hi: `लगभग ${plan.kcal.toLocaleString("en-IN")} किलोकैलोरी प्रतिदिन, तीन बार में बँटी। वही रसोई, वही खाना: बस सही अनुपात में।`,
               })}
             </p>
           </div>
@@ -218,8 +219,8 @@ export function Biomarkers() {
             </h2>
             <p className="mt-4 text-[1.02rem]" style={{ color: "var(--ink-soft)" }}>
               {T({
-                en: "Poshan tracks the full panel, but these four are where Indian reports break — and each one has a fix that lives on your own plate.",
-                hi: "पोषण पूरा पैनल ट्रैक करता है, पर भारतीय रिपोर्ट में गड़बड़ी इन्हीं चार में आती है — और हर एक का इलाज आपकी अपनी थाली में है।",
+                en: "Poshan tracks the full panel, but these four are where Indian reports break, and each one has a fix that lives on your own plate.",
+                hi: "पोषण पूरा पैनल ट्रैक करता है, पर भारतीय रिपोर्ट में गड़बड़ी इन्हीं चार में आती है: और हर एक का इलाज आपकी अपनी थाली में है।",
               })}
             </p>
           </div>
@@ -406,15 +407,17 @@ export function ClosingCta() {
             })}
           </p>
           <div className="flex flex-wrap gap-3 justify-center mt-8 relative">
-            <a
-              href="#premium"
+            <TabLink
+              to="premium"
+              target="premium"
               className="inline-flex items-center min-h-12 px-6 rounded-full font-extrabold text-[0.94rem] no-underline transition-transform hover:-translate-y-0.5"
               style={{ background: "var(--kesar-fill)", color: "#fff" }}
             >
               {T({ en: "See Poshan Home", hi: "पोषण घर देखें" })}
-            </a>
-            <a
-              href="#check"
+            </TabLink>
+            <TabLink
+              to="home"
+              target="check"
               className="inline-flex items-center min-h-12 px-6 rounded-full font-extrabold text-[0.94rem] no-underline transition-colors"
               style={{
                 border: "1.5px solid color-mix(in srgb, var(--roti) 45%, transparent)",
@@ -422,7 +425,7 @@ export function ClosingCta() {
               }}
             >
               {T({ en: "Check my BMI first", hi: "पहले बीएमआई जाँचें" })}
-            </a>
+            </TabLink>
           </div>
         </div>
       </div>
@@ -438,17 +441,26 @@ export function Footer() {
         <p className="text-[0.82rem]" style={{ color: "var(--ink-soft)" }}>
           © 2026 Poshan · {T({ en: "Made in India", hi: "भारत में बना" })}
         </p>
+        {/* These were plain hash links into one long scroll. The sections now
+            live behind tabs and the target may not be mounted, so each one
+            switches tab first and scrolls second. */}
         <nav className="flex flex-wrap gap-6 text-[0.84rem]" aria-label="Footer">
           {[
-            { href: "#check", en: "BMI", hi: "बीएमआई" },
-            { href: "#plate", en: "Meal plans", hi: "मील प्लान" },
-            { href: "#bios", en: "Biomarkers", hi: "बायोमार्कर" },
-            { href: "#premium", en: "Pricing", hi: "मूल्य" },
-            { href: "#clinics", en: "For clinics", hi: "क्लिनिकों के लिए" },
+            { to: "home" as const, target: "check", en: "BMI", hi: "बीएमआई" },
+            { to: "plate" as const, target: "plate", en: "Meal plans", hi: "मील प्लान" },
+            { to: "health" as const, target: "bios", en: "Biomarkers", hi: "बायोमार्कर" },
+            { to: "premium" as const, target: "premium", en: "Pricing", hi: "मूल्य" },
+            { to: "premium" as const, target: "clinics", en: "For clinics", hi: "क्लिनिकों के लिए" },
           ].map((l) => (
-            <a key={l.href} href={l.href} className="no-underline hover:opacity-70" style={{ color: "var(--ink-soft)" }}>
+            <TabLink
+              key={l.target}
+              to={l.to}
+              target={l.target}
+              className="no-underline hover:opacity-70"
+              style={{ color: "var(--ink-soft)" }}
+            >
               {T({ en: l.en, hi: l.hi })}
-            </a>
+            </TabLink>
           ))}
         </nav>
       </div>

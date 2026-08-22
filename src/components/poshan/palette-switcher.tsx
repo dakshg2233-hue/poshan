@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
  *
  * Sindoor is what ships; these are alternatives to look at. All are built on
  * the near-white ground that replaced the old warm cream, since that lift is
- * what stopped the page reading dated — swapping only the accent family.
+ * what stopped the page reading dated: swapping only the accent family.
  *
  * This is a decision tool, not a product feature. Once a palette is chosen,
  * fold it into :root and delete this again. Shipping a colour picker to real
@@ -26,31 +26,31 @@ export const PALETTES: {
   {
     key: "sindoor",
     name: "Sindoor",
-    note: "Vermilion. What ships today — warmest and most appetising of the set.",
+    note: "Vermilion. What ships today: warmest and most appetising of the set.",
     swatch: ["#FDFBFA", "#C2410C", "#EEAA3C"],
   },
   {
     key: "seed",
     name: "Seed",
-    note: "Botanical-clinical. Forest green as the only colour, lime confined to badges, whisper-light 300 headings — and it switches OFF every shadow, gradient and the ladoo, per the system's own rules.",
+    note: "Botanical-clinical. Forest green as the only colour, lime confined to badges, whisper-light 300 headings, and it switches OFF every shadow, gradient and the ladoo, per the system's own rules.",
     swatch: ["#FCFCF7", "#1C3A13", "#D3FA99"],
   },
   {
     key: "kaali",
     name: "Kaali",
-    note: "Matte black. Not #000 — pure black clips shadow detail on OLED and makes every border vanish. The only dark palette here, and the one glass looks best on.",
+    note: "Matte black. Not #000: pure black clips shadow detail on OLED and makes every border vanish. The only dark palette here, and the one glass looks best on.",
     swatch: ["#0E0E0E", "#FF8A5B", "#F0B055"],
   },
   {
     key: "patta",
     name: "Patta",
-    note: "Charcoal and Poshan Leaf, from the Quiet Vitality spec. The only palette built on a light, new-growth green rather than a deep one — cool and clinical where the rest run warm.",
+    note: "Charcoal and Poshan Leaf, from the Quiet Vitality spec. The only palette built on a light, new-growth green rather than a deep one: cool and clinical where the rest run warm.",
     swatch: ["#090A09", "#8FBF72", "#D8C98A"],
   },
   {
     key: "neel",
     name: "Neel",
-    note: "Indigo — the dye India exported for centuries. Coolest and most clinical; the biomarker tables look most at home.",
+    note: "Indigo: the dye India exported for centuries. Coolest and most clinical; the biomarker tables look most at home.",
     swatch: ["#FAFBFD", "#1E40AF", "#E0A52A"],
   },
   {
@@ -74,13 +74,13 @@ export const PALETTES: {
   {
     key: "kaajal",
     name: "Kaajal",
-    note: "Near-monochrome with a single red accent. Lets photography do all the talking — strongest once you have more images.",
+    note: "Near-monochrome with a single red accent. Lets photography do all the talking: strongest once you have more images.",
     swatch: ["#FBFBFB", "#B3311A", "#8A8A8A"],
   },
   {
     key: "jamun",
     name: "Jamun",
-    note: "Deep plum. Distinctive and nobody in the category uses it — which is either an opportunity or a warning.",
+    note: "Deep plum. Distinctive and nobody in the category uses it, which is either an opportunity or a warning.",
     swatch: ["#FCFAFD", "#6B21A8", "#D9A52C"],
   },
 ];
@@ -153,7 +153,7 @@ export function PaletteSwitcher() {
             ))}
           </ul>
           <p className="text-[0.68rem] mt-2 px-1" style={{ color: "var(--ink-soft)" }}>
-            Dark mode still follows Sindoor — I&apos;ll build the dark variant for
+            Dark mode still follows Sindoor: I&apos;ll build the dark variant for
             whichever you pick.
           </p>
         </div>

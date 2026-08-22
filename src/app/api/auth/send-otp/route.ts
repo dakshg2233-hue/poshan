@@ -1,7 +1,18 @@
-import { sendOtpEmail, sendWelcomeEmail } from "@/lib/email";
+import { emailReady, sendOtpEmail, sendWelcomeEmail } from "@/lib/email";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
+  if (!emailReady()) {
+    return NextResponse.json(
+      {
+        configured: false,
+        reason:
+          "RESEND_API_KEY is not set on the server, so one-time codes cannot be emailed yet.",
+      },
+      { status: 503 }
+    );
+  }
+
   try {
     const { email, isNewUser } = await req.json();
 

@@ -57,7 +57,7 @@ export const MagneticCursor: FC<MagneticCursorProps> = ({
 }) => {
   const cursorRef = useRef<HTMLDivElement>(null);
   const cursorStateRef = useRef<CursorState | null>(null);
-  /* Derived at init rather than set inside an effect — setState in an effect
+  /* Derived at init rather than set inside an effect: setState in an effect
      body cascades a render, which the React 19 compiler lint rejects. */
   const [isTouchDevice] = useState(
     () =>

@@ -4,7 +4,7 @@ import type { DishKey } from "@/lib/poshan-data";
 /**
  * Photograph where one exists, vector drawing where it does not.
  *
- * The old comment here claimed you could "pass `photo` on a Dish" — you could
+ * The old comment here claimed you could "pass `photo` on a Dish", you could
  * not: this component only ever received a DishKey, never the Dish object, so
  * there was structurally no path to an image. A keyed lookup fixes that
  * without changing the signature at all six call sites.
@@ -18,7 +18,7 @@ const DISH_PHOTOS: Partial<Record<DishKey, string>> = {
   sabzi: "/dishes/sabzi.jpg",
   dahi: "/dishes/dahi.jpg",
   rice: "/dishes/rice.jpg",
-  /* chutney: no photograph yet — falls through to the vector below. */
+  /* chutney: no photograph yet: falls through to the vector below. */
 };
 
 const DISH_ALT: Record<DishKey, string> = {

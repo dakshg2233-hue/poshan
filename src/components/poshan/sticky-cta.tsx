@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useLang } from "./lang-provider";
+import { TabLink } from "./tabs";
 
 /**
  * Sticky CTA, phone only.
  *
- * Appears once the hero is behind you — showing it over the hero would sit on
+ * Appears once the hero is behind you: showing it over the hero would sit on
  * top of the CTA already there. Hidden on desktop, where the header CTA is
  * always in view, and hidden while the cookie banner is deciding so the two
  * never stack at the bottom of a small screen.
@@ -38,12 +39,14 @@ export function StickyCta() {
   return (
     <div className="fixed inset-x-0 bottom-0 z-[110] p-3 md:hidden print:hidden"
       style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
-      <a href="#check"
+      {/* Visible on every tab, so it has to switch to the one holding the
+          BMI tool rather than jump to a section that may not be mounted. */}
+      <TabLink to="home" target="check"
         className="flex min-h-12 items-center justify-center gap-2 rounded-full text-[0.9rem] font-semibold no-underline shadow-lg"
         style={{ background: "var(--kesar-fill)", color: "#fff" }}>
         <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-white/80" />
-        {T({ en: "Check your BMI — free", hi: "बीएमआई जाँचें — मुफ़्त" })}
-      </a>
+        {T({ en: "Check your BMI, free", hi: "बीएमआई जाँचें, मुफ़्त" })}
+      </TabLink>
     </div>
   );
 }

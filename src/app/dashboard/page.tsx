@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation"
 import { useBiomarkers } from "@/lib/hooks/use-biomarkers"
 import { useProfile } from "@/lib/hooks/use-profile"
 import { useConditions } from "@/lib/hooks/use-conditions"
-import { Navbar } from "@/components/ui/navbar"
+import { DashboardNavbar } from "@/components/poshan/dashboard-navbar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { MacroPersonalizer } from "@/components/poshan/macro-personalizer"
 import { Activity, Heart, Droplet, TrendingUp } from "lucide-react"
 import type { User } from "@supabase/supabase-js"
 
@@ -15,6 +16,7 @@ export default function Dashboard() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isPremium, setIsPremium] = useState(false)
   const { biomarkers } = useBiomarkers()
   const { profile } = useProfile()
   const { conditions } = useConditions()
@@ -31,10 +33,29 @@ export default function Dashboard() {
         router.push("/login")
       } else {
         setUser(data.user)
+        checkSubscription(data.user.id)
       }
       setLoading(false)
     })
   }, [router])
+
+  async function checkSubscription(userId: string) {
+    const supabase = browserClient()
+    if (!supabase) return
+
+    try {
+      const { data } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("plan", "home")
+        .single()
+
+      setIsPremium(!!data)
+    } catch {
+      setIsPremium(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -51,7 +72,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <Navbar />
+      <DashboardNavbar />
       <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 py-8">
           {/* Header */}
@@ -157,13 +178,26 @@ export default function Dashboard() {
             </Card>
           </div>
 
+          {/* Macro Personalizer (Premium Only) */}
+          {isPremium && profile?.tdee && profile?.goal && (
+            <div className="mt-8">
+              <MacroPersonalizer
+                tdee={profile.tdee}
+                goal={profile.goal as any}
+                isPremium={true}
+              />
+            </div>
+          )}
+
           {/* Quick Actions */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+            <button
+              onClick={() => router.push("/dashboard/meals")}
+              className="p-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">
+              🍛 Browse Meals (130+)
+            </button>
             <button className="p-4 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 transition">
               ➕ Add Biomarker
-            </button>
-            <button className="p-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">
-              📋 View Meal Plans
             </button>
             <button className="p-4 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition">
               ⚙️ Edit Profile

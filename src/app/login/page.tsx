@@ -44,14 +44,14 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   /* Middleware puts the page they were heading for in ?next. Only same-site
-     paths are honoured — an absolute URL here would be an open redirect. */
+     paths are honoured: an absolute URL here would be an open redirect. */
   const rawNext = searchParams.get("next");
   const next = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//")
     ? rawNext
     : "/";
   const [step, setStep] = useState<Step>("email");
   /* The hero's email field hands the address over in ?email so it does not
-     have to be typed twice. Seeded once at init, never synced afterwards —
+     have to be typed twice. Seeded once at init, never synced afterwards:
      the field is the user's to edit from that point on. */
   const [email, setEmail] = useState(() => searchParams.get("email")?.slice(0, 254) ?? "");
   const [code, setCode] = useState("");
@@ -63,7 +63,7 @@ function LoginForm() {
 
   const configured = supabaseReady();
 
-  /* Resend cooldown. Rate limiting one-time codes matters — without it the
+  /* Resend cooldown. Rate limiting one-time codes matters, without it the
      endpoint is a free SMS/email cannon pointed at arbitrary addresses. */
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -80,7 +80,7 @@ function LoginForm() {
     setError(null);
 
     /* Validate the input first. Telling someone their address is malformed is
-       useful whether or not the backend is reachable — the config check below
+       useful whether or not the backend is reachable: the config check below
        would otherwise mask it. */
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
       setError("That email address does not look right.");
@@ -142,7 +142,7 @@ function LoginForm() {
     setBusy(false);
 
     if (err) {
-      /* Deliberately not "wrong code" vs "expired code" — do not help someone
+      /* Deliberately not "wrong code" vs "expired code": do not help someone
          probe which addresses have pending codes. */
       setError("That code did not work. Check it, or send a new one.");
       setCode("");
@@ -150,7 +150,25 @@ function LoginForm() {
     }
 
     setStep("done");
-    router.push(next);
+
+    // Check if user is new (just signed up) and needs onboarding
+    const supabase = browserClient();
+    if (supabase) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("onboarding_completed")
+        .eq("user_id", data.user.id)
+        .single();
+
+      // If onboarding not completed, send to onboarding page
+      if (!profile?.onboarding_completed) {
+        router.push("/onboarding");
+      } else {
+        router.push(next);
+      }
+    } else {
+      router.push(next);
+    }
     router.refresh();
   }
 
@@ -176,7 +194,7 @@ function LoginForm() {
             style={{ color: "color-mix(in srgb, var(--panel-ink) 78%, transparent)" }}
           >
             Your measurements and conditions stay on your account, readable only
-            by you. Signing in is free — Poshan Home is the paid tier, and it is
+            by you. Signing in is free: Poshan Home is the paid tier, and it is
             separate.
           </p>
         }
@@ -209,7 +227,7 @@ function LoginForm() {
             </button>
 
             <p className="text-[0.8rem]" style={{ color: "var(--ink-soft)" }}>
-              New here? The same code signs you up — there is no separate
+              New here? The same code signs you up: there is no separate
               registration step.
             </p>
           </form>
@@ -298,7 +316,7 @@ function LoginForm() {
             style={{ background: "var(--roti-2)", color: "var(--ink-soft)" }}
           >
             Supabase keys are not set, so sign-in is inactive. Everything else on
-            the site works without an account — you just cannot save yet.
+            the site works without an account: you just cannot save yet.
           </p>
         )}
       </AuthSection>

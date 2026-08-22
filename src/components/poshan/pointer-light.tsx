@@ -89,7 +89,7 @@ export function PointerLight() {
     };
   }, [calm]);
 
-  /* Nothing rendered under reduced motion — a light that chases the pointer
+  /* Nothing rendered under reduced motion: a light that chases the pointer
      is exactly what that preference asks to be spared. */
   if (calm) return null;
 

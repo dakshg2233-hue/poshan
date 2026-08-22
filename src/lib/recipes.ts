@@ -3,12 +3,12 @@
  *
  * Nutrition is the full panel, not just the four macros: saturated fat, sugar
  * and sodium alongside them, then the minerals and vitamins that actually move
- * on an Indian plate — iron, calcium, potassium, magnesium, zinc, vitamin C,
+ * on an Indian plate: iron, calcium, potassium, magnesium, zinc, vitamin C,
  * B12, D and folate.
  *
  * Values are per serving, drawn from IFCT 2017 (Indian Food Composition
  * Tables) conventions for home portions. They are good planning numbers, not
- * laboratory assays — cooking fat and portion size move them more than the
+ * laboratory assays: cooking fat and portion size move them more than the
  * table does.
  */
 
@@ -97,11 +97,11 @@ export const RECIPES: Record<string, Recipe> = {
       { en: "Lemon and coriander to finish", hi: "ऊपर से नींबू और धनिया" },
     ],
     steps: [
-      { en: "Rinse the poha in a sieve until just soft. Drain fully — soggy poha cannot be saved.", hi: "पोहे को छलनी में तब तक धोएँ जब तक नरम न हो। पूरा पानी निकाल दें — गीला पोहा सुधरता नहीं।" },
+      { en: "Rinse the poha in a sieve until just soft. Drain fully: soggy poha cannot be saved.", hi: "पोहे को छलनी में तब तक धोएँ जब तक नरम न हो। पूरा पानी निकाल दें: गीला पोहा सुधरता नहीं।" },
       { en: "Fry the peanuts in oil until they colour, then lift them out.", hi: "मूंगफली को तेल में रंग आने तक भूनें, फिर निकाल लें।" },
       { en: "Crackle mustard seeds, add curry leaves, chilli and onion. Cook until the onion turns soft.", hi: "राई चटकाएँ, करी पत्ता, मिर्च और प्याज़ डालें। प्याज़ नरम होने तक पकाएँ।" },
       { en: "Stir in turmeric and salt, fold through the poha, cover and steam two minutes.", hi: "हल्दी और नमक मिलाएँ, पोहा मिलाएँ, ढककर दो मिनट भाप दें।" },
-      { en: "Return the peanuts, squeeze lemon over — the vitamin C lifts the iron absorption.", hi: "मूंगफली वापस डालें, नींबू निचोड़ें — विटामिन सी लोहे का अवशोषण बढ़ाता है।" },
+      { en: "Return the peanuts, squeeze lemon over: the vitamin C lifts the iron absorption.", hi: "मूंगफली वापस डालें, नींबू निचोड़ें: विटामिन सी लोहे का अवशोषण बढ़ाता है।" },
     ],
     nutrition: n(8, 55, 11, 2, 4, 3, 380, 210, 32, 2.6, 48, 1.1, 6, 0, 0, 22),
   },
@@ -115,10 +115,10 @@ export const RECIPES: Record<string, Recipe> = {
       { en: "1 katori dahi to serve", hi: "परोसने को 1 कटोरी दही" },
     ],
     steps: [
-      { en: "Mash the potato while warm and season it hard — the filling carries all the flavour.", hi: "आलू गरम रहते मसलें और अच्छा मसाला डालें — स्वाद पूरा भरावन से आता है।" },
+      { en: "Mash the potato while warm and season it hard: the filling carries all the flavour.", hi: "आलू गरम रहते मसलें और अच्छा मसाला डालें: स्वाद पूरा भरावन से आता है।" },
       { en: "Roll a small disc, cup the filling inside, seal and roll gently.", hi: "छोटी लोई बेलें, भरावन भरें, बंद करें और हल्के हाथ से बेलें।" },
       { en: "Cook on a hot tawa, a little ghee on each side until brown spots appear.", hi: "गरम तवे पर सेंकें, दोनों तरफ़ थोड़ा घी, जब तक भूरे धब्बे न आएँ।" },
-      { en: "Serve with dahi rather than extra ghee — protein instead of more fat.", hi: "अतिरिक्त घी की जगह दही के साथ परोसें — और वसा नहीं, प्रोटीन।" },
+      { en: "Serve with dahi rather than extra ghee: protein instead of more fat.", hi: "अतिरिक्त घी की जगह दही के साथ परोसें: और वसा नहीं, प्रोटीन।" },
     ],
     nutrition: n(12, 58, 18, 7, 5, 4, 420, 480, 140, 2.8, 52, 1.4, 14, 0.4, 0, 28),
   },
@@ -134,10 +134,10 @@ export const RECIPES: Record<string, Recipe> = {
     ],
     steps: [
       { en: "Pressure cook the soaked rajma with salt, 5–6 whistles, until it crushes between two fingers.", hi: "भिगोया राजमा नमक के साथ 5–6 सीटी तक पकाएँ, जब तक दो उँगलियों में दबकर टूटे।" },
-      { en: "Brown the onion properly — undercooked onion is why home rajma tastes thin.", hi: "प्याज़ ठीक से भूनें — कच्चा प्याज़ ही वजह है कि घर का राजमा फीका लगता है।" },
+      { en: "Brown the onion properly: undercooked onion is why home rajma tastes thin.", hi: "प्याज़ ठीक से भूनें: कच्चा प्याज़ ही वजह है कि घर का राजमा फीका लगता है।" },
       { en: "Add ginger-garlic, then tomato, and cook until the oil separates.", hi: "अदरक-लहसुन डालें, फिर टमाटर, और तेल छूटने तक पकाएँ।" },
       { en: "Tip in the rajma with its water and simmer 20 minutes, mashing a few beans to thicken.", hi: "राजमा उसके पानी सहित डालें, 20 मिनट उबालें, कुछ दाने मसलकर गाढ़ा करें।" },
-      { en: "Serve over rice with lemon — iron plus vitamin C in the same mouthful.", hi: "चावल पर नींबू के साथ परोसें — एक ही कौर में लोहा और विटामिन सी।" },
+      { en: "Serve over rice with lemon: iron plus vitamin C in the same mouthful.", hi: "चावल पर नींबू के साथ परोसें: एक ही कौर में लोहा और विटामिन सी।" },
     ],
     nutrition: n(16, 78, 10, 2, 12, 5, 460, 720, 90, 4.2, 88, 2.1, 12, 0, 0, 130),
   },
@@ -151,10 +151,10 @@ export const RECIPES: Record<string, Recipe> = {
       { en: "6 rotis", hi: "6 रोटी" },
     ],
     steps: [
-      { en: "Pressure cook the chana with a tea bag — that is where the dark colour comes from, not from burning.", hi: "चने को टी बैग के साथ पकाएँ — गहरा रंग वहीं से आता है, जलाने से नहीं।" },
+      { en: "Pressure cook the chana with a tea bag: that is where the dark colour comes from, not from burning.", hi: "चने को टी बैग के साथ पकाएँ: गहरा रंग वहीं से आता है, जलाने से नहीं।" },
       { en: "Make a thick onion-tomato masala and cook it until it darkens.", hi: "गाढ़ा प्याज़-टमाटर मसाला बनाएँ और गहरा होने तक पकाएँ।" },
       { en: "Add the chana, some cooking water, and simmer 15 minutes.", hi: "चना और थोड़ा उबला पानी डालें, 15 मिनट पकाएँ।" },
-      { en: "Finish with amchur — the sourness is what makes chole taste like chole.", hi: "अंत में अमचूर — खटास ही छोले को छोले बनाती है।" },
+      { en: "Finish with amchur: the sourness is what makes chole taste like chole.", hi: "अंत में अमचूर: खटास ही छोले को छोले बनाती है।" },
     ],
     nutrition: n(15, 62, 12, 2, 11, 6, 520, 560, 110, 3.6, 76, 1.9, 9, 0, 0, 150),
   },
@@ -168,10 +168,10 @@ export const RECIPES: Record<string, Recipe> = {
       { en: "6 rotis", hi: "6 रोटी" },
     ],
     steps: [
-      { en: "Blanch the palak 2 minutes, then straight into cold water — this keeps it green instead of khaki.", hi: "पालक 2 मिनट उबालें, फिर तुरंत ठंडे पानी में — इसी से हरा रहता है, मटमैला नहीं।" },
+      { en: "Blanch the palak 2 minutes, then straight into cold water: this keeps it green instead of khaki.", hi: "पालक 2 मिनट उबालें, फिर तुरंत ठंडे पानी में: इसी से हरा रहता है, मटमैला नहीं।" },
       { en: "Blend to a coarse purée. Do not over-blend; texture matters.", hi: "दरदरा पीसें। ज़्यादा न पीसें; बनावट मायने रखती है।" },
       { en: "Cook the onion-tomato base until the oil separates, then fold in the palak.", hi: "प्याज़-टमाटर तेल छूटने तक पकाएँ, फिर पालक मिलाएँ।" },
-      { en: "Add paneer at the very end and cook 3 minutes — longer turns it rubbery.", hi: "पनीर बिल्कुल अंत में डालें, 3 मिनट पकाएँ — ज़्यादा पकने पर रबड़ जैसा हो जाता है।" },
+      { en: "Add paneer at the very end and cook 3 minutes: longer turns it rubbery.", hi: "पनीर बिल्कुल अंत में डालें, 3 मिनट पकाएँ: ज़्यादा पकने पर रबड़ जैसा हो जाता है।" },
     ],
     nutrition: n(20, 40, 24, 11, 6, 5, 540, 820, 480, 4.8, 95, 2.4, 32, 0.9, 0.2, 190),
   },
@@ -206,7 +206,7 @@ export const RECIPES: Record<string, Recipe> = {
       { en: "Cook onion until translucent, then tomato until it collapses.", hi: "प्याज़ पारदर्शी होने तक पकाएँ, फिर टमाटर गलने तक।" },
       { en: "Add the spices and cook a minute so they lose their raw edge.", hi: "मसाले डालकर एक मिनट पकाएँ ताकि कच्चापन जाए।" },
       { en: "Pour in beaten eggs and stir constantly on low heat.", hi: "फेंटे अंडे डालें और धीमी आँच पर लगातार चलाएँ।" },
-      { en: "Pull it off while still glossy — carry-over heat finishes it.", hi: "चमक रहते ही उतार लें — बची गर्मी बाक़ी काम कर देती है।" },
+      { en: "Pull it off while still glossy: carry-over heat finishes it.", hi: "चमक रहते ही उतार लें: बची गर्मी बाक़ी काम कर देती है।" },
     ],
     nutrition: n(20, 34, 18, 6, 3, 4, 480, 340, 90, 3.2, 44, 1.8, 12, 1.6, 2.4, 62),
   },
@@ -220,7 +220,7 @@ export const RECIPES: Record<string, Recipe> = {
       { en: "6 rotis", hi: "6 रोटी" },
     ],
     steps: [
-      { en: "Brown the onion slowly, 10 minutes — this is the whole gravy.", hi: "प्याज़ धीरे-धीरे 10 मिनट भूनें — पूरी ग्रेवी यही है।" },
+      { en: "Brown the onion slowly, 10 minutes: this is the whole gravy.", hi: "प्याज़ धीरे-धीरे 10 मिनट भूनें: पूरी ग्रेवी यही है।" },
       { en: "Add ginger-garlic, then powdered spices, then tomato.", hi: "अदरक-लहसुन डालें, फिर पिसे मसाले, फिर टमाटर।" },
       { en: "Add chicken and sear it in the masala before any water goes in.", hi: "चिकन डालकर मसाले में भूनें, पानी बाद में।" },
       { en: "Cover and cook 20 minutes. Bone-in keeps it from drying out.", hi: "ढककर 20 मिनट पकाएँ। हड्डी वाला मांस सूखता नहीं।" },
@@ -290,7 +290,7 @@ export const RECIPES: Record<string, Recipe> = {
     ],
     steps: [
       { en: "Make the potato masala: temper mustard, soften onion, add turmeric and mashed potato.", hi: "आलू मसाला बनाएँ: राई तड़काएँ, प्याज़ नरम करें, हल्दी और मसला आलू डालें।" },
-      { en: "Heat the tawa properly. Sprinkle water — it should hiss and vanish.", hi: "तवा ठीक से गरम करें। पानी छिड़कें — छन्न करके उड़ जाना चाहिए।" },
+      { en: "Heat the tawa properly. Sprinkle water: it should hiss and vanish.", hi: "तवा ठीक से गरम करें। पानी छिड़कें: छन्न करके उड़ जाना चाहिए।" },
       { en: "Pour batter at the centre and spread outward in a spiral.", hi: "घोल बीच में डालें और गोल-गोल बाहर की ओर फैलाएँ।" },
       { en: "Crisp the edges, place the filling, fold and serve immediately.", hi: "किनारे कुरकुरे करें, भरावन रखें, मोड़कर तुरंत परोसें।" },
     ],
@@ -305,7 +305,7 @@ export const RECIPES: Record<string, Recipe> = {
       { en: "Pomegranate or grated carrot", hi: "अनार या कद्दूकस गाजर" },
     ],
     steps: [
-      { en: "Mash the cooled rice slightly — warm rice will split the curd.", hi: "ठंडा चावल हल्का मसलें — गरम चावल दही फाड़ देगा।" },
+      { en: "Mash the cooled rice slightly: warm rice will split the curd.", hi: "ठंडा चावल हल्का मसलें: गरम चावल दही फाड़ देगा।" },
       { en: "Fold in the dahi with a little milk to loosen.", hi: "दही मिलाएँ, थोड़ा दूध डालकर पतला करें।" },
       { en: "Temper mustard, curry leaves, hing and ginger; pour over.", hi: "राई, करी पत्ता, हींग, अदरक तड़काकर ऊपर डालें।" },
       { en: "Rest 10 minutes before eating. It improves.", hi: "खाने से 10 मिनट पहले रखें। स्वाद बढ़ता है।" },
@@ -322,9 +322,9 @@ export const RECIPES: Record<string, Recipe> = {
       { en: "1.5 cups rice, cabbage poriyal", hi: "1.5 कप चावल, पत्तागोभी पोरियल" },
     ],
     steps: [
-      { en: "Cook the dal soft and keep its water — that is the body of the rasam.", hi: "दाल नरम पकाएँ, पानी रखें — रसम की जान वही है।" },
+      { en: "Cook the dal soft and keep its water: that is the body of the rasam.", hi: "दाल नरम पकाएँ, पानी रखें: रसम की जान वही है।" },
       { en: "Simmer tamarind water with tomato and rasam powder 10 minutes.", hi: "इमली पानी, टमाटर और रसम पाउडर 10 मिनट उबालें।" },
-      { en: "Add the dal water and heat until it froths — do not boil hard.", hi: "दाल का पानी डालें, झाग आने तक गरम करें — तेज़ न उबालें।" },
+      { en: "Add the dal water and heat until it froths: do not boil hard.", hi: "दाल का पानी डालें, झाग आने तक गरम करें, तेज़ न उबालें।" },
       { en: "Temper and finish with coriander.", hi: "तड़का लगाएँ और धनिया डालें।" },
     ],
     nutrition: n(9, 56, 7, 2, 6, 4, 460, 440, 56, 2.4, 52, 1.2, 22, 0, 0, 70),
@@ -341,7 +341,7 @@ export const RECIPES: Record<string, Recipe> = {
       { en: "Spread the rice out to cool so the grains stay separate.", hi: "चावल फैलाकर ठंडा करें ताकि दाने अलग रहें।" },
       { en: "Fry peanuts and chana dal until golden, then mustard and curry leaves.", hi: "मूंगफली और चना दाल सुनहरा भूनें, फिर राई और करी पत्ता।" },
       { en: "Add turmeric, take off the heat, then add lemon juice.", hi: "हल्दी डालें, आँच से उतारें, फिर नींबू रस डालें।" },
-      { en: "Never boil lemon juice — it turns bitter.", hi: "नींबू रस कभी न उबालें — कड़वा हो जाता है।" },
+      { en: "Never boil lemon juice, it turns bitter.", hi: "नींबू रस कभी न उबालें: कड़वा हो जाता है।" },
     ],
     nutrition: n(8, 58, 11, 2, 3, 2, 400, 260, 40, 1.8, 44, 1.0, 24, 0, 0, 28),
   },
@@ -376,7 +376,7 @@ export const RECIPES: Record<string, Recipe> = {
       { en: "Temper fenugreek and curry leaves in gingelly oil.", hi: "तिल के तेल में मेथी और करी पत्ता तड़काएँ।" },
       { en: "Cook onion, garlic and tomato down, add the spice powders.", hi: "प्याज़, लहसुन, टमाटर गलाएँ, फिर पिसे मसाले।" },
       { en: "Pour in tamarind water and simmer 10 minutes to lose the raw sourness.", hi: "इमली पानी डालें, 10 मिनट पकाएँ ताकि कच्ची खटास जाए।" },
-      { en: "Slide the fish in and simmer 8 minutes. Never stir — shake the pan.", hi: "मछली डालें, 8 मिनट पकाएँ। चलाएँ नहीं — कड़ाही हिलाएँ।" },
+      { en: "Slide the fish in and simmer 8 minutes. Never stir, shake the pan.", hi: "मछली डालें, 8 मिनट पकाएँ। चलाएँ नहीं, कड़ाही हिलाएँ।" },
     ],
     nutrition: n(30, 52, 12, 3, 3, 4, 580, 560, 88, 2.8, 62, 1.4, 18, 2.8, 6.4, 44),
   },
@@ -391,9 +391,9 @@ export const RECIPES: Record<string, Recipe> = {
     ],
     steps: [
       { en: "Dry roast the whole spices with coconut until fragrant, then grind.", hi: "साबुत मसाले नारियल के साथ ख़ुशबू आने तक भूनें, फिर पीसें।" },
-      { en: "This masala is the dish — do not substitute packet powder.", hi: "यही मसाला असली व्यंजन है — पैकेट का पाउडर काम नहीं देगा।" },
+      { en: "This masala is the dish: do not substitute packet powder.", hi: "यही मसाला असली व्यंजन है: पैकेट का पाउडर काम नहीं देगा।" },
       { en: "Brown onion, add chicken, sear, then the ground masala.", hi: "प्याज़ भूनें, चिकन डालकर सेकें, फिर पिसा मसाला।" },
-      { en: "Cook covered 25 minutes with very little water — it should cling, not swim.", hi: "बहुत कम पानी के साथ ढककर 25 मिनट पकाएँ — मसाला चिपके, तैरे नहीं।" },
+      { en: "Cook covered 25 minutes with very little water: it should cling, not swim.", hi: "बहुत कम पानी के साथ ढककर 25 मिनट पकाएँ: मसाला चिपके, तैरे नहीं।" },
     ],
     nutrition: n(36, 54, 18, 7, 4, 4, 600, 580, 82, 3.6, 66, 3.4, 12, 0.6, 0.2, 46),
   },
@@ -411,7 +411,7 @@ export const RECIPES: Record<string, Recipe> = {
       { en: "Rinse the chira briefly and drain.", hi: "चिड़ा जल्दी से धोकर छान लें।" },
       { en: "Toss with jaggery and coconut while still damp.", hi: "नम रहते ही गुड़ और नारियल मिलाएँ।" },
       { en: "Rest 5 minutes so the jaggery melts into it.", hi: "5 मिनट रखें ताकि गुड़ घुल जाए।" },
-      { en: "Jaggery keeps a little iron that white sugar does not — but it still raises blood sugar.", hi: "गुड़ में थोड़ा लोहा रहता है जो चीनी में नहीं — पर यह भी शर्करा बढ़ाता है।" },
+      { en: "Jaggery keeps a little iron that white sugar does not, but it still raises blood sugar.", hi: "गुड़ में थोड़ा लोहा रहता है जो चीनी में नहीं: पर यह भी शर्करा बढ़ाता है।" },
     ],
     nutrition: n(5, 58, 3, 2, 3, 26, 60, 200, 30, 3.2, 34, 0.8, 2, 0, 0, 14),
   },
@@ -427,7 +427,7 @@ export const RECIPES: Record<string, Recipe> = {
     steps: [
       { en: "Soak the poppy seeds, then grind to a smooth paste with green chilli.", hi: "पोस्ता भिगोएँ, फिर हरी मिर्च के साथ बारीक पीसें।" },
       { en: "Fry the potato cubes until the edges catch colour.", hi: "आलू के टुकड़े किनारे रंग आने तक तलें।" },
-      { en: "Add the posto paste and cook on low — it burns fast.", hi: "पोस्तो पेस्ट डालकर धीमी आँच पर पकाएँ — जल्दी जलता है।" },
+      { en: "Add the posto paste and cook on low, it burns fast.", hi: "पोस्तो पेस्ट डालकर धीमी आँच पर पकाएँ, जल्दी जलता है।" },
       { en: "Cook the dal separately, plain, and serve all three together.", hi: "दाल अलग सादी पकाएँ, तीनों साथ परोसें।" },
     ],
     nutrition: n(14, 68, 10, 2, 8, 4, 420, 640, 96, 3.4, 72, 1.8, 18, 0, 0, 118),
@@ -441,7 +441,7 @@ export const RECIPES: Record<string, Recipe> = {
       { en: "1 brinjal for begun bhaja", hi: "1 बैंगन, बेगुन भाजा के लिए" },
     ],
     steps: [
-      { en: "Dry roast the moong dal until it smells nutty — this is what makes it khichuri, not khichdi.", hi: "मूंग दाल भूनें जब तक मेवे जैसी ख़ुशबू न आए — यही खिचुड़ी को खिचड़ी से अलग करता है।" },
+      { en: "Dry roast the moong dal until it smells nutty: this is what makes it khichuri, not khichdi.", hi: "मूंग दाल भूनें जब तक मेवे जैसी ख़ुशबू न आए: यही खिचुड़ी को खिचड़ी से अलग करता है।" },
       { en: "Temper bay leaf and cumin, add ginger and turmeric.", hi: "तेज़पत्ता और जीरा तड़काएँ, अदरक और हल्दी डालें।" },
       { en: "Add rice, dal, vegetables and plenty of water. Cook until soft.", hi: "चावल, दाल, सब्ज़ियाँ और भरपूर पानी डालें। नरम होने तक पकाएँ।" },
       { en: "Fry brinjal slices separately and lay them on top.", hi: "बैंगन के टुकड़े अलग तलकर ऊपर रखें।" },
@@ -463,7 +463,7 @@ export const RECIPES: Record<string, Recipe> = {
       { en: "Rub the fish with turmeric and salt, rest 10 minutes, then fry lightly.", hi: "मछली पर हल्दी-नमक मलें, 10 मिनट रखें, फिर हल्का तलें।" },
       { en: "Fry the potatoes in the same oil.", hi: "उसी तेल में आलू तलें।" },
       { en: "Temper nigella and chilli, add ginger and turmeric, then water.", hi: "कलौंजी और मिर्च तड़काएँ, अदरक-हल्दी डालें, फिर पानी।" },
-      { en: "Return fish and potato, simmer 10 minutes. The jhol stays thin — that is the point.", hi: "मछली और आलू वापस डालें, 10 मिनट पकाएँ। झोल पतला ही रहता है — यही असल है।" },
+      { en: "Return fish and potato, simmer 10 minutes. The jhol stays thin: that is the point.", hi: "मछली और आलू वापस डालें, 10 मिनट पकाएँ। झोल पतला ही रहता है, यही असल है।" },
     ],
     nutrition: n(30, 55, 10, 2, 2, 3, 540, 620, 92, 2.4, 58, 1.6, 14, 3.2, 5.8, 38),
   },
@@ -495,10 +495,10 @@ export const RECIPES: Record<string, Recipe> = {
       { en: "Dahi to serve", hi: "परोसने को दही" },
     ],
     steps: [
-      { en: "Knead everything together — the methi water is enough moisture, add little else.", hi: "सब साथ गूँधें — मेथी का पानी काफ़ी है, और कुछ कम ही डालें।" },
+      { en: "Knead everything together: the methi water is enough moisture, add little else.", hi: "सब साथ गूँधें: मेथी का पानी काफ़ी है, और कुछ कम ही डालें।" },
       { en: "Rest the dough 15 minutes.", hi: "आटा 15 मिनट रखें।" },
       { en: "Roll thin and cook on a medium tawa with a smear of oil.", hi: "पतला बेलें और मध्यम तवे पर थोड़े तेल से सेंकें।" },
-      { en: "Methi is bitter and that is the useful part — it helps blood sugar.", hi: "मेथी कड़वी है और यही काम की बात है — रक्त शर्करा में मदद करती है।" },
+      { en: "Methi is bitter and that is the useful part: it helps blood sugar.", hi: "मेथी कड़वी है और यही काम की बात है: रक्त शर्करा में मदद करती है।" },
     ],
     nutrition: n(11, 48, 14, 4, 6, 3, 380, 380, 180, 4.2, 68, 1.5, 12, 0.3, 0, 84),
   },
@@ -513,7 +513,7 @@ export const RECIPES: Record<string, Recipe> = {
     ],
     steps: [
       { en: "Cook the dal soft and whisk it smooth.", hi: "दाल नरम पकाएँ और चिकना फेंटें।" },
-      { en: "Season with kokum and a pinch of jaggery — sweet-sour is the Maharashtrian signature.", hi: "कोकम और चुटकी गुड़ डालें — खट्टा-मीठा ही महाराष्ट्रीय पहचान है।" },
+      { en: "Season with kokum and a pinch of jaggery: sweet-sour is the Maharashtrian signature.", hi: "कोकम और चुटकी गुड़ डालें: खट्टा-मीठा ही महाराष्ट्रीय पहचान है।" },
       { en: "Knead bajra flour with hot water; it has no gluten so work fast.", hi: "बाजरे का आटा गरम पानी से गूँधें; ग्लूटेन नहीं है इसलिए तेज़ी से काम करें।" },
       { en: "Pat the bhakri by hand rather than rolling, and cook on a hot tawa.", hi: "भाकरी बेलने के बजाय हाथ से थपथपाएँ, गरम तवे पर सेंकें।" },
     ],
@@ -528,10 +528,10 @@ export const RECIPES: Record<string, Recipe> = {
       { en: "3 pav, farsan, lemon", hi: "3 पाव, फ़रसाण, नींबू" },
     ],
     steps: [
-      { en: "Sprout the matki two days ahead — the sprouting is what raises the iron and vitamin C.", hi: "मटकी दो दिन पहले अंकुरित करें — अंकुरण ही लोहा और विटामिन सी बढ़ाता है।" },
-      { en: "Roast onion and coconut dark, then grind — this is the kat.", hi: "प्याज़ और नारियल गहरा भूनें, फिर पीसें — यही कट है।" },
+      { en: "Sprout the matki two days ahead: the sprouting is what raises the iron and vitamin C.", hi: "मटकी दो दिन पहले अंकुरित करें: अंकुरण ही लोहा और विटामिन सी बढ़ाता है।" },
+      { en: "Roast onion and coconut dark, then grind: this is the kat.", hi: "प्याज़ और नारियल गहरा भूनें, फिर पीसें, यही कट है।" },
       { en: "Cook the sprouts with the masala until soft.", hi: "अंकुरित मटकी मसाले के साथ नरम होने तक पकाएँ।" },
-      { en: "Serve with one pav, lemon, and go easy on the farsan — that is where the salt and oil hide.", hi: "एक पाव और नींबू के साथ परोसें, फ़रसाण कम रखें — नमक और तेल वहीं छिपे हैं।" },
+      { en: "Serve with one pav, lemon, and go easy on the farsan: that is where the salt and oil hide.", hi: "एक पाव और नींबू के साथ परोसें, फ़रसाण कम रखें: नमक और तेल वहीं छिपे हैं।" },
     ],
     nutrition: n(16, 55, 15, 4, 11, 5, 720, 680, 88, 4.6, 92, 2.2, 16, 0, 0, 172),
   },
@@ -545,7 +545,7 @@ export const RECIPES: Record<string, Recipe> = {
       { en: "Pinch of jaggery", hi: "चुटकी गुड़" },
     ],
     steps: [
-      { en: "Whisk dahi and besan absolutely smooth before heating — lumps will not come out later.", hi: "गरम करने से पहले दही-बेसन बिल्कुल चिकना फेंटें — गुठलियाँ बाद में नहीं जातीं।" },
+      { en: "Whisk dahi and besan absolutely smooth before heating: lumps will not come out later.", hi: "गरम करने से पहले दही-बेसन बिल्कुल चिकना फेंटें: गुठलियाँ बाद में नहीं जातीं।" },
       { en: "Heat slowly and stir constantly in one direction until it thickens.", hi: "धीरे गरम करें और एक ही दिशा में लगातार चलाएँ जब तक गाढ़ा न हो।" },
       { en: "Simmer 15 minutes so the besan loses its raw taste.", hi: "15 मिनट पकाएँ ताकि बेसन का कच्चापन जाए।" },
       { en: "Temper and pour over. Serve with plain khichdi.", hi: "तड़का लगाकर ऊपर डालें। सादी खिचड़ी के साथ परोसें।" },
@@ -567,7 +567,7 @@ export const RECIPES: Record<string, Recipe> = {
       { en: "Roast dry coconut and onion until properly dark, then grind with chillies.", hi: "सूखा नारियल और प्याज़ गहरा भूनें, फिर मिर्च के साथ पीसें।" },
       { en: "Marinate the chicken in turmeric and salt for 20 minutes.", hi: "चिकन को हल्दी-नमक में 20 मिनट रखें।" },
       { en: "Sear the chicken, add the ground masala, cook until oil floats.", hi: "चिकन सेकें, पिसा मसाला डालें, तेल तैरने तक पकाएँ।" },
-      { en: "Pair with bajra bhakri, not rice — it balances the glycaemic load.", hi: "चावल नहीं, बाजरा भाकरी के साथ लें — ग्लाइसेमिक लोड संतुलित रहता है।" },
+      { en: "Pair with bajra bhakri, not rice: it balances the glycaemic load.", hi: "चावल नहीं, बाजरा भाकरी के साथ लें: ग्लाइसेमिक लोड संतुलित रहता है।" },
     ],
     nutrition: n(35, 45, 24, 10, 6, 4, 660, 620, 92, 4.2, 88, 3.6, 10, 0.6, 0.2, 62),
   },
@@ -581,10 +581,10 @@ export const RECIPES: Record<string, Recipe> = {
       { en: "1 cup rice", hi: "1 कप चावल" },
     ],
     steps: [
-      { en: "Pat the bombil very dry — it holds a lot of water and will not crisp otherwise.", hi: "बोंबिल को अच्छी तरह सुखाएँ — इसमें बहुत पानी होता है, वरना कुरकुरा नहीं होगा।" },
+      { en: "Pat the bombil very dry: it holds a lot of water and will not crisp otherwise.", hi: "बोंबिल को अच्छी तरह सुखाएँ: इसमें बहुत पानी होता है, वरना कुरकुरा नहीं होगा।" },
       { en: "Marinate with chilli, turmeric, ginger-garlic and salt for 15 minutes.", hi: "मिर्च, हल्दी, अदरक-लहसुन और नमक में 15 मिनट रखें।" },
       { en: "Press into rava on both sides.", hi: "दोनों तरफ़ रवा में लपेटें।" },
-      { en: "Shallow fry, not deep — 3 minutes a side is enough.", hi: "कम तेल में तलें, डुबोकर नहीं — हर तरफ़ 3 मिनट काफ़ी है।" },
+      { en: "Shallow fry, not deep: 3 minutes a side is enough.", hi: "कम तेल में तलें, डुबोकर नहीं: हर तरफ़ 3 मिनट काफ़ी है।" },
     ],
     nutrition: n(28, 50, 12, 3, 2, 2, 560, 480, 200, 2.6, 54, 1.8, 8, 2.4, 4.2, 32),
   },
@@ -603,9 +603,9 @@ export const RECIPES: Record<string, Recipe> = {
       { en: "A pinch of black salt", hi: "चुटकी भर काला नमक" },
     ],
     steps: [
-      { en: "Warm the chana in a dry pan for a minute — it wakes the nuttiness up.", hi: "चने को सूखे तवे पर एक मिनट गरम करें — खुशबू लौट आती है।" },
+      { en: "Warm the chana in a dry pan for a minute: it wakes the nuttiness up.", hi: "चने को सूखे तवे पर एक मिनट गरम करें: खुशबू लौट आती है।" },
       { en: "Take off the heat, toss with black salt.", hi: "आँच से हटाकर काला नमक मिलाएँ।" },
-      { en: "Eat with the jaggery alongside, not mixed in — the sweetness is a chaser, not a coating.", hi: "गुड़ साथ में खाएँ, मिलाकर नहीं — मिठास साथ के लिए है, लपेटने के लिए नहीं।" },
+      { en: "Eat with the jaggery alongside, not mixed in: the sweetness is a chaser, not a coating.", hi: "गुड़ साथ में खाएँ, मिलाकर नहीं: मिठास साथ के लिए है, लपेटने के लिए नहीं।" },
     ],
     nutrition: n(10, 26, 3, 0.4, 8, 9, 120, 340, 58, 2.4, 62, 1.4, 1, 0, 0, 68),
   },
@@ -633,7 +633,7 @@ export const RECIPES: Record<string, Recipe> = {
       { en: "1 dried red chilli, pinch of asafoetida", hi: "1 सूखी लाल मिर्च, चुटकी हींग" },
     ],
     steps: [
-      { en: "Pressure cook the soaked chana until soft but still holding shape — three whistles.", hi: "भीगे चने को नरम पर साबुत रहने तक उबालें — तीन सीटी।" },
+      { en: "Pressure cook the soaked chana until soft but still holding shape, three whistles.", hi: "भीगे चने को नरम पर साबुत रहने तक उबालें, तीन सीटी।" },
       { en: "Crackle mustard in a teaspoon of oil, add curry leaves, chilli and asafoetida.", hi: "एक चम्मच तेल में राई चटकाएँ, करी पत्ता, मिर्च और हींग डालें।" },
       { en: "Fold the drained chana through, then the coconut off the heat so it stays fresh.", hi: "छना चना मिलाएँ, फिर आँच बंद करके नारियल डालें ताकि ताज़ा रहे।" },
     ],
@@ -649,7 +649,7 @@ export const RECIPES: Record<string, Recipe> = {
     steps: [
       { en: "Crackle the mustard, add curry leaf, chilli and onion. Cook until the onion goes soft.", hi: "राई चटकाएँ, करी पत्ता, मिर्च और प्याज़ डालें। प्याज़ नरम होने तक पकाएँ।" },
       { en: "Stir in turmeric, then pour the eggs in and keep them moving.", hi: "हल्दी मिलाएँ, फिर अंडे डालकर लगातार चलाते रहें।" },
-      { en: "Take it off while still slightly wet — it carries on cooking in the pan.", hi: "थोड़ा गीला रहते ही उतार लें — कड़ाही में पकता रहता है।" },
+      { en: "Take it off while still slightly wet: it carries on cooking in the pan.", hi: "थोड़ा गीला रहते ही उतार लें: कड़ाही में पकता रहता है।" },
     ],
     nutrition: n(15, 8, 14, 4.2, 1, 3, 320, 190, 58, 2.0, 16, 1.4, 4, 1.1, 2.2, 44),
   },
@@ -662,7 +662,7 @@ export const RECIPES: Record<string, Recipe> = {
     ],
     steps: [
       { en: "Beat the onion and chilli into the eggs.", hi: "प्याज़ और मिर्च अंडों में फेंट लें।" },
-      { en: "Soak each slice both sides — a day-old slice takes it up without falling apart.", hi: "हर स्लाइस दोनों तरफ़ भिगोएँ — पुरानी ब्रेड टूटे बिना सोख लेती है।" },
+      { en: "Soak each slice both sides: a day-old slice takes it up without falling apart.", hi: "हर स्लाइस दोनों तरफ़ भिगोएँ: पुरानी ब्रेड टूटे बिना सोख लेती है।" },
       { en: "Fry on a low flame until set and golden. Low heat matters; high heat browns the outside and leaves the egg wet.", hi: "धीमी आँच पर सुनहरा होने तक सेकें। आँच धीमी ज़रूरी है; तेज़ आँच बाहर से जला देती है और अंडा कच्चा रहता है।" },
     ],
     nutrition: n(17, 32, 15, 4.6, 3, 4, 440, 230, 96, 2.6, 28, 1.6, 3, 1.1, 2.2, 62),
@@ -677,7 +677,7 @@ export const RECIPES: Record<string, Recipe> = {
     ],
     steps: [
       { en: "Put everything in a bowl.", hi: "सब कुछ एक कटोरे में डालें।" },
-      { en: "Mix with your hand — that is the whole technique, and a spoon genuinely does not do it as well.", hi: "हाथ से मिलाएँ — यही पूरी विधि है, चम्मच से वैसा नहीं बनता।" },
+      { en: "Mix with your hand: that is the whole technique, and a spoon genuinely does not do it as well.", hi: "हाथ से मिलाएँ: यही पूरी विधि है, चम्मच से वैसा नहीं बनता।" },
       { en: "Eat at once, before the muri softens.", hi: "तुरंत खाएँ, मुरमुरे नरम पड़ने से पहले।" },
     ],
     nutrition: n(5, 30, 3, 0.4, 3, 2, 210, 120, 18, 1.4, 22, 0.7, 3, 0, 0, 18),
@@ -693,7 +693,7 @@ export const RECIPES: Record<string, Recipe> = {
     steps: [
       { en: "Mix the potato with the masalas and salt.", hi: "आलू में मसाले और नमक मिलाएँ।" },
       { en: "Wrap each egg half in the potato, then coat in beaten egg and crumbs.", hi: "हर आधे अंडे को आलू से ढकें, फिर फेंटे अंडे और चूरे में लपेटें।" },
-      { en: "Bake at 200°C for 20 minutes, turning once. Baked rather than deep fried — same crust, a third of the oil.", hi: "200°C पर 20 मिनट बेक करें, बीच में पलटें। तलने की जगह बेक — परत वही, तेल एक-तिहाई।" },
+      { en: "Bake at 200°C for 20 minutes, turning once. Baked rather than deep fried: same crust, a third of the oil.", hi: "200°C पर 20 मिनट बेक करें, बीच में पलटें। तलने की जगह बेक: परत वही, तेल एक-तिहाई।" },
     ],
     nutrition: n(16, 18, 12, 3.6, 2, 3, 380, 310, 72, 2.2, 26, 1.5, 8, 1.1, 2.0, 54),
   },
@@ -721,7 +721,7 @@ export const RECIPES: Record<string, Recipe> = {
     ],
     steps: [
       { en: "Cook the onion until translucent, add tomato and the masalas.", hi: "प्याज़ को पारदर्शी होने तक पकाएँ, टमाटर और मसाले डालें।" },
-      { en: "Pour the eggs in and scramble hard — bhurji wants small curds, not sheets.", hi: "अंडे डालकर तेज़ी से चलाएँ — भुर्जी में छोटे दाने चाहिए, परत नहीं।" },
+      { en: "Pour the eggs in and scramble hard: bhurji wants small curds, not sheets.", hi: "अंडे डालकर तेज़ी से चलाएँ: भुर्जी में छोटे दाने चाहिए, परत नहीं।" },
       { en: "Serve in a cup without the pav. That is the whole point of it as a snack.", hi: "बिना पाव कटोरी में परोसें। नाश्ते के तौर पर यही बात है।" },
     ],
     nutrition: n(15, 10, 13, 4.0, 2, 4, 350, 260, 64, 2.1, 20, 1.4, 10, 1.1, 2.2, 50),

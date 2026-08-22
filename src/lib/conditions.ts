@@ -1,13 +1,13 @@
 /**
  * Condition-aware nutrition.
  *
- * Rules follow mainstream clinical nutrition practice — ICMR-NIN Dietary
+ * Rules follow mainstream clinical nutrition practice, ICMR-NIN Dietary
  * Guidelines for Indians (2024), WHO sodium guidance, KDIGO for kidney
  * disease, and standard coeliac/thyroid management. Prevalence figures are
  * from ICMR-INDIAB (2023) and NFHS-5.
  *
  * This is educational. It does not diagnose, and it does not replace a
- * registered dietitian or a treating physician — several of these conditions
+ * registered dietitian or a treating physician: several of these conditions
  * need bloodwork to titrate properly, and two of them give directly opposing
  * advice (see the CKD / hypertension conflict below).
  */
@@ -84,14 +84,14 @@ export const CONDITIONS: Condition[] = [
     },
     favour: [
       { en: "Bajra, jowar and ragi rotis", hi: "बाजरा, ज्वार और रागी की रोटी" },
-      { en: "Whole dals and rajma — protein with fibre", hi: "साबुत दाल और राजमा — प्रोटीन के साथ रेशा" },
+      { en: "Whole dals and rajma, protein with fibre", hi: "साबुत दाल और राजमा: प्रोटीन के साथ रेशा" },
       { en: "Methi, karela, and green leafy sabzi", hi: "मेथी, करेला और हरी पत्तेदार सब्ज़ी" },
       { en: "Dahi without sugar", hi: "बिना चीनी का दही" },
     ],
     limit: [
       { en: "White rice, maida, and refined flour breads", hi: "सफ़ेद चावल, मैदा और रिफ़ाइंड आटे की रोटी" },
       { en: "Potato, and fruit juice of any kind", hi: "आलू, और किसी भी तरह का फलों का रस" },
-      { en: "Sugar, jaggery and honey — all raise glucose", hi: "चीनी, गुड़ और शहद — सभी ग्लूकोज़ बढ़ाते हैं" },
+      { en: "Sugar, jaggery and honey, all raise glucose", hi: "चीनी, गुड़ और शहद: सभी ग्लूकोज़ बढ़ाते हैं" },
     ],
     watchOut: {
       en: "Jaggery is not a free pass. It raises blood glucose almost as fast as white sugar; the small mineral content does not offset that.",
@@ -99,7 +99,7 @@ export const CONDITIONS: Condition[] = [
     },
     kcalDelta: -200,
     rules: [
-      { attr: "lowGI", verdict: "good", why: { en: "Low glycaemic load — releases glucose slowly.", hi: "कम ग्लाइसेमिक लोड — ग्लूकोज़ धीरे छोड़ता है।" } },
+      { attr: "lowGI", verdict: "good", why: { en: "Low glycaemic load, releases glucose slowly.", hi: "कम ग्लाइसेमिक लोड: ग्लूकोज़ धीरे छोड़ता है।" } },
       { attr: "highFibre", verdict: "good", why: { en: "Fibre blunts the post-meal glucose rise.", hi: "रेशा भोजन के बाद की ग्लूकोज़ बढ़त को कम करता है।" } },
       { attr: "millet", verdict: "good", why: { en: "Millets sit far lower on the glycaemic index than rice.", hi: "बाजरा-ज्वार चावल से कहीं कम ग्लाइसेमिक इंडेक्स पर हैं।" } },
       { attr: "rice", verdict: "caution", why: { en: "Polished rice spikes glucose. Halve the portion or swap for millet.", hi: "पॉलिश चावल ग्लूकोज़ बढ़ाता है। मात्रा आधी करें या बाजरा लें।" } },
@@ -115,11 +115,11 @@ export const CONDITIONS: Condition[] = [
       hi: "लगभग हर चार में एक भारतीय वयस्क को उच्च रक्तचाप है, और आधे से भी कम को इसका पता है।",
     },
     principle: {
-      en: "Salt is the lever, and most of it is not in the salt shaker. WHO sets the ceiling at 5 g of salt a day — one teaspoon, everything included.",
-      hi: "नमक ही असली नियंत्रण है, और उसका ज़्यादातर हिस्सा नमकदानी में नहीं होता। डब्ल्यूएचओ की सीमा है 5 ग्राम नमक प्रतिदिन — एक छोटा चम्मच, सब कुछ मिलाकर।",
+      en: "Salt is the lever, and most of it is not in the salt shaker. WHO sets the ceiling at 5 g of salt a day: one teaspoon, everything included.",
+      hi: "नमक ही असली नियंत्रण है, और उसका ज़्यादातर हिस्सा नमकदानी में नहीं होता। डब्ल्यूएचओ की सीमा है 5 ग्राम नमक प्रतिदिन: एक छोटा चम्मच, सब कुछ मिलाकर।",
     },
     favour: [
-      { en: "Fresh sabzi and fruit — potassium offsets sodium", hi: "ताज़ी सब्ज़ी और फल — पोटैशियम सोडियम की भरपाई करता है" },
+      { en: "Fresh sabzi and fruit, potassium offsets sodium", hi: "ताज़ी सब्ज़ी और फल: पोटैशियम सोडियम की भरपाई करता है" },
       { en: "Dahi and chaas without added salt", hi: "बिना नमक का दही और छाछ" },
       { en: "Whole grains and dals", hi: "साबुत अनाज और दाल" },
     ],
@@ -134,7 +134,7 @@ export const CONDITIONS: Condition[] = [
     },
     kcalDelta: -150,
     rules: [
-      { attr: "highSodium", verdict: "avoid", why: { en: "High sodium — the single strongest driver of blood pressure.", hi: "अधिक सोडियम — रक्तचाप का सबसे बड़ा कारण।" } },
+      { attr: "highSodium", verdict: "avoid", why: { en: "High sodium: the single strongest driver of blood pressure.", hi: "अधिक सोडियम: रक्तचाप का सबसे बड़ा कारण।" } },
       { attr: "highPotassium", verdict: "good", why: { en: "Potassium helps the body clear sodium.", hi: "पोटैशियम शरीर से सोडियम निकालने में मदद करता है।" } },
       { attr: "fried", verdict: "caution", why: { en: "Fried food usually arrives salted too.", hi: "तला खाना आमतौर पर नमकीन भी होता है।" } },
       { attr: "highFibre", verdict: "good", why: { en: "Fibre-rich eating patterns lower blood pressure.", hi: "रेशेदार आहार रक्तचाप घटाता है।" } },
@@ -153,23 +153,23 @@ export const CONDITIONS: Condition[] = [
     },
     favour: [
       { en: "Vegetables double-boiled to leach potassium", hi: "पोटैशियम निकालने को दो बार उबाली सब्ज़ियाँ" },
-      { en: "Rice and refined grains — low in phosphorus", hi: "चावल और रिफ़ाइंड अनाज — फ़ॉस्फ़ोरस में कम" },
+      { en: "Rice and refined grains, low in phosphorus", hi: "चावल और रिफ़ाइंड अनाज, फ़ॉस्फ़ोरस में कम" },
       { en: "Portion-controlled protein, as your nephrologist sets it", hi: "नियंत्रित मात्रा में प्रोटीन, जैसा आपके नेफ़्रोलॉजिस्ट कहें" },
     ],
     limit: [
       { en: "Banana, coconut water, and citrus", hi: "केला, नारियल पानी और खट्टे फल" },
       { en: "Potato and tomato unless leached", hi: "आलू और टमाटर, जब तक उबालकर न निकाला जाए" },
-      { en: "Dals, nuts and dairy — high phosphorus", hi: "दाल, मेवे और दुग्ध — अधिक फ़ॉस्फ़ोरस" },
+      { en: "Dals, nuts and dairy, high phosphorus", hi: "दाल, मेवे और दुग्ध, अधिक फ़ॉस्फ़ोरस" },
     ],
     watchOut: {
-      en: "Coconut water is widely treated as harmless in India. In advanced kidney disease its potassium load can be life-threatening. Never follow generic blood-pressure advice if you have CKD — ask your nephrologist.",
-      hi: "भारत में नारियल पानी को हानिरहित माना जाता है। बढ़े हुए गुर्दा रोग में इसका पोटैशियम जानलेवा हो सकता है। सीकेडी में सामान्य रक्तचाप सलाह कभी न अपनाएँ — अपने नेफ़्रोलॉजिस्ट से पूछें।",
+      en: "Coconut water is widely treated as harmless in India. In advanced kidney disease its potassium load can be life-threatening. Never follow generic blood-pressure advice if you have CKD, ask your nephrologist.",
+      hi: "भारत में नारियल पानी को हानिरहित माना जाता है। बढ़े हुए गुर्दा रोग में इसका पोटैशियम जानलेवा हो सकता है। सीकेडी में सामान्य रक्तचाप सलाह कभी न अपनाएँ: अपने नेफ़्रोलॉजिस्ट से पूछें।",
     },
     kcalDelta: 0,
     rules: [
-      { attr: "highPotassium", verdict: "avoid", why: { en: "High potassium — kidneys cannot clear it, and the heart is at risk.", hi: "अधिक पोटैशियम — गुर्दे इसे नहीं निकाल पाते, हृदय पर जोखिम।" } },
+      { attr: "highPotassium", verdict: "avoid", why: { en: "High potassium: kidneys cannot clear it, and the heart is at risk.", hi: "अधिक पोटैशियम: गुर्दे इसे नहीं निकाल पाते, हृदय पर जोखिम।" } },
       { attr: "highPhosphorus", verdict: "avoid", why: { en: "High phosphorus damages bone and vessels in kidney disease.", hi: "अधिक फ़ॉस्फ़ोरस गुर्दा रोग में हड्डी और नसों को नुक़सान पहुँचाता है।" } },
-      { attr: "legume", verdict: "caution", why: { en: "Dals carry both potassium and phosphorus — portion strictly.", hi: "दाल में पोटैशियम और फ़ॉस्फ़ोरस दोनों — मात्रा सख़्ती से रखें।" } },
+      { attr: "legume", verdict: "caution", why: { en: "Dals carry both potassium and phosphorus, portion strictly.", hi: "दाल में पोटैशियम और फ़ॉस्फ़ोरस दोनों: मात्रा सख़्ती से रखें।" } },
       { attr: "potato", verdict: "caution", why: { en: "Only if double-boiled and the water discarded.", hi: "केवल दो बार उबालकर और पानी फेंककर।" } },
       { attr: "rice", verdict: "good", why: { en: "Low in phosphorus, unlike whole grains.", hi: "साबुत अनाज के विपरीत फ़ॉस्फ़ोरस में कम।" } },
     ],
@@ -178,8 +178,8 @@ export const CONDITIONS: Condition[] = [
     key: "anaemia",
     name: { en: "Iron deficiency anaemia", hi: "लोहे की कमी से एनीमिया" },
     prevalence: {
-      en: "57% of Indian women aged 15–49 are anaemic (NFHS-5) — the single most common nutritional disorder in the country.",
-      hi: "15–49 वर्ष की 57% भारतीय महिलाएँ एनीमिक हैं (NFHS-5) — देश का सबसे आम पोषण विकार।",
+      en: "57% of Indian women aged 15–49 are anaemic (NFHS-5): the single most common nutritional disorder in the country.",
+      hi: "15–49 वर्ष की 57% भारतीय महिलाएँ एनीमिक हैं (NFHS-5): देश का सबसे आम पोषण विकार।",
     },
     principle: {
       en: "Plant iron is poorly absorbed on its own. What you drink with the meal matters as much as what you eat.",
@@ -187,7 +187,7 @@ export const CONDITIONS: Condition[] = [
     },
     favour: [
       { en: "Rajma, chana, palak and ragi", hi: "राजमा, चना, पालक और रागी" },
-      { en: "Lemon or amla with the meal — vitamin C multiplies absorption", hi: "भोजन के साथ नींबू या आँवला — विटामिन सी अवशोषण कई गुना करता है" },
+      { en: "Lemon or amla with the meal: vitamin C multiplies absorption", hi: "भोजन के साथ नींबू या आँवला: विटामिन सी अवशोषण कई गुना करता है" },
       { en: "Cooking in an iron kadhai", hi: "लोहे की कड़ाही में पकाना" },
     ],
     limit: [
@@ -195,15 +195,15 @@ export const CONDITIONS: Condition[] = [
       { en: "Calcium supplements taken with iron-rich meals", hi: "लोहे वाले भोजन के साथ कैल्शियम सप्लीमेंट" },
     ],
     watchOut: {
-      en: "Chai immediately after lunch is the most common reason Indian iron levels stay low despite a decent diet — tannins can cut absorption by more than half. Move the cup an hour later.",
-      hi: "दोपहर के खाने के तुरंत बाद चाय ही सबसे आम कारण है कि अच्छा खाने पर भी लोहे का स्तर कम रहता है — टैनिन अवशोषण आधे से ज़्यादा घटा देते हैं। चाय एक घंटे बाद लें।",
+      en: "Chai immediately after lunch is the most common reason Indian iron levels stay low despite a decent diet: tannins can cut absorption by more than half. Move the cup an hour later.",
+      hi: "दोपहर के खाने के तुरंत बाद चाय ही सबसे आम कारण है कि अच्छा खाने पर भी लोहे का स्तर कम रहता है: टैनिन अवशोषण आधे से ज़्यादा घटा देते हैं। चाय एक घंटे बाद लें।",
     },
     kcalDelta: 0,
     rules: [
       { attr: "ironRich", verdict: "good", why: { en: "Meaningful iron content.", hi: "अच्छी मात्रा में लोहा।" } },
       { attr: "vitaminC", verdict: "good", why: { en: "Vitamin C alongside iron sharply raises absorption.", hi: "लोहे के साथ विटामिन सी अवशोषण बहुत बढ़ाता है।" } },
       { attr: "legume", verdict: "good", why: { en: "Legumes are the main iron source on a vegetarian plate.", hi: "शाकाहारी थाली में दालें ही लोहे का मुख्य स्रोत हैं।" } },
-      { attr: "dairy", verdict: "caution", why: { en: "Calcium competes with iron — separate them by an hour.", hi: "कैल्शियम लोहे से टकराता है — एक घंटे का अंतर रखें।" } },
+      { attr: "dairy", verdict: "caution", why: { en: "Calcium competes with iron: separate them by an hour.", hi: "कैल्शियम लोहे से टकराता है: एक घंटे का अंतर रखें।" } },
     ],
   },
   {
@@ -258,8 +258,8 @@ export const CONDITIONS: Condition[] = [
       { en: "Fruit juice and sweetened drinks", hi: "फलों का रस और मीठे पेय" },
     ],
     watchOut: {
-      en: "A 5–10% reduction in body weight restores ovulation for many women — a far smaller change than most crash diets aim at, and it holds.",
-      hi: "शरीर के वज़न में 5–10% की कमी कई महिलाओं में ओव्यूलेशन लौटा देती है — अधिकांश क्रैश डाइट के लक्ष्य से कहीं छोटा बदलाव, और यह टिकता है।",
+      en: "A 5–10% reduction in body weight restores ovulation for many women: a far smaller change than most crash diets aim at, and it holds.",
+      hi: "शरीर के वज़न में 5–10% की कमी कई महिलाओं में ओव्यूलेशन लौटा देती है: अधिकांश क्रैश डाइट के लक्ष्य से कहीं छोटा बदलाव, और यह टिकता है।",
     },
     kcalDelta: -250,
     rules: [
@@ -273,8 +273,8 @@ export const CONDITIONS: Condition[] = [
     key: "coeliac",
     name: { en: "Coeliac disease", hi: "सीलिएक रोग" },
     prevalence: {
-      en: "Around 1 in 100, and heavily underdiagnosed — especially across the wheat-eating north.",
-      hi: "लगभग 100 में 1, और बहुत कम पहचाना जाता है — ख़ासकर गेहूँ खाने वाले उत्तर भारत में।",
+      en: "Around 1 in 100, and heavily underdiagnosed: especially across the wheat-eating north.",
+      hi: "लगभग 100 में 1, और बहुत कम पहचाना जाता है: ख़ासकर गेहूँ खाने वाले उत्तर भारत में।",
     },
     principle: {
       en: "This is not a preference. Any gluten damages the small intestine, whether or not symptoms follow.",
@@ -290,12 +290,12 @@ export const CONDITIONS: Condition[] = [
       { en: "Roti, paratha, suji, dalia and maida", hi: "रोटी, पराठा, सूजी, दलिया और मैदा" },
     ],
     watchOut: {
-      en: "Hing sold in India is very often cut with wheat flour, and so is much commercial garam masala. Check the packet — this is the most common hidden source on an Indian coeliac plate.",
-      hi: "भारत में बिकने वाली हींग में अक्सर गेहूँ का आटा मिलाया जाता है, और कई गरम मसालों में भी। पैकेट देखें — भारतीय सीलिएक थाली का यही सबसे आम छिपा स्रोत है।",
+      en: "Hing sold in India is very often cut with wheat flour, and so is much commercial garam masala. Check the packet: this is the most common hidden source on an Indian coeliac plate.",
+      hi: "भारत में बिकने वाली हींग में अक्सर गेहूँ का आटा मिलाया जाता है, और कई गरम मसालों में भी। पैकेट देखें: भारतीय सीलिएक थाली का यही सबसे आम छिपा स्रोत है।",
     },
     kcalDelta: 0,
     rules: [
-      { attr: "wheat", verdict: "avoid", why: { en: "Contains gluten — damages the intestine even without symptoms.", hi: "इसमें ग्लूटेन है — बिना लक्षण के भी आंत को नुक़सान पहुँचाता है।" } },
+      { attr: "wheat", verdict: "avoid", why: { en: "Contains gluten: damages the intestine even without symptoms.", hi: "इसमें ग्लूटेन है: बिना लक्षण के भी आंत को नुक़सान पहुँचाता है।" } },
       { attr: "millet", verdict: "good", why: { en: "Naturally gluten free.", hi: "प्राकृतिक रूप से ग्लूटेन मुक्त।" } },
       { attr: "rice", verdict: "good", why: { en: "Naturally gluten free.", hi: "प्राकृतिक रूप से ग्लूटेन मुक्त।" } },
     ],
@@ -346,15 +346,15 @@ export const CONDITIONS: Condition[] = [
     },
     favour: [
       { en: "Whole grains, dals and plenty of sabzi", hi: "साबुत अनाज, दाल और भरपूर सब्ज़ी" },
-      { en: "Coffee without sugar — good liver evidence", hi: "बिना चीनी की कॉफ़ी — लिवर पर अच्छे प्रमाण" },
+      { en: "Coffee without sugar, good liver evidence", hi: "बिना चीनी की कॉफ़ी: लिवर पर अच्छे प्रमाण" },
     ],
     limit: [
       { en: "Cold drinks, packaged juice and sweets", hi: "कोल्ड ड्रिंक, पैकेट जूस और मिठाई" },
       { en: "Fried food and vanaspati", hi: "तला खाना और वनस्पति" },
     ],
     watchOut: {
-      en: "Packaged fruit juice is worse for the liver than the fruit itself — the fibre is gone and the fructose arrives all at once.",
-      hi: "पैकेट का फलों का रस फल से भी बुरा है — रेशा ग़ायब है और फ़्रक्टोज़ एक साथ पहुँचता है।",
+      en: "Packaged fruit juice is worse for the liver than the fruit itself: the fibre is gone and the fructose arrives all at once.",
+      hi: "पैकेट का फलों का रस फल से भी बुरा है: रेशा ग़ायब है और फ़्रक्टोज़ एक साथ पहुँचता है।",
     },
     kcalDelta: -300,
     rules: [
@@ -376,7 +376,7 @@ export const CONDITIONS: Condition[] = [
       hi: "यूरिक एसिड प्यूरीन, शराब और फ़्रक्टोज़ से बढ़ता है। पानी और दुग्ध इसे घटाते हैं।",
     },
     favour: [
-      { en: "Plenty of water — three litres a day", hi: "भरपूर पानी — रोज़ तीन लीटर" },
+      { en: "Plenty of water: three litres a day", hi: "भरपूर पानी, रोज़ तीन लीटर" },
       { en: "Low-fat dahi and milk", hi: "कम वसा वाला दही और दूध" },
       { en: "Vegetables and whole grains", hi: "सब्ज़ियाँ और साबुत अनाज" },
     ],
@@ -421,7 +421,7 @@ export const CONDITIONS: Condition[] = [
     },
     kcalDelta: 0,
     rules: [
-      { attr: "lactose", verdict: "avoid", why: { en: "Unfermented lactose — the usual trigger.", hi: "बिना ख़मीर वाला लैक्टोज़ — आम कारण।" } },
+      { attr: "lactose", verdict: "avoid", why: { en: "Unfermented lactose, the usual trigger.", hi: "बिना ख़मीर वाला लैक्टोज़, आम कारण।" } },
       { attr: "dairy", verdict: "caution", why: { en: "Fermented dairy such as dahi is usually tolerated.", hi: "दही जैसे ख़मीर वाले दुग्ध आमतौर पर सहन हो जाते हैं।" } },
     ],
   },
@@ -438,8 +438,8 @@ export const CONFLICTS: { pair: [ConditionKey, ConditionKey]; note: Bi }[] = [
   {
     pair: ["ckd", "hypertension"],
     note: {
-      en: "These two pull in opposite directions. Blood pressure advice pushes potassium up; kidney disease requires it kept down. If you have both, the kidney restriction takes priority — confirm with your nephrologist.",
-      hi: "ये दोनों उल्टी दिशाओं में खींचते हैं। रक्तचाप की सलाह पोटैशियम बढ़ाती है; गुर्दा रोग में इसे घटाना ज़रूरी है। दोनों हों तो गुर्दे की पाबंदी प्राथमिक है — अपने नेफ़्रोलॉजिस्ट से पुष्टि करें।",
+      en: "These two pull in opposite directions. Blood pressure advice pushes potassium up; kidney disease requires it kept down. If you have both, the kidney restriction takes priority: confirm with your nephrologist.",
+      hi: "ये दोनों उल्टी दिशाओं में खींचते हैं। रक्तचाप की सलाह पोटैशियम बढ़ाती है; गुर्दा रोग में इसे घटाना ज़रूरी है। दोनों हों तो गुर्दे की पाबंदी प्राथमिक है: अपने नेफ़्रोलॉजिस्ट से पुष्टि करें।",
     },
   },
   {
@@ -488,7 +488,7 @@ export const MEAL_ATTRS: Record<string, FoodAttr[]> = {
 
   /* The nine meals added to fill the empty filter cells. Without an entry
      here the conditions checker has nothing to judge and silently treats a
-     meal as neutral — which for a CKD or gout patient is the wrong default. */
+     meal as neutral, which for a CKD or gout patient is the wrong default. */
   "roasted-chana": ["legume", "highFibre", "lowGI", "ironRich", "highPotassium", "addedSugar"],
   "egg-chaat": ["egg", "leanProtein", "vitaminC"],
   sundal: ["legume", "highFibre", "lowGI", "ironRich", "highPotassium"],
@@ -545,7 +545,7 @@ export const VERDICT_LABEL: Record<Verdict, Bi> = {
 };
 
 /* Badge fills, not theme surfaces. They pair with white text, so they stay
-   dark in both light and dark mode — see --verdict-* in globals.css. */
+   dark in both light and dark mode: see --verdict-* in globals.css. */
 export const VERDICT_COLOUR: Record<Verdict, string> = {
   good: "var(--verdict-good)",
   caution: "var(--verdict-caution)",
@@ -553,6 +553,6 @@ export const VERDICT_COLOUR: Record<Verdict, string> = {
 };
 
 export const MEDICAL_DISCLAIMER: Bi = {
-  en: "Poshan is educational, not a diagnosis. These plans follow ICMR-NIN and WHO guidance, but medication, blood results and the stage of your condition change what is safe for you. Confirm with your doctor or a registered dietitian before making changes — especially for kidney disease, or if you take thyroid medication or blood thinners.",
-  hi: "पोषण शैक्षिक है, निदान नहीं। ये प्लान आईसीएमआर-एनआईएन और डब्ल्यूएचओ मार्गदर्शन पर आधारित हैं, पर दवाएँ, रक्त जाँच और आपकी स्थिति का चरण बदल देते हैं कि आपके लिए क्या सुरक्षित है। बदलाव से पहले अपने डॉक्टर या पंजीकृत आहार विशेषज्ञ से पुष्टि करें — ख़ासकर गुर्दा रोग में, या यदि आप थायरॉइड या ख़ून पतला करने की दवा लेते हैं।",
+  en: "Poshan is educational, not a diagnosis. These plans follow ICMR-NIN and WHO guidance, but medication, blood results and the stage of your condition change what is safe for you. Confirm with your doctor or a registered dietitian before making changes: especially for kidney disease, or if you take thyroid medication or blood thinners.",
+  hi: "पोषण शैक्षिक है, निदान नहीं। ये प्लान आईसीएमआर-एनआईएन और डब्ल्यूएचओ मार्गदर्शन पर आधारित हैं, पर दवाएँ, रक्त जाँच और आपकी स्थिति का चरण बदल देते हैं कि आपके लिए क्या सुरक्षित है। बदलाव से पहले अपने डॉक्टर या पंजीकृत आहार विशेषज्ञ से पुष्टि करें: ख़ासकर गुर्दा रोग में, या यदि आप थायरॉइड या ख़ून पतला करने की दवा लेते हैं।",
 };

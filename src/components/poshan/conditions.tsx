@@ -76,8 +76,8 @@ export function Conditions() {
             </h2>
             <p className="mt-4 text-[1.02rem]" style={{ color: "var(--ink-soft)" }}>
               {T({
-                en: "Pick one or more. Every plan in the library is then checked against your condition and marked — with the reason, not just a colour.",
-                hi: "एक या अधिक चुनें। फिर लाइब्रेरी का हर प्लान आपकी स्थिति के हिसाब से जाँचा और चिह्नित होता है — कारण के साथ, सिर्फ़ रंग नहीं।",
+                en: "Pick one or more. Every plan in the library is then checked against your condition and marked: with the reason, not just a colour.",
+                hi: "एक या अधिक चुनें। फिर लाइब्रेरी का हर प्लान आपकी स्थिति के हिसाब से जाँचा और चिह्नित होता है: कारण के साथ, सिर्फ़ रंग नहीं।",
               })}
             </p>
           </div>

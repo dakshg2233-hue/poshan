@@ -16,7 +16,7 @@ import { NextResponse, type NextRequest } from "next/server";
  */
 
 /**
- * Sign-in required. Everything not listed here is public, including "/" —
+ * Sign-in required. Everything not listed here is public, including "/":
  * the marketing page has to sell the product before it can ask for an
  * account, and a visitor who hits a wall before seeing the thali, the 38
  * meals or the pricing has been given no reason to sign up.
@@ -30,7 +30,7 @@ export async function middleware(request: NextRequest) {
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  /* Not configured yet — pass through rather than 500 the whole site.
+  /* Not configured yet: pass through rather than 500 the whole site.
      Without this guard an unconfigured deploy would redirect to a login
      page that cannot sign anyone in, i.e. a dead end. */
   if (!url || !key) return response;
@@ -56,7 +56,7 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   /* Allow-list flipped to a deny-list. Previously everything was gated except
-     a handful of paths, which meant any new page defaulted to private — and
+     a handful of paths, which meant any new page defaulted to private, and
      put the whole marketing site behind sign-in. Now only the pages that show
      a person their own data require it, and a new page is public by default,
      which is the right default for a site whose job is to persuade. */

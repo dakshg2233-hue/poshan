@@ -5,7 +5,7 @@ import { useProfile } from "@/lib/hooks/use-profile";
 import type { GoalKey, DietKey, RegionKey } from "@/lib/poshan-data";
 
 /**
- * The body profile — height, weight, goal, diet, region — with two tiers of
+ * The body profile: height, weight, goal, diet, region: with two tiers of
  * persistence:
  *
  *   signed in  → the profiles table, debounced
@@ -62,7 +62,7 @@ function readLocal(): Body | null {
 /**
  * Resolves the starting values. Returns `ready: false` until it knows whether
  * there is a profile, so the consumer can mount its state seeded correctly
- * rather than seeding from defaults and then setting state in an effect —
+ * rather than seeding from defaults and then setting state in an effect:
  * which is both a flash of wrong data and a React 19 compiler lint error.
  */
 export function useBodySource() {
@@ -88,7 +88,7 @@ export function useBodySource() {
 
   const save = useCallback(
     (b: Body) => {
-      /* Always mirror locally — it is free, and it means a signed-in user who
+      /* Always mirror locally: it is free, and it means a signed-in user who
          later signs out does not lose what they were looking at. */
       try {
         localStorage.setItem(LOCAL_KEY, JSON.stringify(b));
@@ -123,7 +123,7 @@ export function useBodyState(initial: Body, save: (b: Body) => void) {
   /* Debounced write. Sliders fire continuously; without this every pixel of
      drag would be a database round trip. */
   useEffect(() => {
-    /* Do not write the values we were just given — that would be an immediate
+    /* Do not write the values we were just given: that would be an immediate
        no-op round trip on every mount. */
     if (first.current) {
       first.current = false;
@@ -158,7 +158,7 @@ export function useBodyState(initial: Body, save: (b: Body) => void) {
 
   /* Kept so the flush above reads the latest value without making that effect
      depend on `body` and re-register on every keystroke. Written in an effect,
-     not during render — a ref write while rendering is unsafe under concurrent
+     not during render: a ref write while rendering is unsafe under concurrent
      rendering and React 19's compiler lint rejects it. */
   useEffect(() => {
     bodyRef.current = body;

@@ -5,7 +5,7 @@ import Link from "next/link";
 
 /**
  * Route error boundary. Without this an unhandled render error shows a blank
- * white page — the worst possible failure state for a health product.
+ * white page: the worst possible failure state for a health product.
  *
  * The copy explains what happened and offers a way forward, per the rule that
  * errors state the cause and the fix rather than apologising.
@@ -34,7 +34,7 @@ export default function Error({
         </h1>
         <p className="mt-3" style={{ color: "var(--ink-soft)" }}>
           Your measurements were not sent anywhere and nothing was saved. Try
-          again — if it keeps happening, reload the page.
+          again: if it keeps happening, reload the page.
         </p>
         {error.digest && (
           <p

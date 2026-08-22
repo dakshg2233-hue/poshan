@@ -12,7 +12,7 @@ import type { ReactNode } from "react";
  *    "solaceui feature updates", "Download the windows app") and hardcoded demo
  *    values as input `value` props. All replaced with real content via props.
  *  - Its `FieldBox` cleared the field on focus and hid the label while typing.
- *    That reads well in a screenshot and fails as a login — labels are now
+ *    That reads well in a screenshot and fails as a login, labels are now
  *    persistent and inputs are properly controlled by the caller.
  *  - Palette moved from #FC7819 to the masala tokens so it belongs to Poshan.
  *  - Content is passed in, so the same shell serves sign-in, sign-up and the
@@ -90,7 +90,7 @@ export function AuthSection({
             shape="corners"
             frame={2854.5}
             /* Sindoor: haldi, vermilion and elaichi. Hardcoded because the
-               shader takes literals, not CSS vars — keep in step with :root. */
+               shader takes literals, not CSS vars: keep in step with :root. */
             colors={["#E8A33D", "#B03A16", "#4A7C4E", "#E8A33D"]}
             colorBack="#00000000"
             className="absolute inset-0"

@@ -31,13 +31,17 @@ export const FOOD_CURSORS: FoodCursor[] = [
   { key: "apple", name: { en: "Apple", hi: "सेब" } },
   { key: "cucumber", name: { en: "Cucumber", hi: "खीरा" } },
   { key: "banana", name: { en: "Peeled banana", hi: "छिला केला" } },
+  /* Plain discs, last. Not mithai: the way out for anyone who finds a
+     sweet following the pointer distracting but still wants the cursor. */
+  { key: "white", name: { en: "Plain white", hi: "सादा सफ़ेद" } },
+  { key: "black", name: { en: "Plain black", hi: "सादा काला" } },
 ];
 
 const STORAGE_KEY = "poshan-cursor";
 
 export function CursorPicker() {
   const { T } = useLang();
-  /* Derived at init, not set in an effect — a setState in an effect body
+  /* Derived at init, not set in an effect: a setState in an effect body
      cascades a render and the React 19 compiler lint rejects it. */
   const [hidden] = useState(
     () =>
@@ -65,15 +69,20 @@ export function CursorPicker() {
   const current = FOOD_CURSORS.find((f) => f.key === active) ?? FOOD_CURSORS[0];
 
   return (
-    /* Top-left, clear of the nav. Floating chrome rather than a footer row —
-       a cursor picker 23,000px down the page is one nobody ever finds. */
-    <div className="fixed top-20 left-4 z-[95] print:hidden">
+    /* Bottom-left: floating chrome, but out of the composition. Top-left put
+       the chip directly under the logo, which is why this was taken off the
+       page rather than moved. Down here it mirrors the palette control in the
+       opposite corner, and the mobile sticky CTA that also lives at the bottom
+       is no conflict: this never renders on touch. */
+    /* flex-col-reverse so the list opens upward. Anchored at the bottom, a
+       normally-ordered list would unroll straight off the viewport. */
+    <div className="fixed bottom-4 left-4 z-[95] flex flex-col-reverse items-start print:hidden">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         className="liquid-glass-chrome refract flex items-center gap-2 min-h-9 pl-2 pr-3.5 rounded-full text-[0.76rem] font-extrabold cursor-pointer shadow-lg"
-        /* No opaque background here — .liquid-glass-chrome supplies a
+        /* No opaque background here, .liquid-glass-chrome supplies a
            translucent one, and an opaque inline fill would leave nothing
            for the blur to show through. */
         style={{ color: "var(--ink)" }}
@@ -84,7 +93,7 @@ export function CursorPicker() {
 
       {open && (
         <ul
-          className="liquid-glass-chrome refract mt-2 w-[178px] rounded-2xl p-2 shadow-2xl grid gap-0.5 list-none"
+          className="liquid-glass-chrome refract mb-2 w-[178px] rounded-2xl p-2 shadow-2xl grid gap-0.5 list-none"
           role="radiogroup"
           aria-label={T({ en: "Choose a cursor", hi: "कर्सर चुनें" })}
         >

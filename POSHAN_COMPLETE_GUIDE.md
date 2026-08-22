@@ -1,4 +1,4 @@
-# Poshan — Complete Project Guide
+# Poshan, Complete Project Guide
 
 **Last Updated:** 2026-08-22  
 **Project:** Nutrition tool for Asian-Indian BMI and meal planning  
@@ -77,7 +77,7 @@ poshan-app/
 │   │   │   ├── hero-video.tsx         # Hero: dark botanical still-life, spotlight, glass nav
 │   │   │   ├── hero-cinematic.tsx     # Previous photographic hero (kept for swap)
 │   │   │   ├── hero.tsx               # BMI input tool (the core)
-│   │   │   ├── thali.tsx              # SVG thali (plate) — CURRENTLY RENDERED
+│   │   │   ├── thali.tsx              # SVG thali (plate), CURRENTLY RENDERED
 │   │   │   ├── thali-3d.tsx           # 3D interactive thali (written, NOT mounted)
 │   │   │   ├── dish-art.tsx           # Meal photos (structure in place, no photos yet)
 │   │   │   ├── meal-library.tsx       # 38 meal cards, filters, recipes
@@ -203,7 +203,7 @@ poshan-app/
 | **DM Sans** (self-hosted) | UI buttons, labels, nav | 12–20px | 400–600 |
 | **IBM Plex Mono** (self-hosted) | Biomarker data, monospace | 12–16px | 400–600 |
 
-Imported via `next/font` in `src/app/layout.tsx` — no external requests, CSP-safe.
+Imported via `next/font` in `src/app/layout.tsx`: no external requests, CSP-safe.
 
 ### 4.3 Glass Effects
 
@@ -217,7 +217,7 @@ Imported via `next/font` in `src/app/layout.tsx` — no external requests, CSP-s
 .glass-near|mid|far     /* food depth cues (size, blur, opacity) */
 ```
 
-Uses `background: linear-gradient(...transparent...) + backdrop-filter: blur()` — works on all modern browsers.
+Uses `background: linear-gradient(...transparent...) + backdrop-filter: blur()`: works on all modern browsers.
 
 ### 4.4 Spacing & Layout
 
@@ -334,7 +334,7 @@ biomarkers (
 - 100dvh dark still-life (thali photograph)
 - Instrument Serif wordmark (4rem–15rem, italic)
 - "YOUR DAILY NUTRITION RITUAL" eyebrow + green dot
-- "Nourishment, in your rhythm — consciously made." subline
+- "Nourishment, in your rhythm, consciously made." subline
 - Frosted glass nav pill (5 labels: Meal plans, Biomarkers, Pricing, For clinics)
 - Top-right green CTA "Find your blend" with northeast arrow
 - Mobile hamburger menu → fullscreen dark overlay with staggered entries
@@ -380,7 +380,7 @@ biomarkers (
 - Returns: estimated items, calories, macros
 - User can adjust portions/items, add to log
 
-**Note:** Uses `VISION_API_KEY` (Anthropic) — set in `.env.local`.
+**Note:** Uses `VISION_API_KEY` (Anthropic), set in `.env.local`.
 
 ### 7.6 Conditions (`conditions.tsx`)
 
@@ -426,23 +426,23 @@ biomarkers (
 
 ### Not Implemented
 
-1. **Interactive thali** — `thali-3d.tsx` exists but is NOT mounted. The SVG version (`thali.tsx`) renders instead.
+1. **Interactive thali**, `thali-3d.tsx` exists but is NOT mounted. The SVG version (`thali.tsx`) renders instead.
    - Work needed: Photo base + six perspective-fitted overlay fills that respond to drag
    - Connected to use-body-profile for persistence
 
-2. **Meal photos** — 38 cards have a photo slot (`dish-art.tsx`), but no images exist yet.
+2. **Meal photos**: 38 cards have a photo slot (`dish-art.tsx`), but no images exist yet.
    - Files needed: `~/Downloads/poshan-meals/` (currently empty)
    - Schema change: `Dish` object instead of `DishKey` to carry photos
 
 3. **Edge functions not deployed:**
-   - `supabase/functions/verify-payment/index.ts` — Razorpay signature check (reads keys from client, NOT SECURE)
-   - `supabase/functions/notify-biomarker/index.ts` — Alerts on biomarker changes (only logs, doesn't send)
+   - `supabase/functions/verify-payment/index.ts`: Razorpay signature check (reads keys from client, NOT SECURE)
+   - `supabase/functions/notify-biomarker/index.ts`: Alerts on biomarker changes (only logs, doesn't send)
 
-4. **No tests** — zero test coverage. Many bugs fixed (data loss on `/profile`, broken build) that a single test would have caught.
+4. **No tests**: zero test coverage. Many bugs fixed (data loss on `/profile`, broken build) that a single test would have caught.
 
-5. **Scanner default** — `src/app/api/scan/route.ts` still defaults to `http://localhost:20128` (OmniRoute), not Anthropic.
+5. **Scanner default**, `src/app/api/scan/route.ts` still defaults to `http://localhost:20128` (OmniRoute), not Anthropic.
 
-6. **Palette persistence** — palette switcher is a dev tool, currently shipping to real visitors. Once a palette is chosen, delete the switcher and bake it into `:root`.
+6. **Palette persistence**: palette switcher is a dev tool, currently shipping to real visitors. Once a palette is chosen, delete the switcher and bake it into `:root`.
 
 ### Bugs Fixed This Session
 
@@ -490,7 +490,7 @@ biomarkers (
 1. Open `src/app/globals.css`
 2. Find the palette block (e.g., `:root[data-palette="sindoor"]`)
 3. Update the token (e.g., `--brand-1: #newcolor`)
-4. Save, reload — should apply site-wide
+4. Save, reload, should apply site-wide
 
 ### 9.3 Add a Health Condition
 
@@ -502,7 +502,7 @@ biomarkers (
 ### 9.4 Fix a Page's Layout
 
 1. Identify which component is rendering it (e.g., `premium.tsx`)
-2. Check for inline `style={{...}}` — often hidden from CSS classes
+2. Check for inline `style={{...}}`: often hidden from CSS classes
 3. Look in `globals.css` for relevant `.class` definitions
 4. Edit CSS (not Tailwind classes alone) for most reliable changes
 5. Reload, verify on both desktop (1280px) and mobile (375px)
@@ -546,7 +546,7 @@ RAZORPAY_KEY_ID=your-key-id
 NEXT_PUBLIC_ANALYTICS_ID=G-your-ga-id
 ```
 
-**Do NOT commit `.env.local`** — it contains live keys.
+**Do NOT commit `.env.local`**: it contains live keys.
 
 ---
 
@@ -564,7 +564,7 @@ This codebase has had 6+ bugs from specificity clashes. Watch for:
 2. **`:not()` carries its argument's specificity.**
    ```css
    main section:not(#hero) { } /* (1 id, 0 class, 2 type) = specificity (1,0,2) */
-   main #meals { } /* (1 id, 0 class, 1 type) = specificity (1,0,1) — LOSES */
+   main #meals { } /* (1 id, 0 class, 1 type) = specificity (1,0,1), LOSES */
    ```
    Selector: `main section#id` = (1,0,2), ties and wins by order.
 
@@ -577,10 +577,10 @@ This codebase has had 6+ bugs from specificity clashes. Watch for:
 
 4. **React 19 lint rejects setState in effect body.**
    ```tsx
-   // WRONG — React lint error:
+   // WRONG, React lint error:
    useEffect(() => { setData(...); }, [])
    
-   // RIGHT — defer with setTimeout:
+   // RIGHT, defer with setTimeout:
    useEffect(() => { setTimeout(() => setData(...), 0); }, [])
    ```
 
@@ -590,9 +590,9 @@ This codebase has had 6+ bugs from specificity clashes. Watch for:
 
 `next.config.ts` sets strict CSP headers. External requests are blocked:
 
-- `media-src 'self'` — no CloudFront, YouTube, etc.
-- `font-src 'self'` — no Google Fonts, Figma fonts
-- `script-src 'self'` — no Sentry, external tracking (Analytics is whitelisted post-consent)
+- `media-src 'self'`: no CloudFront, YouTube, etc.
+- `font-src 'self'`: no Google Fonts, Figma fonts
+- `script-src 'self'`: no Sentry, external tracking (Analytics is whitelisted post-consent)
 - Exception: Google Fonts stylesheets from `https://fonts.googleapis.com` (allowed)
 
 **When adding external assets:**
@@ -617,14 +617,14 @@ This codebase has had 6+ bugs from specificity clashes. Watch for:
 
 Based on the plan at `.claude/plans/should-i-give-u-crispy-storm.md`:
 
-1. **Wire auth & persistence** — signed-in users currently lose their data on refresh
-2. **Fix `/profile` data loss bug** — form initializes from null, overwrites data
-3. **Ship sindoor palette** — delete other 9, build dark variant
-4. **Point scanner at Anthropic** — currently defaults to localhost
-5. **Deploy edge functions** — payment verification and biomarker alerts
-6. **Form error states** — login OTP and profile form validation
-7. **Interactive thali** — mount `thali-3d.tsx`, wire drag-to-resize
-8. **Meal photos** — populate `~/Downloads/poshan-meals/`, wire to cards
+1. **Wire auth & persistence**: signed-in users currently lose their data on refresh
+2. **Fix `/profile` data loss bug**: form initializes from null, overwrites data
+3. **Ship sindoor palette**: delete other 9, build dark variant
+4. **Point scanner at Anthropic**: currently defaults to localhost
+5. **Deploy edge functions**: payment verification and biomarker alerts
+6. **Form error states**: login OTP and profile form validation
+7. **Interactive thali**, mount `thali-3d.tsx`, wire drag-to-resize
+8. **Meal photos**, populate `~/Downloads/poshan-meals/`, wire to cards
 
 ---
 
@@ -633,7 +633,7 @@ Based on the plan at `.claude/plans/should-i-give-u-crispy-storm.md`:
 - **Tailwind classes**: https://tailwindcss.com/docs
 - **Next.js docs**: Read `node_modules/next/dist/docs/` (breaking changes from training data)
 - **Supabase**: Use `poshan-app:supabase` skill
-- **React 19**: Breaking from 18 — re-read component patterns
+- **React 19**: Breaking from 18, re-read component patterns
 - **Specificity**: Open DevTools, inspect, check "Styles" panel for what's winning
 
 ---

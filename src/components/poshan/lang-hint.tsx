@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
  * is useless to exactly the person who needs it most. Both scripts appear
  * whichever language is active.
  *
- * Dismissible and remembered — a permanent badge next to a control you have
+ * Dismissible and remembered: a permanent badge next to a control you have
  * already found is just clutter.
  */
 const STORAGE_KEY = "poshan-lang-hint-seen";

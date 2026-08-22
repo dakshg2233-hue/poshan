@@ -11,7 +11,7 @@ import { usePrefersReducedMotion } from "@/lib/use-media-query";
  * about:
  *
  *  1. Under prefers-reduced-motion the text renders as ordinary markup. Not a
- *     zero-duration animation — no per-character spans at all.
+ *     zero-duration animation: no per-character spans at all.
  *  2. The visible text is split into spans, so it is wrapped in an element
  *     carrying the real string as aria-label with the spans aria-hidden.
  *     Otherwise a screen reader announces the heading one letter at a time.

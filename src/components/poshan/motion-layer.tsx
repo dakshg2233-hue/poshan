@@ -7,7 +7,7 @@ import { usePrefersReducedMotion } from "@/lib/use-media-query";
  * Page-level motion that has no single owner: the scroll progress rule and the
  * pointer-tilt behaviour on cards.
  *
- * Everything here is off under prefers-reduced-motion — not merely
+ * Everything here is off under prefers-reduced-motion, not merely
  * transition-less, but not installed at all, so no listeners and no frame work.
  */
 export function MotionLayer() {
@@ -36,7 +36,7 @@ export function MotionLayer() {
   }, [calm]);
 
   /* Pointer tilt on any .lift card. Delegated from the document rather than
-     bound per card — there are 35+ of them, and 35 pairs of listeners for a
+     bound per card: there are 35+ of them, and 35 pairs of listeners for a
      hover effect is not a trade worth making. */
   useEffect(() => {
     if (calm) return;

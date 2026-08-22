@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLang } from "./lang-provider";
 import { Thali } from "./thali";
+import { TabLink } from "./tabs";
 import { usePrefersReducedMotion } from "@/lib/use-media-query";
 import type { Band, Plan } from "@/lib/poshan-data";
 
@@ -19,7 +20,7 @@ function useCounter(target: number) {
   const from = useRef(target);
 
   useEffect(() => {
-    /* No setState in the effect body — reduced motion returns the target
+    /* No setState in the effect body: reduced motion returns the target
        directly below, so there is nothing to animate or synchronise. */
     if (calm) return;
     const start = performance.now();
@@ -91,33 +92,33 @@ export function Hero({
 
           <p className="max-w-[44ch] text-[1.055rem]" style={{ color: "var(--ink-soft)" }}>
             {T({
-              en: "Most fitness apps measure you against a European body and feed you chicken breast. Poshan reads your Body Mass Index on Asian-Indian cutoffs — where 23 already counts as overweight — then builds the plate you actually eat.",
-              hi: "ज़्यादातर फ़िटनेस ऐप आपको यूरोपीय शरीर के पैमाने पर नापते हैं और चिकन ब्रेस्ट खिलाते हैं। पोषण आपका बॉडी मास इंडेक्स एशियाई-भारतीय कटऑफ़ पर पढ़ता है — जहाँ 23 पहले से ही अधिक वज़न है — और फिर वही थाली बनाता है जो आप सच में खाते हैं।",
+              en: "Most fitness apps measure you against a European body and feed you chicken breast. Poshan reads your Body Mass Index on Asian-Indian cutoffs: where 23 already counts as overweight: then builds the plate you actually eat.",
+              hi: "ज़्यादातर फ़िटनेस ऐप आपको यूरोपीय शरीर के पैमाने पर नापते हैं और चिकन ब्रेस्ट खिलाते हैं। पोषण आपका बॉडी मास इंडेक्स एशियाई-भारतीय कटऑफ़ पर पढ़ता है: जहाँ 23 पहले से ही अधिक वज़न है: और फिर वही थाली बनाता है जो आप सच में खाते हैं।",
             })}
           </p>
 
           <div className="flex flex-wrap gap-3 mt-7">
             {/* data-magnetic: the cursor engulfs these rather than sitting on
-                top of them. The hover translate is dropped on the primary —
+                top of them. The hover translate is dropped on the primary:
                 the cursor already supplies the feedback, and both at once
                 reads as jitter. */}
-            <a
-              href="#plate"
+            <TabLink
+              to="plate"
               data-magnetic
               data-magnetic-color="var(--kesar-fill)"
               className="inline-flex items-center min-h-12 px-6 rounded-full font-extrabold text-[0.94rem] no-underline"
               style={{ background: "var(--kesar-fill)", color: "#fff" }}
             >
               {T({ en: "See my thali", hi: "मेरी थाली देखें" })}
-            </a>
-            <a
-              href="#premium"
+            </TabLink>
+            <TabLink
+              to="premium"
               data-magnetic
               className="inline-flex items-center min-h-12 px-6 rounded-full font-extrabold text-[0.94rem] no-underline"
               style={{ border: "1.5px solid var(--ink)", color: "var(--ink)" }}
             >
-              {T({ en: "Poshan Home — ₹299", hi: "पोषण घर — ₹299" })}
-            </a>
+              {T({ en: "Poshan Home, ₹299", hi: "पोषण घर, ₹299" })}
+            </TabLink>
           </div>
         </div>
 

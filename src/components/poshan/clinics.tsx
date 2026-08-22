@@ -5,7 +5,7 @@ import { CLINIC_TIERS, CLINIC_ROADMAP, type ClinicTier } from "@/lib/poshan-data
 import { BlurText } from "@/components/ui/blur-text";
 
 /**
- * Poshan for Clinics — the B2B tier.
+ * Poshan for Clinics, the B2B tier.
  *
  * Two deliberate choices, both commercial rather than technical:
  *
@@ -32,7 +32,7 @@ export function Clinics() {
           >
             {T({ en: "For hospitals and clinics", hi: "अस्पतालों और क्लिनिकों के लिए" })}
           </p>
-          {/* Word-by-word blur-in. Renders as plain text under reduced motion —
+          {/* Word-by-word blur-in. Renders as plain text under reduced motion:
               no motion components mounted at all. */}
           <BlurText
             as="h2"
@@ -46,8 +46,8 @@ export function Clinics() {
           />
           <p className="mt-4 text-[1.02rem]" style={{ color: "var(--ink-soft)" }}>
             {T({
-              en: "Enter a patient's lab values, and Poshan drafts a plan from the food their region actually cooks. You review it, sign it off, and only then does the patient see it — every approval logged against your registration number.",
-              hi: "मरीज़ के जाँच मान भरें, और पोषण उनके क्षेत्र में सचमुच बनने वाले खाने से प्लान तैयार करता है। आप जाँचें, मंज़ूरी दें, तभी मरीज़ उसे देखता है — हर मंज़ूरी आपके पंजीकरण नंबर के साथ दर्ज।",
+              en: "Enter a patient's lab values, and Poshan drafts a plan from the food their region actually cooks. You review it, sign it off, and only then does the patient see it: every approval logged against your registration number.",
+              hi: "मरीज़ के जाँच मान भरें, और पोषण उनके क्षेत्र में सचमुच बनने वाले खाने से प्लान तैयार करता है। आप जाँचें, मंज़ूरी दें, तभी मरीज़ उसे देखता है: हर मंज़ूरी आपके पंजीकरण नंबर के साथ दर्ज।",
             })}
           </p>
         </div>
@@ -127,7 +127,7 @@ function TierCard({ tier }: { tier: ClinicTier }) {
         <p className="text-[0.78rem] mb-4" style={{ color: "var(--ink-soft)" }}>
           {T({ en: "or ₹", hi: "या ₹" })}
           {tier.yearly!.toLocaleString("en-IN")}
-          {T({ en: " a year — two months free", hi: " सालाना — दो माह मुफ़्त" })}
+          {T({ en: " a year, two months free", hi: " सालाना, दो माह मुफ़्त" })}
         </p>
       )}
 
@@ -158,7 +158,7 @@ function TierCard({ tier }: { tier: ClinicTier }) {
 
       <a
         /* Both of these were #clinic-signup / #clinic-contact, and neither
-           target has ever existed — every tier's CTA was a link to nowhere.
+           target has ever existed, every tier's CTA was a link to nowhere.
            /login is the real path: it is where an account actually starts.
            The enterprise tier still wants a genuine contact route (a form or
            a published address); until there is one, sending it somewhere

@@ -1,7 +1,23 @@
-# Poshan — पोषण
+# Poshan, पोषण
 
 Indian nutrition and biomarker tracker. Body Mass Index read on **Asian-Indian
 cutoffs**, meal plans built from food people actually cook, in Hindi and English.
+
+## Getting started
+
+```bash
+git clone https://github.com/dakshg2233-hue/poshan.git
+cd poshan
+npm install
+cp .env.example .env.local
+```
+
+Fill in your own keys in `.env.local`: Supabase and Resend are the two that
+matter first, since they carry sign-in and email. Everything in the template is
+optional to boot, though: a blank value switches its feature off rather than
+crashing, so the site runs fine with none of them set. `.env.local` is
+gitignored; `.env.example` holds keys with no values and is the only env file
+that gets committed.
 
 ```bash
 npm run dev
@@ -16,7 +32,7 @@ Then open http://localhost:3000
 The previous version of Poshan was a single self-contained `index.html` with
 vanilla JavaScript (still at `~/poshan-website/index.html`). It had **no
 `package.json`, no TypeScript, no Tailwind and no shadcn**, so the Spline
-component could not be dropped into it — a React component needs a React
+component could not be dropped into it: a React component needs a React
 project. This app is that project.
 
 If you ever need to reproduce the setup:
@@ -86,8 +102,8 @@ any layout change:
 - **Asian-Indian cutoffs** (ICMR / WHO Asia-Pacific): overweight starts at 23.0,
   not the European 25.0. This is the product's whole argument, so the thali rim
   is drawn as a scale with 18.5 / 23 / 25 marked on it.
-- **Nutrients are always spelled out** — "Protein", "Carbohydrate", "Dietary
-  Fibre", "Glycated Haemoglobin" — never bare abbreviations.
+- **Nutrients are always spelled out**, "Protein", "Carbohydrate", "Dietary
+  Fibre", "Glycated Haemoglobin", never bare abbreviations.
 - **Fonts are self-hosted** through `next/font/google`: Tiro Devanagari Hindi
   (display, covers both scripts), Mukta (UI, by Ek Type in Mumbai), IBM Plex
   Mono (figures). No external font requests.

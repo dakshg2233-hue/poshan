@@ -11,7 +11,7 @@ import { AnimatedHeading, FadeIn } from "@/components/ui/animated-heading";
  *
  *  - The brief specified a video on a CloudFront path belonging to another
  *    account. That is not ours to ship, and next.config.ts restricts media to
- *    'self' anyway. This uses the thali photograph Daksh generated instead —
+ *    'self' anyway. This uses the thali photograph Daksh generated instead:
  *    which also loads far faster than a video and needs no autoplay policy.
  *  - The brief said no overlay of any kind. Over a real photograph that leaves
  *    white text sitting on a pale steel plate and a lit window, which is
@@ -37,7 +37,7 @@ export function HeroCinematic() {
         sizes="100vw"
         className="object-cover object-center"
       />
-      {/* Legibility scrim — bottom-weighted, top of frame untouched */}
+      {/* Legibility scrim: bottom-weighted, top of frame untouched */}
       <div className="absolute inset-0 hero-scrim" aria-hidden />
 
       {/* ------------------------------------------------------ content */}
@@ -47,7 +47,7 @@ export function HeroCinematic() {
           <div>
             {/* On its own dark chip rather than straight over the photograph.
                 This eyebrow sits high in the frame where the scrim is weakest,
-                across the lit window and the bright rim of the plate — measured
+                across the lit window and the bright rim of the plate, measured
                 2.79:1 as amber, and 2.64:1 when I tried brightening it, because
                 lighter text moved TOWARD a light background. A controlled
                 ground is the only fix that holds whatever the photo does. */}
@@ -87,8 +87,8 @@ export function HeroCinematic() {
             <FadeIn delay={800} duration={1000}>
               <p className="text-base md:text-lg mb-6 max-w-[52ch]" style={{ color: "#e6ddd6" }}>
                 {T({
-                  en: "Most fitness apps measure you against a European body. Poshan reads your BMI on Asian-Indian cutoffs — where 23 already counts as overweight — then builds the plate you actually eat.",
-                  hi: "ज़्यादातर फ़िटनेस ऐप आपको यूरोपीय शरीर के पैमाने पर नापते हैं। पोषण आपका बीएमआई एशियाई-भारतीय कटऑफ़ पर पढ़ता है — जहाँ 23 पहले से ही अधिक वज़न है — और फिर वही थाली बनाता है जो आप सच में खाते हैं।",
+                  en: "Most fitness apps measure you against a European body. Poshan reads your BMI on Asian-Indian cutoffs: where 23 already counts as overweight: then builds the plate you actually eat.",
+                  hi: "ज़्यादातर फ़िटनेस ऐप आपको यूरोपीय शरीर के पैमाने पर नापते हैं। पोषण आपका बीएमआई एशियाई-भारतीय कटऑफ़ पर पढ़ता है: जहाँ 23 पहले से ही अधिक वज़न है: और फिर वही थाली बनाता है जो आप सच में खाते हैं।",
                 })}
               </p>
             </FadeIn>

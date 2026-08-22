@@ -15,7 +15,7 @@ import { Conditions } from "./conditions";
 import { MotionLayer } from "./motion-layer";
 import { Clinics } from "./clinics";
 /* hero-cinematic.tsx is the previous photographic hero. It is kept, not
-   deleted — swapping these two imports and the tag below reverts the hero. */
+   deleted: swapping these two imports and the tag below reverts the hero. */
 import { HeroVideo } from "./hero-video";
 import { CursorPicker } from "./cursor-picker";
 import { PaletteControl } from "./palette-control";
@@ -24,6 +24,7 @@ import { StickyCta } from "./sticky-cta";
 import { Consent } from "./consent";
 import { GlassFilter } from "@/components/ui/glass-filter";
 import { MagneticCursor } from "@/components/ui/magnetic-cursor";
+import { TabProvider, TabPanel } from "./tabs";
 import { Bands, Meals, Biomarkers, Testimonials, ClosingCta, Footer } from "./sections";
 import {
   bandFor,
@@ -101,60 +102,82 @@ function PoshanAppInner({
       cursorColor="transparent"
       contrastBoost={1}
     >
-      {/* One copy for the document — filters are referenced by id. */}
+      {/* One copy for the document: filters are referenced by id. */}
       <GlassFilter />
       <MotionLayer />
+      {/* Wraps Nav as well as main, because the tab strip and the site search
+          both live in the bar and both drive the same active tab. */}
+      <TabProvider>
       <Nav />
       <main id="top" className="flex-1">
-        {/* Photographic opener. The BMI tool below is untouched — it is the
-            core interaction and does not belong buried under a hero. */}
-        <HeroVideo />
-        <Hero
-          height={height}
-          weight={weight}
-          setHeight={setHeight}
-          setWeight={setWeight}
-          bmi={bmi}
-          band={band}
-          plan={plan}
-        />
-        <Bands />
-        <Meals band={band} plan={plan} />
-        <MealLibrary goal={goal} />
-        <FoodScanner />
-        <Conditions />
-        {/* diet and region now live here too, so all five values persist
-            together rather than the customiser holding two of them privately. */}
-        <Premium
-          baseKcal={plan.kcal}
-          goal={goal}
-          setGoal={setGoal}
-          diet={diet}
-          setDiet={setDiet}
-          region={region}
-          setRegion={setRegion}
-          signedIn={signedIn}
-        />
-        <Clinics />
-        <Biomarkers />
-        <Testimonials />
-        <ClosingCta />
+        {/* One tab mounts at a time. The sections themselves are unchanged;
+            only which of them is in the document at once has moved. */}
+        <TabPanel tab="home">
+          {/* Photographic opener. The BMI tool below is untouched: it is the
+              core interaction and does not belong buried under a hero. */}
+          <HeroVideo />
+          <Hero
+            height={height}
+            weight={weight}
+            setHeight={setHeight}
+            setWeight={setWeight}
+            bmi={bmi}
+            band={band}
+            plan={plan}
+          />
+          <Bands />
+        </TabPanel>
+
+        <TabPanel tab="plate">
+          <Meals band={band} plan={plan} />
+        </TabPanel>
+
+        <TabPanel tab="meals">
+          <MealLibrary goal={goal} />
+          <FoodScanner />
+        </TabPanel>
+
+        <TabPanel tab="health">
+          <Conditions />
+          <Biomarkers />
+        </TabPanel>
+
+        <TabPanel tab="premium">
+          {/* diet and region now live here too, so all five values persist
+              together rather than the customiser holding two of them privately. */}
+          <Premium
+            baseKcal={plan.kcal}
+            goal={goal}
+            setGoal={setGoal}
+            diet={diet}
+            setDiet={setDiet}
+            region={region}
+            setRegion={setRegion}
+            signedIn={signedIn}
+          />
+          <Clinics />
+          <Testimonials />
+          <ClosingCta />
+        </TabPanel>
       </main>
+      {/* Inside the provider: the footer links switch tabs too. */}
       <Footer />
-      {/* Both are chrome, not content, so they sit outside <main>. Moved up
-          from the footer — a cursor picker buried 23,000px down is a picker
-          nobody finds. */}
-      {/* Dev tools, not design. Both were sitting on the composition — the
-          cursor chip directly under the logo. Restore by uncommenting. */}
-      {/* <CursorPicker /> */}
+      {/* Chrome, not content, so it sits outside <main>. Still inside the
+          provider, because the sticky CTA points at the BMI tool and has to
+          switch tab to reach it from anywhere else. */}
+      {/* Bottom-left. These were taken off the page because the cursor chip
+          sat directly under the logo; it lives in the opposite bottom corner
+          now, so it is reachable without landing on the composition. */}
+      <CursorPicker />
       {/* Fixed chrome, not nav furniture: the header stows over the hero,
           which used to take the only palette control off screen with it. */}
-      {/* <PaletteControl /> */}
+      <PaletteControl />
       {/* The hero's pointer spotlight, carried down the whole page. */}
       <PointerLight />
       <StickyCta />
       {/* Nothing is loaded and no id is set until this is accepted. */}
       <Consent />
+      </TabProvider>
     </MagneticCursor>
   );
 }

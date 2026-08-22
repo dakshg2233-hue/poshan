@@ -2,13 +2,13 @@ import crypto from "node:crypto";
 import { serviceClient } from "@/lib/supabase";
 
 /**
- * Razorpay webhook — the actual source of truth for payments.
+ * Razorpay webhook: the actual source of truth for payments.
  *
  * Why this route exists: the browser `handler` callback in checkout only runs
  * if the customer's tab survives the payment. Close it, lose signal, or hit a
  * flaky network and the money is taken while your database never hears about
  * it. Razorpay retries this webhook until it gets a 2xx, so this is what you
- * reconcile against — never the client.
+ * reconcile against, never the client.
  *
  * Set the endpoint and secret in the Razorpay dashboard, subscribe to
  * `payment.captured` and `payment.failed`.
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
   const valid = a.length === b.length && crypto.timingSafeEqual(a, b);
 
   if (!valid) {
-    /* Do not echo anything useful — an attacker probing the endpoint learns
+    /* Do not echo anything useful: an attacker probing the endpoint learns
        nothing beyond "rejected". */
     return Response.json({ error: "Invalid signature." }, { status: 401 });
   }

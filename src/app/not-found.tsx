@@ -20,7 +20,7 @@ import Link from "next/link";
  * 425x1 rule, and the 640px mobile behaviour.
  */
 export const metadata: Metadata = {
-  title: "Page not found — Poshan",
+  title: "Page not found, Poshan",
   description:
     "That page does not exist. Head back to Poshan to check your BMI on Asian-Indian cutoffs and build a plate that fits how you actually eat.",
   robots: { index: false, follow: true },
@@ -36,14 +36,14 @@ export default function NotFound() {
       className="relative w-full overflow-x-hidden"
       style={{ minHeight: "100svh", background: "#000" }}
     >
-      {/* Background — lowest layer, no overlay of any kind over it. */}
+      {/* Background: lowest layer, no overlay of any kind over it. */}
       <div
         aria-hidden="true"
         className="absolute inset-0 h-full w-full bg-cover bg-center"
         style={{ backgroundImage: "url('/thali-hero.jpg')" }}
       />
 
-      {/* Header logo — centred, 233x40, white only, unanimated. */}
+      {/* Header logo: centred, 233x40, white only, unanimated. */}
       <div
         aria-label="Poshan"
         className="absolute z-10 flex items-center not-found-logo"
@@ -73,7 +73,7 @@ export default function NotFound() {
         </span>
       </div>
 
-      {/* Centred content — 483px column, 44px gaps. */}
+      {/* Centred content: 483px column, 44px gaps. */}
       <div
         className="absolute z-10 flex flex-col items-center text-center not-found-group"
         style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: 483, gap: 44 }}

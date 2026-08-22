@@ -181,7 +181,7 @@ export function Thali({
           <path d="M240 212q1-6 5-8" stroke="var(--imli)" strokeWidth={2.4} fill="none" strokeLinecap="round" />
         </g>
 
-        {/* roti stack — count follows the plan */}
+        {/* roti stack: count follows the plan */}
         {[
           { y: 300, f: "#E8D4A8" },
           { y: 290, f: "#EFDCB4" },
@@ -209,11 +209,11 @@ export function Thali({
           );
         })}
 
-        {/* rice mound — steps aside entirely on the tightest plan */}
+        {/* rice mound: steps aside entirely on the tightest plan */}
         <g style={{ opacity: riceOff ? 0.18 : 1, transition: "opacity .5s ease" }}>
           {/* Heaped rice.
               The previous version was a single smooth arc with three dots in
-              it, which read as a bun or a pebble — the silhouette carried no
+              it, which read as a bun or a pebble: the silhouette carried no
               information that it was grain. A heap of rice is identifiable by
               its EDGE: lumpy rather than drawn, because thousands of grains
               never settle into a clean curve. Hence the scalloped contour and

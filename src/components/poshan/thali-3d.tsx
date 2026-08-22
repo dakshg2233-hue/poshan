@@ -20,7 +20,7 @@ import { MaskedHeading } from "@/components/ui/masked-heading";
 /**
  * The photograph that shows through the "Turn the plate over." heading.
  *
- * Empty until Daksh supplies imagery — MaskedHeading falls back to plain text
+ * Empty until Daksh supplies imagery: MaskedHeading falls back to plain text
  * when this is "", so the section works today. To switch it on: drop an
  * overhead thali shot (2400px+ wide) at public/thali-hero.jpg and set this to
  * "/thali-hero.jpg". Nothing else needs to change.
@@ -50,7 +50,7 @@ const KATORI_R = 1.05;
 /**
  * Steel only looks like steel if it has something to reflect. A metalness
  * material with no environment renders black, which is exactly what happened
- * on the first pass. This generates a small studio environment in memory —
+ * on the first pass. This generates a small studio environment in memory:
  * no asset to download.
  */
 function StudioEnvironment() {
@@ -106,7 +106,7 @@ function Katori({
   const { invalidate } = useThree();
   const x = Math.cos(angle) * KATORI_R;
   const z = Math.sin(angle) * KATORI_R;
-  /* Never fully empty visually — a bowl scaled to 0 disappears and there is
+  /* Never fully empty visually: a bowl scaled to 0 disappears and there is
      then nothing left to grab to put food back in. */
   const target = Math.max(0.04, portion / MAX_PORTION);
 
@@ -259,7 +259,7 @@ function ThaliMesh({
       onPointerUp={onUp}
       onPointerLeave={onUp}
     >
-      {/* band ring — the BMI category, as light rather than a label */}
+      {/* band ring: the BMI category, as light rather than a label */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]}>
         <torusGeometry args={[2.02, 0.045, 16, 96]} />
         <meshStandardMaterial
@@ -294,7 +294,7 @@ function ThaliMesh({
         />
       ))}
 
-      {/* roti stack — height follows the portion you set */}
+      {/* roti stack: height follows the portion you set */}
       {Array.from({ length: Math.max(0, Math.round(plate.roti.portion * 4)) }).map((_, i) => (
         <mesh key={i} position={[-0.55, 0.1 + i * 0.055, 0.78]} castShadow>
           <cylinderGeometry args={[0.55, 0.55, 0.05, 48]} />
@@ -306,7 +306,7 @@ function ThaliMesh({
         </mesh>
       ))}
 
-      {/* Rice mound — steps aside on the tightest plan.
+      {/* Rice mound: steps aside on the tightest plan.
           Seated ON the plate: the plate is 0.16 tall centred at 0, so its top
           face is y=0.08, and a hemisphere's flat side sits at its own origin.
           It used to sit at 0.13 and floated 0.05 above the steel. Scaled to
@@ -334,7 +334,7 @@ function ThaliMesh({
 function useInView<T extends HTMLElement>() {
   const supported = typeof IntersectionObserver !== "undefined";
   const [node, setNode] = useState<T | null>(null);
-  /* Without observer support, treat the section as permanently visible —
+  /* Without observer support, treat the section as permanently visible:
      derived at init rather than set inside the effect, which would cascade. */
   const [inView, setInView] = useState(!supported);
 
@@ -396,7 +396,7 @@ export default function Thali3D({
               </p>
               {/* The heading is a window onto the thali photograph. With no
                   photo present MaskedHeading renders as ordinary text, so this
-                  is safe to ship before any imagery exists — drop a file at
+                  is safe to ship before any imagery exists: drop a file at
                   THALI_PHOTO below and the letters fill with it. */}
               <MaskedHeading
                 text={T({ en: "Turn the plate over.", hi: "थाली को घुमाकर देखें।" })}
@@ -422,8 +422,8 @@ export default function Thali3D({
                 style={{ color: "color-mix(in srgb, var(--roti) 72%, transparent)" }}
               >
                 {T({
-                  en: "Drag the thali to look at it from any angle. It is the same plate as above, not a picture of one — the bowls hold your portions and the ring is lit in your band's colour.",
-                  hi: "थाली को खींचकर हर कोण से देखें। यह ऊपर वाली ही थाली है, उसकी तस्वीर नहीं — कटोरियों में आपकी मात्रा है और छल्ला आपके वर्ग के रंग में जगमगाता है।",
+                  en: "Drag the thali to look at it from any angle. It is the same plate as above, not a picture of one: the bowls hold your portions and the ring is lit in your band's colour.",
+                  hi: "थाली को खींचकर हर कोण से देखें। यह ऊपर वाली ही थाली है, उसकी तस्वीर नहीं: कटोरियों में आपकी मात्रा है और छल्ला आपके वर्ग के रंग में जगमगाता है।",
                 })}
               </p>
             </div>

@@ -35,7 +35,7 @@ export function useProfile() {
     const fetchProfile = async () => {
       try {
         const response = await fetch("/api/profile");
-        /* 401 means signed out. That is a normal state, not a failure —
+        /* 401 means signed out. That is a normal state, not a failure:
            surfacing it as an error would light up the UI for every visitor. */
         if (response.status === 401) {
           if (!cancelled) setProfile(null);
