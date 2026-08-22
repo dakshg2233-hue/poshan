@@ -588,6 +588,8 @@ export type MealTime = "breakfast" | "lunch" | "dinner" | "snack";
 /** Sub-categories. `vegan` and `jain` are always subsets of `veg`. */
 export type DietTag = "vegan" | "jain" | "egg" | "highProtein" | "lowGi" | "ironRich";
 
+export type SubscriptionTier = "free" | "premium" | "enterprise";
+
 export type MealPlanItem = {
   id: string;
   name: Bi;
@@ -599,6 +601,7 @@ export type MealPlanItem = {
   macros: Macros;
   note: Bi;
   photo?: string;
+  tier?: SubscriptionTier; // 'free' = Poshan (free), 'premium' = Poshan Home
 };
 
 export const CATEGORY_LABEL: Record<FoodCategory, Bi> = {
@@ -624,7 +627,7 @@ export const MEAL_TIME_LABEL: Record<MealTime, Bi> = {
 
 export const MEAL_LIBRARY: MealPlanItem[] = [
   /* ---------------------------------------------------- NORTH · veg */
-  { id: "poha", region: "north", time: "breakfast", category: "veg", tags: ["vegan"],
+  { id: "poha", region: "north", time: "breakfast", category: "veg", tags: ["vegan"], tier: "free",
     name: { en: "Poha with peanuts", hi: "मूंगफली वाला पोहा" }, kcal: 350,
     macros: { protein: 8, carbohydrate: 55, fat: 11, fibre: 4 },
     note: { en: "Flattened rice, turmeric, curry leaves. Light enough to work before a commute.",
@@ -1434,4 +1437,23 @@ export function filterMeals(opts: {
 export const countByCategory = () => ({
   veg: MEAL_LIBRARY.filter((m) => m.category === "veg").length,
   nonveg: MEAL_LIBRARY.filter((m) => m.category === "nonveg").length,
+});
+
+/** Meals available in a subscription tier */
+export function mealsByTier(tier: SubscriptionTier) {
+  if (tier === "free") {
+    // Free tier: basic 101 meals - foundational meal library
+    return MEAL_LIBRARY.filter((m) => m.tier === "free" || !m.tier);
+  }
+  if (tier === "premium") {
+    // Premium (Poshan Home): all 1363+ meals including exclusive premium meals
+    return MEAL_LIBRARY.filter((m) => !m.tier || m.tier === "premium" || m.tier === "free");
+  }
+  return MEAL_LIBRARY;
+}
+
+export const mealCounts = () => ({
+  total: MEAL_LIBRARY.length,
+  free: MEAL_LIBRARY.filter((m) => m.tier === "free" || !m.tier).length,
+  premium: MEAL_LIBRARY.length, // Premium gets access to all meals
 });

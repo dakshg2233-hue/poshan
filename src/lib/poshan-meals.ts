@@ -10,7 +10,7 @@ export const EXPANDED_MEAL_LIBRARY: MealPlanItem[] = [
   // ========== NORTH REGION ==========
 
   // NORTH · BREAKFAST · VEG
-  { id: "poha-basic", region: "north", time: "breakfast", category: "veg", tags: ["vegan"],
+  { id: "poha-basic", region: "north", time: "breakfast", category: "veg", tags: ["vegan"], tier: "premium" as const,
     name: { en: "Poha with peanuts", hi: "मूंगफली वाला पोहा" }, kcal: 350,
     macros: { protein: 8, carbohydrate: 55, fat: 11, fibre: 4 },
     note: { en: "Flattened rice, turmeric, curry leaves. Light start.", hi: "चिवड़ा, हल्दी, करी पत्ता।" } },
@@ -798,6 +798,7 @@ export const EXPANDED_MEAL_LIBRARY: MealPlanItem[] = [
       time: time as any,
       category: category as any,
       tags: [tag] as any,
+      tier: "premium" as const,
       name,
       kcal: 300 + (i % 200),
       macros: {
@@ -840,6 +841,7 @@ export const EXPANDED_MEAL_LIBRARY: MealPlanItem[] = [
       time: time as any,
       category: category as any,
       tags: [tag] as any,
+      tier: "premium" as const,
       name,
       kcal: 280 + (i % 220),
       macros: {
@@ -880,6 +882,7 @@ export const EXPANDED_MEAL_LIBRARY: MealPlanItem[] = [
       time: time as any,
       category: category as any,
       tags: [tag] as any,
+      tier: "premium" as const,
       name,
       kcal: 260 + (i % 200),
       macros: {
@@ -920,6 +923,7 @@ export const EXPANDED_MEAL_LIBRARY: MealPlanItem[] = [
       time: time as any,
       category: category as any,
       tags: [tag] as any,
+      tier: "premium" as const,
       name,
       kcal: 270 + (i % 210),
       macros: {
@@ -962,6 +966,7 @@ export const EXPANDED_MEAL_LIBRARY: MealPlanItem[] = [
       time: time as any,
       category: category as any,
       tags: [tag] as any,
+      tier: "premium" as const,
       name,
       kcal: 280 + (i % 220),
       macros: {
@@ -998,6 +1003,7 @@ export const EXPANDED_MEAL_LIBRARY: MealPlanItem[] = [
       time: time as any,
       category: category as any,
       tags: [tag] as any,
+      tier: "premium" as const,
       name,
       kcal: 300 + (i % 200),
       macros: {
@@ -1033,6 +1039,7 @@ export const EXPANDED_MEAL_LIBRARY: MealPlanItem[] = [
       time: time as any,
       category: category as any,
       tags: [] as any,
+      tier: "premium" as const,
       name,
       kcal: 280 + (i % 240),
       macros: {
@@ -1069,6 +1076,7 @@ export const EXPANDED_MEAL_LIBRARY: MealPlanItem[] = [
       time: time as any,
       category: category as any,
       tags: ["highProtein"] as any,
+      tier: "premium" as const,
       name,
       kcal: 300 + (i % 200),
       macros: {
