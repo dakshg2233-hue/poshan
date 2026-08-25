@@ -1,0 +1,1218 @@
+<title>Poshan at 23</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap">
+
+<style>
+/* ============================================================
+   POSHAN — seed deck
+   Dark-first. Bare :root carries the dark palette; the light
+   palette is redefined under prefers-color-scheme AND the
+   explicit [data-theme="light"] stamp, so either wins both ways.
+   ============================================================ */
+:root {
+  color-scheme: dark;
+
+  --ground:      #0C0F0D;
+  --surface:     #141915;
+  --surface-2:   #1B211C;
+  --line:        #28322A;
+  --line-strong: #3E4B40;
+
+  --ink:    #E6EBE5;
+  --ink-2:  #9EAA9F;
+  --ink-3:  #6B776C;
+
+  --leaf:   #8FBF72;   /* Poshan Leaf — UI accent */
+  --gold:   #D8C98A;   /* khaki — figures, eyebrows */
+  --brick:  #E07A5F;   /* semantic: the Western line, risk */
+
+  --series-1: #2F9E6B;  /* Poshan for Clinics       */
+  --series-2: #D95926;  /* Poshan Home              */
+  --series-3: #9085E9;  /* Insurance & pharma       */
+
+  --band:    rgba(224, 122, 95, 0.13);
+  --shadow:  0 1px 0 rgba(255,255,255,0.03) inset;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --ground:      #F4F6F3;
+    --surface:     #FFFFFF;
+    --surface-2:   #EDF1EA;
+    --line:        #DCE2D8;
+    --line-strong: #B9C4B5;
+    --ink:    #131A15;
+    --ink-2:  #56635A;
+    --ink-3:  #8A968C;
+    --leaf:   #2F6B1E;
+    --gold:   #8A6E22;
+    --brick:  #B2482C;
+    --series-1: #1B8F5E;
+    --series-2: #C2410C;
+    --series-3: #4A3AA7;
+    --band:    rgba(178, 72, 44, 0.10);
+    --shadow:  0 1px 2px rgba(19,26,21,0.04);
+  }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --ground:      #F4F6F3;
+  --surface:     #FFFFFF;
+  --surface-2:   #EDF1EA;
+  --line:        #DCE2D8;
+  --line-strong: #B9C4B5;
+  --ink:    #131A15;
+  --ink-2:  #56635A;
+  --ink-3:  #8A968C;
+  --leaf:   #2F6B1E;
+  --gold:   #8A6E22;
+  --brick:  #B2482C;
+  --series-1: #1B8F5E;
+  --series-2: #C2410C;
+  --series-3: #4A3AA7;
+  --band:    rgba(178, 72, 44, 0.10);
+  --shadow:  0 1px 2px rgba(19,26,21,0.04);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: "DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 16.5px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---------------------------------------------------- scaffold */
+
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 28px 120px;
+}
+
+/* The measurement rail: a chart axis running down the document.
+   Section numbers are tick labels on it — a deck is a real
+   sequence, so the numbering carries order, not decoration. */
+.movement {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 0 36px;
+  padding: 72px 0 8px;
+  border-top: 1px solid var(--line);
+}
+.movement:first-of-type { border-top: 0; }
+
+.rail {
+  position: relative;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  color: var(--ink-3);
+  padding-top: 6px;
+}
+.rail::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 34px; bottom: -8px;
+  width: 1px;
+  background: var(--line);
+}
+.rail::after {
+  content: "";
+  position: absolute;
+  left: -3px; top: 32px;
+  width: 7px; height: 1px;
+  background: var(--line-strong);
+}
+.rail b {
+  display: block;
+  font-weight: 600;
+  color: var(--leaf);
+  font-size: 12px;
+}
+.rail span { display: block; margin-top: 3px; }
+
+.body { min-width: 0; }
+
+@media (max-width: 880px) {
+  .movement { grid-template-columns: 1fr; gap: 0; padding-top: 52px; }
+  .rail { padding-top: 0; margin-bottom: 16px; }
+  .rail::before, .rail::after { display: none; }
+  .rail b { display: inline; }
+  .rail span { display: inline; margin-left: 10px; }
+  .page { padding: 0 20px 80px; }
+}
+
+/* ---------------------------------------------------- type */
+
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+
+h2 {
+  font-family: "Instrument Serif", Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  font-size: clamp(2rem, 4.4vw, 3.15rem);
+  line-height: 1.06;
+  letter-spacing: -0.012em;
+  margin-bottom: 18px;
+}
+h2 em { font-style: italic; color: var(--leaf); }
+
+h3 {
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  margin: 38px 0 12px;
+}
+
+p { margin: 0 0 17px; max-width: 68ch; color: var(--ink-2); }
+p strong { color: var(--ink); font-weight: 500; }
+.lede { font-size: 1.14rem; line-height: 1.55; color: var(--ink); max-width: 64ch; }
+
+.mono {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.eyebrow {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 14px;
+}
+
+a { color: var(--leaf); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--leaf);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ---------------------------------------------------- cover */
+
+.cover {
+  padding: 96px 0 76px;
+  border-bottom: 1px solid var(--line);
+}
+.wordmark {
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: clamp(4.2rem, 15vw, 11rem);
+  line-height: 0.86;
+  letter-spacing: -0.03em;
+  margin: 0;
+  color: var(--ink);
+}
+.wordmark i { font-style: italic; color: var(--leaf); }
+.devanagari {
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: clamp(1.5rem, 4vw, 2.4rem);
+  color: var(--ink-3);
+  margin: 10px 0 0;
+  letter-spacing: 0.02em;
+}
+.cover-thesis {
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: clamp(1.5rem, 3.4vw, 2.35rem);
+  line-height: 1.22;
+  color: var(--ink);
+  max-width: 22ch;
+  margin: 40px 0 0;
+}
+.cover-thesis em { font-style: italic; color: var(--gold); }
+.cover-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 40px;
+  margin-top: 48px;
+  padding-top: 26px;
+  border-top: 1px solid var(--line);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+}
+.cover-meta b { color: var(--ink); font-weight: 500; }
+
+/* ---------------------------------------------------- cards & grids */
+
+.grid { display: grid; gap: 14px; margin: 26px 0; }
+.g2 { grid-template-columns: repeat(auto-fit, minmax(258px, 1fr)); }
+.g3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 20px 20px 22px;
+  box-shadow: var(--shadow);
+}
+.card h4 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.004em;
+  color: var(--ink);
+}
+.card p { margin: 0; font-size: 0.925rem; line-height: 1.55; }
+.card p + p { margin-top: 10px; }
+
+.card-num {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  display: block;
+  margin-bottom: 12px;
+}
+
+/* stat tiles */
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 18px 18px 20px;
+}
+.stat .figure {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.92rem;
+  font-weight: 500;
+  letter-spacing: -0.028em;
+  line-height: 1;
+  color: var(--ink);
+  display: block;
+}
+.stat .figure small { font-size: 0.94rem; color: var(--ink-2); letter-spacing: 0; }
+.stat .label {
+  display: block;
+  margin-top: 9px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+.stat.hi .figure { color: var(--leaf); }
+.stat.warn .figure { color: var(--brick); }
+
+/* ---------------------------------------------------- lists */
+
+ul.clean { list-style: none; padding: 0; margin: 18px 0; }
+ul.clean li {
+  position: relative;
+  padding: 11px 0 11px 26px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-2);
+  font-size: 0.945rem;
+  line-height: 1.55;
+  max-width: 74ch;
+}
+ul.clean li:last-child { border-bottom: 1px solid var(--line); }
+ul.clean li::before {
+  content: "";
+  position: absolute;
+  left: 4px; top: 20px;
+  width: 7px; height: 1px;
+  background: var(--line-strong);
+}
+ul.clean li b { color: var(--ink); font-weight: 600; }
+ul.clean li.done::before { background: var(--leaf); width: 7px; height: 7px; top: 17px; border-radius: 50%; }
+ul.clean li.gap::before  { background: var(--brick); width: 7px; height: 7px; top: 17px; border-radius: 50%; }
+
+/* ---------------------------------------------------- tables */
+
+.table-wrap { overflow-x: auto; margin: 22px 0; border: 1px solid var(--line); border-radius: 3px; }
+table { border-collapse: collapse; width: 100%; min-width: 520px; background: var(--surface); }
+caption {
+  caption-side: top;
+  text-align: left;
+  padding: 14px 16px 12px;
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+}
+th, td {
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 0.9rem;
+  border-top: 1px solid var(--line);
+}
+thead th {
+  border-top: 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 500;
+  background: var(--surface-2);
+}
+td.num, th.num {
+  text-align: right;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+tbody tr:hover td { background: var(--surface-2); }
+tfoot td {
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--surface-2);
+  border-top: 1px solid var(--line-strong);
+}
+td b { color: var(--ink); font-weight: 600; }
+
+/* ---------------------------------------------------- callout */
+
+.note {
+  border-left: 2px solid var(--leaf);
+  background: var(--surface);
+  padding: 16px 20px;
+  margin: 26px 0;
+  border-radius: 0 3px 3px 0;
+}
+.note.warn { border-left-color: var(--brick); }
+.note p { margin: 0; font-size: 0.94rem; }
+.note p + p { margin-top: 10px; }
+.note .eyebrow { margin-bottom: 8px; }
+.note.warn .eyebrow { color: var(--brick); }
+
+/* ---------------------------------------------------- charts */
+
+.figure-block { margin: 30px 0 34px; }
+.figure-block .cap {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--ink-3);
+  margin-top: 12px;
+  line-height: 1.6;
+  max-width: 76ch;
+}
+.chart-frame {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 22px 22px 18px;
+  overflow-x: auto;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  margin-bottom: 20px;
+  font-size: 0.82rem;
+  color: var(--ink-2);
+}
+.legend i {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border-radius: 2px;
+  margin-right: 7px;
+  vertical-align: -1px;
+}
+
+/* stacked ARR columns */
+.arr {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 26px;
+  align-items: end;
+  min-height: 340px;
+  min-width: 460px;
+  padding-top: 8px;
+}
+.arr-col { display: flex; flex-direction: column; justify-content: flex-end; height: 340px; }
+.arr-total {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 8px;
+  text-align: center;
+}
+.arr-stack { display: flex; flex-direction: column-reverse; gap: 2px; }
+.arr-seg {
+  border-radius: 0;
+  position: relative;
+  cursor: default;
+  transition: filter .15s ease;
+}
+.arr-seg:first-child { border-radius: 0 0 1px 1px; }
+.arr-stack .arr-seg:last-child { border-radius: 4px 4px 0 0; }
+.arr-seg:hover { filter: brightness(1.18); }
+.arr-x {
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--ink-3);
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+
+/* use-of-funds bars — magnitude, one hue */
+.funds { display: flex; flex-direction: column; gap: 3px; min-width: 420px; }
+.fund-row {
+  display: grid;
+  grid-template-columns: 218px minmax(0,1fr) 78px;
+  align-items: center;
+  gap: 16px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+}
+.fund-row:first-child { border-top: 0; }
+.fund-name { font-size: 0.9rem; color: var(--ink); line-height: 1.35; }
+.fund-track { height: 15px; background: var(--surface-2); border-radius: 2px; }
+.fund-bar {
+  display: block;
+  height: 15px;
+  background: var(--leaf);
+  border-radius: 2px 4px 4px 2px;
+  transition: filter .15s ease;
+}
+.fund-row:hover .fund-bar { filter: brightness(1.15); }
+.fund-val {
+  text-align: right;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.88rem;
+  color: var(--ink);
+}
+.fund-val small { display: block; color: var(--ink-3); font-size: 0.72rem; }
+@media (max-width: 620px) {
+  .fund-row { grid-template-columns: 1fr 66px; }
+  .fund-track { grid-column: 1 / -1; }
+}
+
+/* prevalence bars */
+.prev { display: flex; flex-direction: column; gap: 2px; min-width: 400px; }
+.prev-row {
+  display: grid;
+  grid-template-columns: 200px minmax(0,1fr) 68px;
+  align-items: center;
+  gap: 14px;
+  padding: 7px 0;
+}
+.prev-name { font-size: 0.88rem; color: var(--ink-2); }
+.prev-bar { height: 13px; background: var(--gold); border-radius: 2px 4px 4px 2px; opacity: 0.82; }
+.prev-bar.em { background: var(--brick); opacity: 1; }
+.prev-val {
+  text-align: right;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.86rem;
+  color: var(--ink);
+}
+@media (max-width: 620px) {
+  .prev-row { grid-template-columns: 1fr 58px; }
+  .prev-bar { grid-column: 1 / -1; }
+}
+
+/* ---------------------------------------------------- misc */
+
+.pill {
+  display: inline-block;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+  color: var(--ink-2);
+  margin-bottom: 12px;
+}
+.pill.leaf { color: var(--leaf); border-color: var(--leaf); }
+.pill.brick { color: var(--brick); border-color: var(--brick); }
+
+.fill-slot {
+  border: 1px dashed var(--line-strong);
+  border-radius: 3px;
+  padding: 3px 9px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.8rem;
+  color: var(--ink-3);
+  display: inline-block;
+}
+
+footer.close {
+  margin-top: 34px;
+  padding-top: 30px;
+  border-top: 1px solid var(--line);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  color: var(--ink-3);
+  line-height: 1.85;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+
+<div class="page">
+
+<!-- ============================================ COVER -->
+<header class="cover">
+  <p class="eyebrow">Seed round &middot; August 2026 &middot; Confidential</p>
+  <h1 class="wordmark">Posh<i>a</i>n</h1>
+  <p class="devanagari">पोषण</p>
+  <p class="cover-thesis">A billion people are being measured on <em>somebody else&rsquo;s scale.</em></p>
+  <div class="cover-meta">
+    <span>Raising <b>&#8377;12 crore</b></span>
+    <span>Clinical nutrition &middot; India</span>
+    <span>Pre-launch, product built</span>
+    <span>Target: <b>&#8377;1,000 Cr by mid-2028</b></span>
+  </div>
+</header>
+
+<!-- ============================================ 01 PROBLEM -->
+<section class="movement">
+  <div class="rail"><b>01</b><span>PROBLEM</span></div>
+  <div class="body">
+    <p class="eyebrow">The measurement is wrong before the advice begins</p>
+    <h2>India is being read on <em>somebody else&rsquo;s scale.</em></h2>
+
+    <p class="lede">Body Mass Index was calibrated on European bodies. Asian-Indians carry more visceral fat, and carry it earlier, at a lower weight. So the ICMR and the WHO Asia-Pacific consensus move the line: <strong>overweight begins at 23.0, not 25.0. Obesity at 27.5, not 30.0.</strong></p>
+
+    <p>Every mainstream tracker an Indian household can download still draws the line at 25. Between 23.0 and 25.0 sits a population that is metabolically at risk and is being told, by the app on their phone, that they are fine.</p>
+
+    <div class="figure-block">
+      <div class="chart-frame">
+        <svg viewBox="0 0 880 252" width="100%" style="min-width:640px;display:block" role="img" aria-labelledby="cutoff-t cutoff-d">
+          <title id="cutoff-t">Asian-Indian versus Western Body Mass Index cutoffs</title>
+          <desc id="cutoff-d">On Asian-Indian cutoffs the healthy range ends at a Body Mass Index of 23.0 and obesity begins at 27.5. On Western cutoffs the healthy range runs to 25.0 and obesity begins at 30.0. The band between 23.0 and 25.0 is read as healthy by Western-calibrated tools and as overweight by Indian clinical guidance.</desc>
+
+          <!-- the invisible band -->
+          <rect x="360" y="70" width="106.7" height="116" fill="var(--band)"></rect>
+          <line x1="360" y1="52" x2="360" y2="200" stroke="var(--brick)" stroke-width="1" stroke-dasharray="3 3" opacity="0.75"></line>
+          <line x1="466.7" y1="52" x2="466.7" y2="200" stroke="var(--brick)" stroke-width="1" stroke-dasharray="3 3" opacity="0.75"></line>
+          <line x1="466.7" y1="128" x2="486" y2="128" stroke="var(--brick)" stroke-width="1" opacity="0.75"></line>
+          <text x="493" y="122" fill="var(--brick)" font-family="IBM Plex Mono, monospace" font-size="12.5" font-weight="500">The invisible band</text>
+          <text x="493" y="140" fill="var(--ink-3)" font-family="IBM Plex Mono, monospace" font-size="11">Overweight in Delhi. Healthy in the app.</text>
+
+          <!-- INDIA axis -->
+          <text x="40" y="30" fill="var(--ink)" font-family="DM Sans, sans-serif" font-size="13" font-weight="700">Asian-Indian cutoffs &nbsp;<tspan fill="var(--ink-3)" font-weight="400">ICMR / WHO Asia-Pacific &mdash; what Poshan uses</tspan></text>
+          <line x1="40"  y1="70" x2="120" y2="70" stroke="var(--ink-3)" stroke-width="3" stroke-linecap="round"></line>
+          <line x1="126" y1="70" x2="354" y2="70" stroke="var(--series-1)" stroke-width="6" stroke-linecap="round"></line>
+          <line x1="366" y1="70" x2="840" y2="70" stroke="var(--brick)" stroke-width="6" stroke-linecap="round"></line>
+          <text x="240" y="58" text-anchor="middle" fill="var(--series-1)" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="0.06em">HEALTHY</text>
+          <text x="600" y="58" text-anchor="middle" fill="var(--brick)" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="0.06em">OVERWEIGHT &rarr; OBESE 27.5</text>
+          <text x="120" y="90" text-anchor="middle" fill="var(--ink-3)" font-family="IBM Plex Mono, monospace" font-size="11.5">18.5</text>
+          <text x="360" y="90" text-anchor="middle" fill="var(--ink)" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="600">23.0</text>
+
+          <!-- WESTERN axis -->
+          <line x1="40"  y1="186" x2="120" y2="186" stroke="var(--ink-3)" stroke-width="3" stroke-linecap="round"></line>
+          <line x1="126" y1="186" x2="461" y2="186" stroke="var(--series-1)" stroke-width="6" stroke-linecap="round" opacity="0.45"></line>
+          <line x1="473" y1="186" x2="840" y2="186" stroke="var(--brick)" stroke-width="6" stroke-linecap="round" opacity="0.45"></line>
+          <text x="120"   y="172" text-anchor="middle" fill="var(--ink-3)" font-family="IBM Plex Mono, monospace" font-size="11.5">18.5</text>
+          <text x="466.7" y="172" text-anchor="middle" fill="var(--ink-2)" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="600">25.0</text>
+          <text x="733"   y="172" text-anchor="middle" fill="var(--ink-3)" font-family="IBM Plex Mono, monospace" font-size="11.5">30.0</text>
+          <text x="40" y="228" fill="var(--ink-2)" font-family="DM Sans, sans-serif" font-size="13" font-weight="700">Western cutoffs &nbsp;<tspan fill="var(--ink-3)" font-weight="400">what every mainstream tracker ships with</tspan></text>
+
+          <!-- axis scale -->
+          <text x="840" y="246" text-anchor="end" fill="var(--ink-3)" font-family="IBM Plex Mono, monospace" font-size="10" letter-spacing="0.08em">BODY MASS INDEX &rarr;</text>
+        </svg>
+      </div>
+      <p class="cap">Fig. 1 &mdash; Two centimetres of scale, one national blind spot. Poshan&rsquo;s entire product sits on the left-hand line.</p>
+    </div>
+
+    <h3>The population inside that error</h3>
+    <p>The ICMR&ndash;INDIAB study, published in <em>The Lancet Diabetes &amp; Endocrinology</em> in 2023, is the first national, age-standardised metabolic survey of India. Its numbers are the market.</p>
+
+    <div class="figure-block">
+      <div class="chart-frame">
+        <div class="prev">
+          <div class="prev-row"><span class="prev-name">Abdominal obesity</span><span class="prev-bar em" style="width:100%"></span><span class="prev-val">351 M</span></div>
+          <div class="prev-row"><span class="prev-name">Hypertension</span><span class="prev-bar" style="width:89.7%"></span><span class="prev-val">315 M</span></div>
+          <div class="prev-row"><span class="prev-name">Generalised obesity</span><span class="prev-bar" style="width:72.4%"></span><span class="prev-val">254 M</span></div>
+          <div class="prev-row"><span class="prev-name">Hypercholesterolaemia</span><span class="prev-bar" style="width:60.7%"></span><span class="prev-val">213 M</span></div>
+          <div class="prev-row"><span class="prev-name">Prediabetes</span><span class="prev-bar" style="width:38.7%"></span><span class="prev-val">136 M</span></div>
+          <div class="prev-row"><span class="prev-name">Diabetes</span><span class="prev-bar em" style="width:28.8%"></span><span class="prev-val">101 M</span></div>
+        </div>
+      </div>
+      <p class="cap">Fig. 2 &mdash; Indian adults living with each condition, 2021 estimates. Source: ICMR&ndash;INDIAB-17, <em>The Lancet Diabetes &amp; Endocrinology</em>, 2023. Abdominal obesity &mdash; the one Western BMI misses most often &mdash; is the largest bar on the chart.</p>
+    </div>
+
+    <h3>Three people are failed at the same moment</h3>
+    <div class="grid g3">
+      <div class="card">
+        <span class="card-num">THE PATIENT</span>
+        <h4>Gets advice they cannot cook</h4>
+        <p>&ldquo;Eat healthy&rdquo; arrives as quinoa, kale and grilled chicken breast. The household cooks dal, chawal, roti and sabzi. The plan is abandoned at the kitchen door &mdash; not from non-compliance, but from irrelevance.</p>
+      </div>
+      <div class="card">
+        <span class="card-num">THE CLINICIAN</span>
+        <h4>Has nothing between the prescription and &ldquo;eat less rice&rdquo;</h4>
+        <p>An endocrinologist writes metformin in ninety seconds and has no tool that turns an HbA1c of 8.4 into a Tuesday dinner. Dietetics referral is a paper sheet, unfollowed and unmeasured.</p>
+      </div>
+      <div class="card">
+        <span class="card-num">THE HOSPITAL</span>
+        <h4>Runs dietetics as an unauditable cost centre</h4>
+        <p>No record of what was advised, by whom, or whether the patient opened it. Nothing to show an accreditor, nothing to bill against, nothing to improve on.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 02 PRODUCT -->
+<section class="movement">
+  <div class="rail"><b>02</b><span>PRODUCT</span></div>
+  <div class="body">
+    <p class="eyebrow">What we built</p>
+    <h2>A clinical plate, in the food the house <em>already cooks.</em></h2>
+
+    <p class="lede">Poshan reads height and weight against Asian-Indian cutoffs, then draws a thali &mdash; the actual round plate, with the actual katoris &mdash; portioned for that person&rsquo;s band, goal, diet and region. In Hindi or English. It is a nutrition tool, not medical advice, and it says so on every screen.</p>
+
+    <p>One engine, two products, sold to two buyers who reinforce each other.</p>
+
+    <div class="grid g2">
+      <div class="card">
+        <span class="card-num">B2C &mdash; &#8377;299 / month &middot; &#8377;2,499 / year</span>
+        <h4>Poshan Home</h4>
+        <p>BMI on Indian cutoffs, a portioned thali, 40 dishes with full nutrition and recipes, four biomarkers logged by hand, meal-photo scanning, condition support for diabetes, PCOS, thyroid and anaemia, up to six family profiles, and a registered dietitian reviewing the plan monthly.</p>
+      </div>
+      <div class="card">
+        <span class="card-num">B2B &mdash; &#8377;999 / &#8377;3,999 / &#8377;14,999 per month</span>
+        <h4>Poshan for Clinics</h4>
+        <p>The clinician enters lab values &mdash; HbA1c, creatinine, eGFR, haemoglobin, lipids. Poshan drafts a plan from the food that region actually cooks. <strong>The clinician approves it before the patient ever sees it</strong>, and the sign-off is logged against their registration number with a timestamp.</p>
+      </div>
+    </div>
+
+    <h3>What is already in the box</h3>
+    <ul class="clean">
+      <li class="done"><b>Asian-Indian band engine</b> &mdash; ten BMI bands on ICMR cutoffs, each mapped to a portioned plan.</li>
+      <li class="done"><b>40 dishes</b> with complete macro and micronutrient profiles, full recipes, regional and veg/non-veg variants.</li>
+      <li class="done"><b>An 11-condition safety checker</b> with a documented conflict matrix &mdash; it catches the case where a renal-safe plan collides with an anaemia-corrective one.</li>
+      <li class="done"><b>Clinician sign-off, logged</b> &mdash; registration number and timestamp on every plan released to a patient. This is the feature that makes Poshan sellable into a hospital.</li>
+      <li class="done"><b>Meal-photo scanning</b> on the Claude vision API &mdash; photograph the plate, get items and calories back.</li>
+      <li class="done"><b>Hindi and English throughout</b>, including the patient-facing plan and the printed discharge sheet.</li>
+      <li class="done"><b>Row-level security on every table</b> &mdash; no account can read another account&rsquo;s health data at the database layer.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================ 03 MOAT -->
+<section class="movement">
+  <div class="rail"><b>03</b><span>WHY US</span></div>
+  <div class="body">
+    <p class="eyebrow">Why this is better than what exists</p>
+    <h2>Four things nobody else has <em>all four of.</em></h2>
+
+    <div class="table-wrap">
+      <table>
+        <caption>Where the alternatives break down</caption>
+        <thead>
+          <tr><th>Alternative</th><th>What it gets right</th><th>Where it breaks</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>HealthifyMe, MyFitnessPal</b></td><td>Scale, polish, brand</td><td>Western cutoffs, Western food database, human coaches as the margin sink. No clinician in the loop, so no hospital will buy it.</td></tr>
+          <tr><td><b>Hospital dietetics departments</b></td><td>Real clinical authority</td><td>Pen, paper and a photocopied sheet. No follow-up, no adherence data, no audit trail, does not scale past the department.</td></tr>
+          <tr><td><b>Diet influencers and WhatsApp plans</b></td><td>Cheap, culturally fluent</td><td>No clinical accountability, no lab values, no liability anyone will underwrite. Actively dangerous in renal and pregnancy cases.</td></tr>
+          <tr><td><b>Nutrition modules inside an EMR</b></td><td>Already in the hospital</td><td>A text box. Zero nutritional depth, zero regional food knowledge, no patient-facing surface at all.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <span class="card-num">EDGE 01 &middot; CALIBRATION</span>
+        <h4>23.0, not 25.0</h4>
+        <p>Every downstream number changes: the band, the deficit, the portion, the escalation threshold. A competitor cannot patch this in &mdash; it re-bases their entire recommendation engine and invalidates every plan they have ever issued.</p>
+      </div>
+      <div class="card">
+        <span class="card-num">EDGE 02 &middot; THE FOOD IS THE FOOD</span>
+        <h4>Katori, not cup</h4>
+        <p>Portions in household measures, dishes by region, and nutrition computed on Indian preparation &mdash; dal with the tadka in it. Building this is years of unglamorous data work, which is exactly why it is defensible.</p>
+      </div>
+      <div class="card">
+        <span class="card-num">EDGE 03 &middot; THE CLINICIAN SIGNS</span>
+        <h4>Approval is a logged event</h4>
+        <p>No plan reaches a patient un-approved. That single design decision converts Poshan from a consumer app into procurable clinical software: it satisfies the accreditor, it survives the liability question, and it makes the doctor the distributor.</p>
+      </div>
+      <div class="card">
+        <span class="card-num">EDGE 04 &middot; LANGUAGE</span>
+        <h4>Hindi first, not Hindi-also</h4>
+        <p>The plan is authored bilingual, not machine-translated from an English original. A discharge sheet a patient&rsquo;s mother can read is the difference between adherence and a bin.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 04 TRACTION -->
+<section class="movement">
+  <div class="rail"><b>04</b><span>TRACTION</span></div>
+  <div class="body">
+    <p class="eyebrow">Where we actually are</p>
+    <h2>Pre-revenue. Pre-launch. <em>Built.</em></h2>
+
+    <div class="note warn">
+      <p class="eyebrow">Read this before you read the rest</p>
+      <p><strong>Poshan has not launched and has no revenue.</strong> No users, no pilots, no signed clinics. Stating otherwise would not survive a week of diligence, so the traction below is engineering traction &mdash; every line of it verifiable in the repository today &mdash; and the commercial slots are left empty for you to fill with real numbers before this document is sent anywhere.</p>
+    </div>
+
+    <p class="lede">What that buys an investor: the eighteen months of product risk that normally consumes a seed round is already spent. This round is being raised entirely against distribution risk, which is a far more legible thing to underwrite.</p>
+
+    <h3>Built and verifiable</h3>
+    <div class="grid g3">
+      <div class="stat hi"><span class="figure">40</span><span class="label">dishes with full macro, micronutrient and recipe data</span></div>
+      <div class="stat hi"><span class="figure">11</span><span class="label">conditions modelled, with a documented conflict matrix</span></div>
+      <div class="stat hi"><span class="figure">10</span><span class="label">BMI bands on Asian-Indian cutoffs, each with a portioned plan</span></div>
+      <div class="stat"><span class="figure">2</span><span class="label">languages, authored in parallel &mdash; not translated</span></div>
+      <div class="stat"><span class="figure">4</span><span class="label">clinical tiers priced, from &#8377;999 to enterprise</span></div>
+      <div class="stat"><span class="figure">0</span><span class="label">contrast failures across ~920 text nodes in the accessibility audit</span></div>
+    </div>
+
+    <p>Also shipped: Supabase email-OTP authentication with row-level security on every health table, three authenticated API routes, a consent-gated analytics layer that loads nothing until a visitor accepts, a published privacy policy and terms written from what the code actually does, and a live sitemap and robots policy that keeps every account page out of the index.</p>
+
+    <h3>The numbers to fill in before you send this</h3>
+    <p>An Indian seed investor in health will ask for these four and nothing else. Each is achievable inside six weeks without spending a rupee of the round, and the deck is materially stronger with even small real numbers in it than with none.</p>
+    <ul class="clean">
+      <li><b>Clinician discovery interviews</b> &mdash; <span class="fill-slot">n = ___</span> conversations with diabetologists, nephrologists and dietitians. Target 40. This is free and it is the single most persuasive slide a pre-launch health company can own.</li>
+      <li><b>Letters of intent from clinics</b> &mdash; <span class="fill-slot">___ signed</span>. Target 10 founding-partner LOIs at the &#8377;3,999 tier. Non-binding, but it converts &ldquo;we think doctors want this&rdquo; into &ldquo;these ten do.&rdquo;</li>
+      <li><b>Waitlist</b> &mdash; <span class="fill-slot">___ emails</span>. Target 2,000 before launch, from a single landing page and organic Hindi content.</li>
+      <li><b>Design partner pilot</b> &mdash; <span class="fill-slot">___ patients</span> through one real clinic, unpaid, measuring plan-open rate at 30 days. One pilot with an honest adherence number beats a thousand vanity signups.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================ 05 MODEL -->
+<section class="movement">
+  <div class="rail"><b>05</b><span>MODEL</span></div>
+  <div class="body">
+    <p class="eyebrow">How it makes money</p>
+    <h2>Two price lists, one <em>compounding loop.</em></h2>
+
+    <div class="table-wrap">
+      <table>
+        <caption>Poshan for Clinics &mdash; founding-partner pricing, held twelve months from signup</caption>
+        <thead>
+          <tr><th>Tier</th><th class="num">Per month</th><th class="num">Per year</th><th>Seats &amp; patients</th><th>Sold by</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>Practitioner</b></td><td class="num">&#8377;999</td><td class="num">&#8377;9,999</td><td>1 clinician &middot; 40 active patients</td><td>Self-serve</td></tr>
+          <tr><td><b>Clinic</b></td><td class="num">&#8377;3,999</td><td class="num">&#8377;39,999</td><td>5 clinicians &middot; 200 active patients</td><td>Self-serve + inside sales</td></tr>
+          <tr><td><b>Hospital</b></td><td class="num">&#8377;14,999</td><td class="num">&#8377;1,49,999</td><td>Unlimited clinicians &middot; 750 patients</td><td>Field sales, on a purchase order</td></tr>
+          <tr><td><b>Enterprise</b></td><td class="num">Quoted</td><td class="num">Quoted</td><td>Multi-site &middot; unlimited</td><td>Field sales &amp; solution engineering</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td>Blended ARPA assumption</td><td class="num">&#8377;3,125</td><td class="num">&#8377;37,500</td><td colspan="2">70% Practitioner / 22% Clinic / 7% Hospital / 1% Enterprise</td></tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <p>Poshan Home sits alongside at <strong>&#8377;299 a month or &#8377;2,499 a year</strong>, with a seven-day trial. Blended for the monthly-annual mix and promotional discounting, we model <strong>&#8377;2,200 realised ARPU</strong> per paying household per year.</p>
+
+    <h3>The loop &mdash; and the reason to fund a sales team</h3>
+    <p class="lede">A clinic account is not just &#8377;37,500 of software revenue. It is a patient-acquisition channel with a doctor&rsquo;s endorsement attached, and it is the entire strategic argument of this round.</p>
+
+    <p>A Clinic-tier account carries roughly 120 active patients. When the clinician hands a patient a plan and says &ldquo;keep this updated on the app,&rdquo; that patient converts to Poshan Home at a rate no advertisement will ever reach &mdash; and at essentially no marginal acquisition cost. We model a conservative <strong>15% attach rate</strong>.</p>
+
+    <div class="grid g3">
+      <div class="stat"><span class="figure">&#8377;22,000</span><span class="label">Fully loaded cost to close one clinic account through field sales</span></div>
+      <div class="stat hi"><span class="figure">4.2&times;</span><span class="label">LTV to CAC on the clinic account alone, at a conservative three-year life</span></div>
+      <div class="stat hi"><span class="figure">33&times;</span><span class="label">LTV to CAC on a household the clinic sends us &mdash; incremental CAC is about &#8377;110</span></div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <caption>Unit economics, three ways of acquiring the same household</caption>
+        <thead>
+          <tr><th>Channel</th><th class="num">CAC</th><th class="num">Gross profit / yr</th><th class="num">Avg. life</th><th class="num">LTV</th><th class="num">LTV : CAC</th><th class="num">Payback</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Paid media, direct to consumer</td><td class="num">&#8377;720</td><td class="num">&#8377;1,716</td><td class="num">16 mo</td><td class="num">&#8377;2,288</td><td class="num">3.2&times;</td><td class="num">5 mo</td></tr>
+          <tr><td><b>Sent by their own clinician</b></td><td class="num">&#8377;110</td><td class="num">&#8377;1,716</td><td class="num">26 mo</td><td class="num">&#8377;3,718</td><td class="num"><b>33.8&times;</b></td><td class="num">&lt; 1 mo</td></tr>
+          <tr><td>The clinic account itself (SaaS)</td><td class="num">&#8377;22,000</td><td class="num">&#8377;30,750</td><td class="num">36 mo</td><td class="num">&#8377;92,250</td><td class="num">4.2&times;</td><td class="num">9 mo</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <p class="eyebrow">The one sentence that matters</p>
+      <p>Money spent on a clinical sales rep buys software revenue at 4.2&times; <em>and</em> buys consumer households at 33&times;. Money spent on consumer advertising buys only the 3.2&times;. <strong>That is why the round is weighted to sales rather than to marketing</strong> &mdash; and why the marketing spend is scoped to support the sales motion, not to replace it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 06 GTM -->
+<section class="movement">
+  <div class="rail"><b>06</b><span>GO TO MARKET</span></div>
+  <div class="body">
+    <p class="eyebrow">How the money gets spent</p>
+    <h2>Indian clinical software is sold in the <em>corridor.</em></h2>
+
+    <p class="lede">No diabetologist has ever bought practice software from a landing page. They buy it from a person who showed up on a Tuesday afternoon between patients, demonstrated it on a real lab report, and came back on Thursday. This is a field motion, and it is the thing the round is for.</p>
+
+    <h3>The motion, end to end</h3>
+    <ul class="clean">
+      <li><b>Source</b> &mdash; inside sales work the specialist lists: 6,233 diabetologists nationally, plus endocrinology, nephrology and obstetrics, plus every hospital dietetics department in eight metros.</li>
+      <li><b>Demo</b> &mdash; a field rep sits in the clinic and enters that clinician&rsquo;s own patient&rsquo;s HbA1c. The plan drafts in front of them. This is a four-minute demonstration and it is the entire sale.</li>
+      <li><b>Trial</b> &mdash; fourteen days at the Practitioner tier, with a clinical success manager onboarding their first ten patients by hand so the account is never empty.</li>
+      <li><b>Land</b> &mdash; &#8377;999 a month is below the threshold at which an Indian consultant needs anyone&rsquo;s approval to sign. That price is deliberate.</li>
+      <li><b>Expand</b> &mdash; Practitioner to Clinic when the second consultant asks for a seat; Clinic to Hospital when the dietetics department wants departments and audit. <strong>Expansion, not new logos, is where the second year of revenue comes from.</strong></li>
+    </ul>
+
+    <h3>Eight metros, in this order</h3>
+    <p>Delhi NCR and Mumbai first &mdash; highest specialist density and the corporate-hospital chains whose approval other cities copy. Then Bengaluru, Hyderabad, Pune, Chennai, Ahmedabad, Kolkata. Maharashtra alone holds 1,127 diabetologists and Tamil Nadu 727, so two of the first four cities sit on the deepest lists in the country.</p>
+
+    <h3>What the marketing agency is actually for</h3>
+    <p>Not brand advertising. Three jobs, all of them in service of the sales motion:</p>
+    <ul class="clean">
+      <li><b>Hindi-first performance</b> &mdash; the consumer funnel, run on Meta, Google and YouTube in Hindi and English, with a hard &#8377;720 blended CAC ceiling and monthly cohort reporting.</li>
+      <li><b>Clinician credibility content</b> &mdash; the case studies, the conference presence at Diabetes India, ESICON and IDACON, and the KOL programme that gets twenty respected consultants using Poshan publicly. A rep who can name three peers already on the platform closes at roughly twice the rate of one who cannot.</li>
+      <li><b>Regional-language production</b> &mdash; the patient-facing video and print assets that a clinic hands out, in the language of the clinic&rsquo;s catchment.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================ 07 THE ASK -->
+<section class="movement">
+  <div class="rail"><b>07</b><span>THE ASK</span></div>
+  <div class="body">
+    <p class="eyebrow">The round</p>
+    <h2>&#8377;12 crore, for <em>eighteen months.</em></h2>
+
+    <p class="lede">Priced to reach Series A metrics with a quarter of margin, not to reach &#8377;1,000 crore. Average burn of &#8377;66.7 lakh a month, weighted to the clinical sales team because that is where the 33&times; sits.</p>
+
+    <div class="figure-block">
+      <div class="chart-frame">
+        <div class="funds">
+          <div class="fund-row">
+            <span class="fund-name">Clinical sales team<br><small style="color:var(--ink-3);font-size:0.78rem">Head of sales, 8&rarr;14 field reps, 4&rarr;7 SDRs, 2&rarr;4 clinical success</small></span>
+            <span class="fund-track"><span class="fund-bar" style="width:100%"></span></span>
+            <span class="fund-val">&#8377;4.20 Cr<small>35%</small></span>
+          </div>
+          <div class="fund-row">
+            <span class="fund-name">Marketing &amp; demand generation<br><small style="color:var(--ink-3);font-size:0.78rem">Agency retainer, paid media, KOL programme, conferences</small></span>
+            <span class="fund-track"><span class="fund-bar" style="width:71.4%"></span></span>
+            <span class="fund-val">&#8377;3.00 Cr<small>25%</small></span>
+          </div>
+          <div class="fund-row">
+            <span class="fund-name">Product &amp; engineering<br><small style="color:var(--ink-3);font-size:0.78rem">4 engineers, designer, PM, mobile app, security audit</small></span>
+            <span class="fund-track"><span class="fund-bar" style="width:57.1%"></span></span>
+            <span class="fund-val">&#8377;2.40 Cr<small>20%</small></span>
+          </div>
+          <div class="fund-row">
+            <span class="fund-name">Clinical, regulatory &amp; compliance<br><small style="color:var(--ink-3);font-size:0.78rem">Dietitian panel, medical director, ABDM certification, DPDP</small></span>
+            <span class="fund-track"><span class="fund-bar" style="width:28.6%"></span></span>
+            <span class="fund-val">&#8377;1.20 Cr<small>10%</small></span>
+          </div>
+          <div class="fund-row">
+            <span class="fund-name">Working capital &amp; reserve</span>
+            <span class="fund-track"><span class="fund-bar" style="width:28.6%"></span></span>
+            <span class="fund-val">&#8377;1.20 Cr<small>10%</small></span>
+          </div>
+        </div>
+      </div>
+      <p class="cap">Fig. 3 &mdash; Use of funds over eighteen months. Total &#8377;12.00 crore.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <caption>Clinical sales team &mdash; the &#8377;4.20 crore line, itemised</caption>
+        <thead><tr><th>Line</th><th>Headcount</th><th class="num">18-month cost</th></tr></thead>
+        <tbody>
+          <tr><td>Head of Clinical Sales</td><td>1 &middot; &#8377;35 L per year</td><td class="num">&#8377;52.5 L</td></tr>
+          <tr><td>Field representatives, eight metros</td><td>8 &rarr; 14 &middot; &#8377;8 L fixed + &#8377;4 L variable</td><td class="num">&#8377;1.98 Cr</td></tr>
+          <tr><td>Inside sales / SDRs</td><td>4 &rarr; 7 &middot; &#8377;5 L per year</td><td class="num">&#8377;41.3 L</td></tr>
+          <tr><td>Clinical success managers</td><td>2 &rarr; 4 &middot; &#8377;9 L per year</td><td class="num">&#8377;40.5 L</td></tr>
+          <tr><td>Field travel, demo kits, conference presence</td><td>&mdash;</td><td class="num">&#8377;60.0 L</td></tr>
+          <tr><td>Sales operations, CRM and tooling</td><td>&mdash;</td><td class="num">&#8377;15.0 L</td></tr>
+          <tr><td>Recruiting and onboarding</td><td>&mdash;</td><td class="num">&#8377;15.0 L</td></tr>
+        </tbody>
+        <tfoot><tr><td colspan="2">Total</td><td class="num">&#8377;4.20 Cr</td></tr></tfoot>
+      </table>
+    </div>
+
+    <h3>What &#8377;12 crore has to prove</h3>
+    <ul class="clean">
+      <li><b>Month 3</b> &mdash; live and taking payment. Ten founding-partner clinics onboarded, payment verification moved server-side, DPDP compliance in place.</li>
+      <li><b>Month 6</b> &mdash; 180 paying clinic accounts, 6,000 paying households, &#8377;2 Cr ARR. First hospital signed on a purchase order.</li>
+      <li><b>Month 12</b> &mdash; 700 clinic accounts, 22,000 households, &#8377;7.4 Cr ARR. ABDM certification complete. Outcomes study enrolled and reading out.</li>
+      <li><b>Month 15&ndash;18</b> &mdash; &#8377;12&ndash;15 Cr ARR, net revenue retention above 110% on the clinic book, and the first insurance or pharma contract signed. <strong>These are Series A metrics in Indian healthtech.</strong></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================ 08 WHAT MORE -->
+<section class="movement">
+  <div class="rail"><b>08</b><span>GAPS</span></div>
+  <div class="body">
+    <p class="eyebrow">What more we need to grow and scale</p>
+    <h2>The honest list of what <em>is not built yet.</em></h2>
+
+    <p class="lede">Sales and marketing are the right things to fund and they are not sufficient on their own. Three tiers of work sit behind the number, and the first tier is not optional &mdash; nothing else in this document happens until it is done.</p>
+
+    <span class="pill brick">Tier 1 &middot; Ship blockers &middot; 0&ndash;90 days &middot; before a single rupee arrives</span>
+    <ul class="clean">
+      <li class="gap"><b>Go live.</b> Authentication and persistence are not fully wired &mdash; a signed-in user can still lose profile data on refresh. This is the only thing standing between a finished product and a revenue-generating one.</li>
+      <li class="gap"><b>Move payment verification server-side.</b> The Razorpay signature check currently reads keys on the client and the edge function is written but not deployed. <strong>Do not take money until this ships.</strong> It is a genuine security defect, not a nice-to-have.</li>
+      <li class="gap"><b>DPDP Act 2023 compliance.</b> Health data is sensitive personal data under Indian law. Consent architecture, a named Data Protection Officer, breach procedure and data-processing agreements. No hospital procurement will clear without it.</li>
+      <li class="gap"><b>A test suite.</b> There is currently zero coverage, and the profile data-loss bug is exactly the class a single test catches. An enterprise buyer&rsquo;s security review will ask.</li>
+      <li class="gap"><b>Point the scanner at production.</b> The vision route still defaults to a localhost endpoint.</li>
+      <li class="gap"><b>Ship one palette.</b> The palette switcher is a development tool currently shipping to real visitors. Choose Sindoor, build its dark variant, delete the other nine.</li>
+    </ul>
+
+    <span class="pill leaf">Tier 2 &middot; Scale unlocks &middot; 3&ndash;12 months &middot; funded by this round</span>
+    <ul class="clean">
+      <li><b>Lab report parsing.</b> Today a clinician types HbA1c in by hand. Parsing a Dr Lal PathLabs or Metropolis PDF into structured values removes the single largest friction in the clinical workflow and is the difference between a tool used weekly and one used daily. <em>Highest return of anything on this list.</em></li>
+      <li><b>ABDM / ABHA certification.</b> Already declared as in-certification. It is the enterprise unlock, the credibility marker, and increasingly a procurement precondition for government-linked and accredited hospitals.</li>
+      <li><b>A mobile application.</b> India is mobile-first and the patient half of this product lives on a phone. A progressive web app at minimum; native for the retention and the notification channel that drives adherence.</li>
+      <li><b>The dish library from 40 to 500+.</b> Forty dishes is a demo. Five hundred with regional variants and lab-verified nutrition is the moat, and it is the asset a competitor cannot buy.</li>
+      <li><b>Six more languages.</b> Hindi and English reach roughly 45% of the country. Tamil, Telugu, Bengali, Marathi, Gujarati and Kannada reach most of the rest &mdash; and they are exactly the states with the deepest specialist lists.</li>
+      <li><b>The registered dietitian network as an operation.</b> Poshan Home promises a monthly dietitian review. At 85,000 subscribers that is a staffed operation with rostering, quality control and escalation paths &mdash; not a feature. It must be designed as a marketplace or it becomes a margin sink and takes the gross margin down with it.</li>
+      <li><b>Observability and support tooling.</b> Error tracking, uptime monitoring, an SLA-backed support desk. Enterprise buyers ask for the runbook.</li>
+    </ul>
+
+    <span class="pill">Tier 3 &middot; The &#8377;1,000 crore unlocks &middot; 12&ndash;24 months &middot; needs the Series A</span>
+    <p>These three change the <em>shape</em> of the business rather than its size. Clinic-by-clinic selling is a good &#8377;300 crore company. It is not a &#8377;1,000 crore one, and the next section shows why.</p>
+    <div class="grid g3">
+      <div class="card">
+        <span class="card-num">UNLOCK 01</span>
+        <h4>Insurance and corporate wellness</h4>
+        <p>Star Health, Niva Bupa, HDFC Ergo and every large employer run wellness programmes with a nutrition line item and no credible Indian product to fill it. One contract is 80,000 covered lives at roughly &#8377;350 per life per year. That is B2B2C at a scale no field sales team can reach one clinic at a time.</p>
+      </div>
+      <div class="card">
+        <span class="card-num">UNLOCK 02</span>
+        <h4>Pharma patient-support programmes</h4>
+        <p>USV, Abbott, Sun and Lupin already fund diabetes and cardiac adherence programmes. Poshan is a natural fit, the revenue is high-margin and non-dilutive, and each programme arrives with a medical-representative field force that is already inside the clinics we are trying to reach.</p>
+      </div>
+      <div class="card">
+        <span class="card-num">UNLOCK 03</span>
+        <h4>A published outcomes study</h4>
+        <p>HbA1c delta at twelve weeks against standard dietary counselling, peer-reviewed and Indian. This is the single asset that turns a hospital procurement committee&rsquo;s &ldquo;no&rdquo; into a &ldquo;yes,&rdquo; makes the insurance conversation possible at all, and justifies a premium revenue multiple. Enrol it in month 6.</p>
+      </div>
+    </div>
+
+    <h3>And the hires that are not on the org chart yet</h3>
+    <ul class="clean">
+      <li class="gap"><b>A clinical co-founder or medical director.</b> An Indian health company without a named, credentialled clinician at the top has a ceiling &mdash; on hospital sales, on regulator conversations, and on this round&rsquo;s valuation. This is the most important open role.</li>
+      <li class="gap"><b>A VP of Sales who has carried a bag into Indian hospitals.</b> Hired before the reps, not after. Everything in Tier 3 depends on this person existing.</li>
+      <li class="gap"><b>A growth lead who owns CAC.</b> The agency executes; someone internal has to own the number, or the &#8377;3 crore leaves without a cohort report to show for it.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================ 09 THE 1000 CR MATH -->
+<section class="movement">
+  <div class="rail"><b>09</b><span>THE MATH</span></div>
+  <div class="body">
+    <p class="eyebrow">The road to &#8377;1,000 crore by mid-2028</p>
+    <h2>A number is a plan only once you write down <em>what has to be true.</em></h2>
+
+    <p class="lede">&#8377;1,000 crore is a valuation, not revenue. Indian vertical healthtech SaaS growing above 100% year on year trades at roughly 8&ndash;12&times; ARR in private rounds. So the target resolves to a single, checkable figure: <strong>Poshan needs about &#8377;97 crore of ARR by June 2028.</strong> Here is what that costs.</p>
+
+    <div class="figure-block">
+      <div class="chart-frame">
+        <div class="legend">
+          <span><i style="background:var(--series-1)"></i>Poshan for Clinics</span>
+          <span><i style="background:var(--series-2)"></i>Poshan Home</span>
+          <span><i style="background:var(--series-3)"></i>Insurance, corporate &amp; pharma</span>
+        </div>
+        <div class="arr" id="arr">
+          <div class="arr-col">
+            <div class="arr-total">&#8377;2.0 Cr</div>
+            <div class="arr-stack">
+              <div class="arr-seg" style="height:3px;background:var(--series-1)" data-s="Poshan for Clinics" data-v="&#8377;0.7 Cr" data-p="Mar 2027"></div>
+              <div class="arr-seg" style="height:4px;background:var(--series-2)" data-s="Poshan Home" data-v="&#8377;1.3 Cr" data-p="Mar 2027"></div>
+            </div>
+            <div class="arr-x">MAR 2027</div>
+          </div>
+          <div class="arr-col">
+            <div class="arr-total">&#8377;8.9 Cr</div>
+            <div class="arr-stack">
+              <div class="arr-seg" style="height:7px;background:var(--series-1)" data-s="Poshan for Clinics" data-v="&#8377;2.6 Cr" data-p="Sep 2027"></div>
+              <div class="arr-seg" style="height:13px;background:var(--series-2)" data-s="Poshan Home" data-v="&#8377;4.8 Cr" data-p="Sep 2027"></div>
+              <div class="arr-seg" style="height:4px;background:var(--series-3)" data-s="Insurance, corporate &amp; pharma" data-v="&#8377;1.5 Cr" data-p="Sep 2027"></div>
+            </div>
+            <div class="arr-x">SEP 2027</div>
+          </div>
+          <div class="arr-col">
+            <div class="arr-total">&#8377;61.0 Cr</div>
+            <div class="arr-stack">
+              <div class="arr-seg" style="height:29px;background:var(--series-1)" data-s="Poshan for Clinics" data-v="&#8377;11.0 Cr" data-p="Mar 2028"></div>
+              <div class="arr-seg" style="height:75px;background:var(--series-2)" data-s="Poshan Home" data-v="&#8377;28.0 Cr" data-p="Mar 2028"></div>
+              <div class="arr-seg" style="height:59px;background:var(--series-3)" data-s="Insurance, corporate &amp; pharma" data-v="&#8377;22.0 Cr" data-p="Mar 2028"></div>
+            </div>
+            <div class="arr-x">MAR 2028</div>
+          </div>
+          <div class="arr-col">
+            <div class="arr-total" style="color:var(--leaf)">&#8377;97.0 Cr</div>
+            <div class="arr-stack">
+              <div class="arr-seg" style="height:42px;background:var(--series-1)" data-s="Poshan for Clinics" data-v="&#8377;15.8 Cr" data-p="Jun 2028"></div>
+              <div class="arr-seg" style="height:116px;background:var(--series-2)" data-s="Poshan Home" data-v="&#8377;43.2 Cr" data-p="Jun 2028"></div>
+              <div class="arr-seg" style="height:102px;background:var(--series-3)" data-s="Insurance, corporate &amp; pharma" data-v="&#8377;38.0 Cr" data-p="Jun 2028"></div>
+            </div>
+            <div class="arr-x">JUN 2028</div>
+          </div>
+        </div>
+      </div>
+      <p class="cap">Fig. 4 &mdash; The &#8377;1,000 crore case: ARR by revenue line, in crore. Linear scale; the March 2027 column is genuinely near zero. Full figures for both cases in the table below.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <caption>Two cases, side by side &mdash; ARR in &#8377; crore</caption>
+        <thead>
+          <tr><th>Checkpoint</th><th class="num">Clinics</th><th class="num">Home</th><th class="num">Insurance &amp; pharma</th><th class="num">Total ARR</th><th class="num">At 10&times;</th></tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="6" style="background:var(--surface-2);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.1em;color:var(--ink-3)">BASE CASE &mdash; THIS ROUND ONLY, NO SERIES A</td></tr>
+          <tr><td>Mar 2027</td><td class="num">0.7</td><td class="num">1.3</td><td class="num">&mdash;</td><td class="num"><b>2.0</b></td><td class="num">&#8377;20 Cr</td></tr>
+          <tr><td>Sep 2027</td><td class="num">2.6</td><td class="num">4.8</td><td class="num">&mdash;</td><td class="num"><b>7.4</b></td><td class="num">&#8377;74 Cr</td></tr>
+          <tr><td>Mar 2028</td><td class="num">7.1</td><td class="num">12.1</td><td class="num">&mdash;</td><td class="num"><b>19.2</b></td><td class="num">&#8377;192 Cr</td></tr>
+          <tr><td>Jun 2028</td><td class="num">10.5</td><td class="num">18.7</td><td class="num">&mdash;</td><td class="num"><b>29.2</b></td><td class="num"><b>&#8377;292 Cr</b></td></tr>
+          <tr><td colspan="6" style="background:var(--surface-2);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.1em;color:var(--ink-3)">&#8377;1,000 CRORE CASE &mdash; ADDS A &#8377;70 CRORE SERIES A IN Q3 2027</td></tr>
+          <tr><td>Mar 2027</td><td class="num">0.7</td><td class="num">1.3</td><td class="num">0.0</td><td class="num"><b>2.0</b></td><td class="num">&#8377;20 Cr</td></tr>
+          <tr><td>Sep 2027</td><td class="num">2.6</td><td class="num">4.8</td><td class="num">1.5</td><td class="num"><b>8.9</b></td><td class="num">&#8377;89 Cr</td></tr>
+          <tr><td>Mar 2028</td><td class="num">11.0</td><td class="num">28.0</td><td class="num">22.0</td><td class="num"><b>61.0</b></td><td class="num">&#8377;610 Cr</td></tr>
+          <tr><td>Jun 2028</td><td class="num">15.8</td><td class="num">43.2</td><td class="num">38.0</td><td class="num"><b>97.0</b></td><td class="num"><b>&#8377;970 Cr</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>What has to be true for the second table</h3>
+    <ul class="clean">
+      <li><b>4,200 clinic accounts</b> by June 2028, at &#8377;37,500 blended ARPA. Against roughly 1.5&ndash;2 lakh addressable clinics nationally, that is 2&ndash;3% penetration. This is the most defensible line in the model.</li>
+      <li><b>1.8 lakh paying households</b> at &#8377;2,400 blended ARPU. Roughly half arrive through clinicians and insurance partners at near-zero CAC; the rest are bought. This is achievable only <em>with</em> the third leg feeding it.</li>
+      <li><b>About one million covered lives</b> across eleven insurance and corporate contracts plus four pharma programmes, at &#8377;350 per life per year. <span class="mono" style="color:var(--brick)">This is the aggressive assumption in the model.</span> It is roughly $4 per life per year &mdash; a fraction of comparable US programmes &mdash; but it requires the outcomes study, ABDM certification and a named clinical leader to exist first.</li>
+      <li><b>A &#8377;70 crore Series A closing in Q3 2027</b>, off approximately &#8377;6&ndash;8 crore of ARR and 110%+ net revenue retention.</li>
+      <li><b>Gross margin held above 75%</b> &mdash; which means the dietitian-review promise must be productised, not staffed linearly.</li>
+    </ul>
+
+    <div class="note warn">
+      <p class="eyebrow">The sentence to say out loud in the meeting</p>
+      <p><strong>&#8377;12 crore does not buy a &#8377;1,000 crore company. It buys the proof that earns the &#8377;70 crore that buys it.</strong></p>
+      <p>Sold clinic by clinic on this round alone, Poshan reaches roughly &#8377;29 crore of ARR by mid-2028 &mdash; a &#8377;300 crore company, and a 6&ndash;7&times; return on a seed round priced at a &#8377;45 crore post-money. That is a good outcome and it is the case that should be underwritten. The &#8377;1,000 crore path exists, the arithmetic closes, and it runs through insurance, pharma and a published outcomes study &mdash; none of which can be bought with this round. Any deck that claims otherwise is asking to be taken apart in diligence.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 10 RISKS -->
+<section class="movement">
+  <div class="rail"><b>10</b><span>RISK</span></div>
+  <div class="body">
+    <p class="eyebrow">What kills this company</p>
+    <h2>The five we lose sleep over.</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Risk</th><th>Why it is real</th><th>What we do about it</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>Clinical liability</b></td>
+            <td>A renal or pregnancy patient is harmed by a plan that carried our name. This is existential, not reputational.</td>
+            <td>Clinician sign-off is mandatory and logged. The 11-condition conflict checker runs on every plan. Professional indemnity from day one, and a medical director who owns the escalation path.</td>
+          </tr>
+          <tr>
+            <td><b>Regulatory reclassification</b></td>
+            <td>If a regulator reads condition-specific plans as a medical device, the compliance burden changes overnight.</td>
+            <td>Poshan is positioned and worded as a nutrition tool that requires clinician approval, never as diagnosis or treatment. Monitor CDSCO guidance; the sign-off architecture is what keeps us on the right side of the line.</td>
+          </tr>
+          <tr>
+            <td><b>HealthifyMe moves down-market</b></td>
+            <td>They have the brand, the capital and the distribution to bolt on Asian-Indian cutoffs.</td>
+            <td>The cutoffs are copyable in a sprint. The clinician sign-off architecture, the audit trail and the hospital relationships are not &mdash; they are a different company shape and a different cost structure. Get 2,000 clinics signed before it matters.</td>
+          </tr>
+          <tr>
+            <td><b>Clinic churn after the trial</b></td>
+            <td>Doctors sign up, use it twice, and let the card lapse. This is the standard failure mode of Indian practice software.</td>
+            <td>Clinical success managers onboard the first ten patients by hand. Lab-report parsing removes the daily friction. Watch weekly-active clinicians, never seats sold.</td>
+          </tr>
+          <tr>
+            <td><b>The dietitian promise becomes a margin sink</b></td>
+            <td>&ldquo;A registered dietitian reviews your plan monthly&rdquo; scales linearly with headcount and takes gross margin down with it.</td>
+            <td>Productise the review &mdash; the dietitian approves a drafted plan rather than authoring one &mdash; and run the panel as a marketplace. If margin cannot be held above 75%, change the promise before launch, not after.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 11 CLOSE -->
+<section class="movement">
+  <div class="rail"><b>11</b><span>CLOSE</span></div>
+  <div class="body">
+    <p class="eyebrow">The ask</p>
+    <h2>Fund the corridor, and the <em>plate follows.</em></h2>
+
+    <p class="lede">Poshan is a finished product looking for its first thousand clinicians. The technical risk is behind it; the money is for the field team that puts it in front of doctors, and the demand generation that makes those doctors take the meeting.</p>
+
+    <div class="grid g3">
+      <div class="stat hi"><span class="figure">&#8377;12<small> Cr</small></span><span class="label">Seed round, 18 months of runway</span></div>
+      <div class="stat"><span class="figure">&#8377;29<small> Cr ARR</small></span><span class="label">Base case by June 2028 &mdash; a ~&#8377;300 Cr company</span></div>
+      <div class="stat"><span class="figure">&#8377;97<small> Cr ARR</small></span><span class="label">The &#8377;1,000 Cr case, with a Series A and the third leg</span></div>
+    </div>
+
+    <p>The line is at 23. Everything else in this document is a consequence of taking that seriously.</p>
+
+    <footer class="close">
+      POSHAN &middot; पोषण<br>
+      Daksh &middot; dakshg2233@gmail.com<br>
+      <br>
+      Prevalence figures: ICMR&ndash;INDIAB-17, <em>The Lancet Diabetes &amp; Endocrinology</em>, 2023 (2021 estimates).<br>
+      Specialist counts: national diabetologist registry, October 2025.<br>
+      Product and pricing figures are drawn from the Poshan codebase as of August 2026.<br>
+      Financial projections are management estimates and are not a forecast or a guarantee of performance.<br>
+      Commercial traction fields are deliberately left blank &mdash; fill them before this document leaves your hands.
+    </footer>
+  </div>
+</section>
+
+</div>
+
+<script>
+(function () {
+  var chart = document.getElementById("arr");
+  if (!chart) return;
+
+  var tip = document.createElement("div");
+  tip.setAttribute("role", "tooltip");
+  tip.style.cssText =
+    "position:fixed;z-index:50;pointer-events:none;opacity:0;transition:opacity .12s ease;" +
+    "background:var(--surface);color:var(--ink);border:1px solid var(--line-strong);border-radius:3px;" +
+    "padding:8px 11px;font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.45;" +
+    "box-shadow:0 6px 20px rgba(0,0,0,.28);max-width:230px";
+  document.body.appendChild(tip);
+
+  function show(seg, x, y) {
+    tip.innerHTML =
+      '<div style="font-family:\'IBM Plex Mono\',monospace;font-size:10px;letter-spacing:.1em;color:var(--ink-3)">' +
+      seg.dataset.p + "</div>" + seg.dataset.s +
+      '<div style="font-family:\'IBM Plex Mono\',monospace;font-variant-numeric:tabular-nums;font-size:15px;margin-top:3px">' +
+      seg.dataset.v + "</div>";
+    tip.style.opacity = "1";
+    var w = tip.offsetWidth, h = tip.offsetHeight;
+    tip.style.left = Math.min(Math.max(8, x - w / 2), window.innerWidth - w - 8) + "px";
+    tip.style.top = Math.max(8, y - h - 14) + "px";
+  }
+
+  chart.querySelectorAll(".arr-seg").forEach(function (seg) {
+    seg.setAttribute("tabindex", "0");
+    seg.setAttribute("aria-label", seg.dataset.p + ", " + seg.dataset.s + ", " + seg.dataset.v);
+    function at(e) {
+      var r = seg.getBoundingClientRect();
+      show(seg, e && e.clientX ? e.clientX : r.left + r.width / 2, r.top);
+    }
+    seg.addEventListener("mouseenter", at);
+    seg.addEventListener("mousemove", at);
+    seg.addEventListener("focus", at);
+    seg.addEventListener("mouseleave", function () { tip.style.opacity = "0"; });
+    seg.addEventListener("blur", function () { tip.style.opacity = "0"; });
+  });
+})();
+</script>
