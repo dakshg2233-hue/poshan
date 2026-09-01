@@ -13,13 +13,19 @@ import {
   REGIONS,
   GOALS,
   GOAL_TAGS,
+  COLLECTIONS,
   filterMeals,
   countByCategory,
+  countByCollection,
   type FoodCategory,
   type MealTime,
   type RegionKey,
   type GoalKey,
+  type CollectionKey,
 } from "@/lib/poshan-data";
+
+/** Cards added per "show more" press. */
+const PAGE = 60;
 
 /**
  * The FSSAI food mark, as printed on every packaged food sold in India:
@@ -59,13 +65,17 @@ export function MealLibrary({ goal }: { goal: GoalKey }) {
   const [category, setCategory] = useState<FoodCategory | null>(null);
   const [region, setRegion] = useState<RegionKey | null>(null);
   const [time, setTime] = useState<MealTime | null>(null);
+  const [collection, setCollection] = useState<CollectionKey | null>(null);
   const [byGoal, setByGoal] = useState(false);
   const [query, setQuery] = useState("");
+  /* The library runs to four figures. Mounting every card at once costs a
+     visible pause on a mid-range phone, so the grid grows on request. */
+  const [shown, setShown] = useState(PAGE);
 
   const goalLabel = GOALS.find((g) => g.key === goal)!.label;
 
   const meals = useMemo(() => {
-    const filtered = filterMeals({ category, region, time, goal: byGoal ? goal : null });
+    const filtered = filterMeals({ category, region, time, collection, goal: byGoal ? goal : null });
     /* Name and note, both languages regardless of which is on screen: Indian
        dish names get typed in either script, and someone reading the English
        copy still searches "पनीर". Applied after the filters so the count the
@@ -88,9 +98,22 @@ export function MealLibrary({ goal }: { goal: GoalKey }) {
           a.tags.filter((t) => wanted.includes(t)).length ||
         b.macros.protein - a.macros.protein
     );
-  }, [category, region, time, byGoal, goal, query]);
+  }, [category, region, time, collection, byGoal, goal, query]);
+
+  /* Any change to the filters puts the grid back to the first page, so the
+     count above the grid and the cards below it never disagree. Adjusted
+     during render rather than in an effect: React re-runs this pass before
+     anything paints, so the short grid never flashes at the old length. */
+  const filterSig = `${category}|${region}|${time}|${collection}|${byGoal}|${goal}|${query}`;
+  const [prevSig, setPrevSig] = useState(filterSig);
+  if (filterSig !== prevSig) {
+    setPrevSig(filterSig);
+    setShown(PAGE);
+  }
 
   const counts = countByCategory();
+  const collectionCounts = useMemo(() => countByCollection(), []);
+  const visible = meals.slice(0, shown);
 
   return (
     <section id="meals" className="py-14 md:py-24">
@@ -244,7 +267,25 @@ export function MealLibrary({ goal }: { goal: GoalKey }) {
               value={time}
               onChange={(k) => setTime(k as MealTime | null)}
             />
+            <FilterRow
+              label={T({ en: "Shelf", hi: "श्रेणी" })}
+              options={[
+                { key: null, label: T({ en: "All", hi: "सभी" }) },
+                ...COLLECTIONS.map((c) => ({
+                  key: c.key as string | null,
+                  label: `${T(c.label)} (${collectionCounts[c.key]})`,
+                })),
+              ]}
+              value={collection}
+              onChange={(k) => setCollection(k as CollectionKey | null)}
+            />
           </div>
+
+          {collection && (
+            <p className="text-[0.85rem] mb-6 max-w-[52ch]" style={{ color: "var(--ink-soft)" }}>
+              {T(COLLECTIONS.find((c) => c.key === collection)!.blurb)}
+            </p>
+          )}
 
           {/* ---------- results ---------- */}
           <p className="text-[0.82rem] mb-4" style={{ color: "var(--ink-soft)" }} aria-live="polite">
@@ -267,13 +308,19 @@ export function MealLibrary({ goal }: { goal: GoalKey }) {
             </div>
           ) : (
             <ul className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(268px,1fr))] list-none p-0 m-0">
-              {meals.map((m) => (
+              {visible.map((m, i) => (
                 <li
                   key={m.id}
                   /* Fill, border and depth all come from .surface-card. No
                      inline background here: an inline style beats the
                      stylesheet and would flatten the card back out. */
-                  className="surface-card lift rounded-2xl p-5 flex flex-col"
+                  className="surface-card lift card-in rounded-2xl p-5 flex flex-col"
+                  /* Stagger index, capped at 11 and reset once per page so
+                     each "show more" batch waves in the same way the first
+                     one did. Uncapped, the sixtieth card would wait a second
+                     and a half; unmodulated, every appended card would carry
+                     the cap and land in one flat block. */
+                  style={{ "--i": Math.min(i % PAGE, 11) } as React.CSSProperties}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-2.5 min-w-0">
@@ -343,6 +390,22 @@ export function MealLibrary({ goal }: { goal: GoalKey }) {
                 </li>
               ))}
             </ul>
+          )}
+
+          {meals.length > visible.length && (
+            <div className="mt-8 text-center">
+              <button
+                type="button"
+                onClick={() => setShown((n) => n + PAGE)}
+                className="px-6 py-3 rounded-full text-[0.9rem]"
+                style={{ background: "var(--surface)", border: "1px solid var(--line)", color: "var(--ink)" }}
+              >
+                {T({
+                  en: `Show ${Math.min(PAGE, meals.length - visible.length)} more of ${meals.length}`,
+                  hi: `${meals.length} में से ${Math.min(PAGE, meals.length - visible.length)} और दिखाएँ`,
+                })}
+              </button>
+            </div>
           )}
         </div>
       </div>

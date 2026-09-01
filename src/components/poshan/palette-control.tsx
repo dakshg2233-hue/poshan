@@ -136,7 +136,7 @@ export function PaletteControl() {
           role="radiogroup"
           aria-label={T({ en: "Colour palette", hi: "रंग पट्टिका" })}
           onKeyDown={onListKeyDown}
-          className="mb-2 w-[268px] max-h-[68vh] overflow-y-auto rounded-2xl p-2 shadow-2xl border"
+          className="popover-in popover-br mb-2 w-[268px] max-h-[68vh] overflow-y-auto rounded-2xl p-2 shadow-2xl border"
           style={{
             background: "color-mix(in srgb, var(--roti) 94%, transparent)",
             borderColor: "var(--line)",
@@ -144,7 +144,7 @@ export function PaletteControl() {
             WebkitBackdropFilter: "blur(16px)",
           }}
         >
-          {PALETTES.map((p) => {
+          {PALETTES.map((p, i) => {
             const checked = p.key === active;
             return (
               <button
@@ -156,13 +156,14 @@ export function PaletteControl() {
                    within it. Nine tab stops here would be tedious. */
                 tabIndex={checked ? 0 : -1}
                 onClick={() => choose(p.key)}
-                className="w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-left cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+                className="card-in w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-left cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
                 style={{
+                  "--i": i,
                   background: checked ? "var(--roti-2)" : "transparent",
                   border: checked ? "1px solid var(--kesar)" : "1px solid transparent",
                   color: "var(--ink)",
                   outlineColor: "var(--kesar)",
-                }}
+                } as React.CSSProperties}
               >
                 <span className="flex shrink-0 rounded-full overflow-hidden" aria-hidden>
                   {p.swatch.map((c) => (

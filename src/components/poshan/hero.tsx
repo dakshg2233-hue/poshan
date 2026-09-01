@@ -42,6 +42,15 @@ function useCounter(target: number) {
   return calm ? target : shown;
 }
 
+/**
+ * The staged hero entrance is a first-impression flourish, and it is spent
+ * once. Module scope rather than state: it has to survive the unmount that
+ * happens every time the visitor leaves the home tab, so that coming back
+ * gets the calm panel fade instead of replaying the curtain-up. A reload is
+ * a new visit and earns it again.
+ */
+let heroEntrancePlayed = false;
+
 export function Hero({
   height,
   weight,
@@ -61,14 +70,35 @@ export function Hero({
 }) {
   const { T } = useLang();
   const shown = useCounter(bmi);
+  const calm = usePrefersReducedMotion();
+
+  /* Read once at mount, then burn it, so the first render of this session
+     stages in and every later one does not. */
+  const [stage] = useState(() => !heroEntrancePlayed && !calm);
+  useEffect(() => {
+    heroEntrancePlayed = true;
+  }, []);
+  /* Marks an element as step `d` in the entrance queue, merging into whatever
+     className and style it already carries rather than replacing them. Once
+     the entrance is spent it hands the originals straight back, so no stray
+     class or custom property is left behind on the markup. */
+  const s = (d: number, className = "", style: React.CSSProperties = {}) =>
+    stage
+      ? {
+          className: `${className} hero-step`.trim(),
+          style: { ...style, "--d": d } as React.CSSProperties,
+        }
+      : { className, style };
 
   return (
     <section id="check" className="py-10 md:py-16">
       <div className="w-[min(1180px,100%-2.5rem)] mx-auto grid gap-10 lg:grid-cols-[1fr_1.02fr] items-center">
         <div>
           <p
-            className="text-[0.74rem] font-extrabold uppercase mb-4"
-            style={{ letterSpacing: "0.17em", color: "var(--kesar)" }}
+            {...s(0, "text-[0.74rem] font-extrabold uppercase mb-4", {
+              letterSpacing: "0.17em",
+              color: "var(--kesar)",
+            })}
           >
             {T({
               en: "Indian bodies · Indian food · Indian science",
@@ -80,24 +110,27 @@ export function Hero({
             className="text-[clamp(2.4rem,6.4vw,4.05rem)] leading-[1.08]"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            <span className="block">
+            {/* The two lines land separately. A headline that arrives in one
+                block reads as a card; one that arrives line by line reads as
+                someone saying it. */}
+            <span {...s(1, "block")}>
               {T({ en: "Know your body.", hi: "अपना शरीर जानें।" })}
             </span>
-            <span className="block" style={{ color: "var(--kesar)" }}>
+            <span {...s(2, "block", { color: "var(--kesar)" })}>
               {T({ en: "Eat like home.", hi: "घर जैसा खाएँ।" })}
             </span>
           </h1>
 
-          <div className="shiro w-[104px] my-6" />
+          <div {...s(3, "shiro w-[104px] my-6")} />
 
-          <p className="max-w-[44ch] text-[1.055rem]" style={{ color: "var(--ink-soft)" }}>
+          <p {...s(4, "max-w-[44ch] text-[1.055rem]", { color: "var(--ink-soft)" })}>
             {T({
               en: "Most fitness apps measure you against a European body and feed you chicken breast. Poshan reads your Body Mass Index on Asian-Indian cutoffs: where 23 already counts as overweight: then builds the plate you actually eat.",
               hi: "ज़्यादातर फ़िटनेस ऐप आपको यूरोपीय शरीर के पैमाने पर नापते हैं और चिकन ब्रेस्ट खिलाते हैं। पोषण आपका बॉडी मास इंडेक्स एशियाई-भारतीय कटऑफ़ पर पढ़ता है: जहाँ 23 पहले से ही अधिक वज़न है: और फिर वही थाली बनाता है जो आप सच में खाते हैं।",
             })}
           </p>
 
-          <div className="flex flex-wrap gap-3 mt-7">
+          <div {...s(5, "flex flex-wrap gap-3 mt-7")}>
             {/* data-magnetic: the cursor engulfs these rather than sitting on
                 top of them. The hover translate is dropped on the primary:
                 the cursor already supplies the feedback, and both at once

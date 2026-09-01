@@ -252,7 +252,20 @@ export function TabPanel({
   const { active } = useTabs();
   if (active !== tab) return null;
   return (
-    <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} tabIndex={-1}>
+    /* key on the tab so React remounts the node on every switch: a CSS entry
+       animation only runs on mount, and without the key React would reuse the
+       element and the new panel would appear with no transition at all.
+       There is no exit half deliberately - the outgoing panel is gone the
+       moment state changes, and holding it on screen to animate out would
+       delay the content the user just asked for. */
+    <div
+      key={tab}
+      className="panel-in"
+      role="tabpanel"
+      id={`panel-${tab}`}
+      aria-labelledby={`tab-${tab}`}
+      tabIndex={-1}
+    >
       {children}
     </div>
   );

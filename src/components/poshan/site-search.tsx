@@ -174,7 +174,7 @@ export function SiteSearch() {
         createPortal(
         <div
           ref={panelRef}
-          className="liquid-glass-chrome refract w-[min(23rem,calc(100vw-2rem))] rounded-2xl p-2.5 shadow-2xl"
+          className="liquid-glass-chrome refract popover-in w-[min(23rem,calc(100vw-2rem))] rounded-2xl p-2.5 shadow-2xl"
           style={{
             position: "fixed",
             top: "4.3rem",

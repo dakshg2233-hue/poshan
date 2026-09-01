@@ -1,9 +1,37 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useLang } from "./lang-provider";
 import { LangHint } from "./lang-hint";
 import { TabBar } from "./tabs";
 import { SiteSearch } from "./site-search";
+
+/**
+ * Whether the page has scrolled far enough for the bar to read as
+ * "compact." A small hysteresis band (48px to engage, 24px to release)
+ * rather than one threshold, so a page that has settled exactly on the
+ * boundary does not flicker between states on sub-pixel scroll jitter.
+ */
+function useCompactNav() {
+  const [compact, setCompact] = useState(false);
+  useEffect(() => {
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        setCompact((was) => (was ? window.scrollY > 24 : window.scrollY > 48));
+        raf = 0;
+      });
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+  return compact;
+}
 
 /* The four anchor links that used to live here are gone. They pointed into a
    single continuous scroll; navigation is the tab strip now, and TABS in
@@ -11,6 +39,7 @@ import { SiteSearch } from "./site-search";
 
 export function Nav() {
   const { lang, setLang, T } = useLang();
+  const compact = useCompactNav();
 
   /* The bar used to stow itself while the video hero held the top of the
      frame, because the hero carries its own floating chrome and two bars
@@ -46,7 +75,16 @@ export function Nav() {
       </a>
       <div className="w-[min(1180px,100%-2.5rem)] mx-auto flex items-center gap-4 h-[66px]">
         <a href="#top" className="flex items-center gap-2.5 no-underline shrink-0" aria-label="Poshan home">
-          <svg viewBox="0 0 40 40" aria-hidden className="w-[30px] h-[30px] shrink-0">
+          {/* transform, not width/height: the mark scales down rather than
+              the header shrinking, which would force a layout pass on every
+              scroll frame. data-compact carries the state; the transition
+              lives in CSS so a hover on this same link doesn't fight it. */}
+          <svg
+            viewBox="0 0 40 40"
+            aria-hidden
+            data-compact={compact}
+            className="nav-logo-mark w-[30px] h-[30px] shrink-0"
+          >
             <circle cx={20} cy={20} r={18} fill="none" stroke="var(--steel)" strokeWidth={2.5} />
             <circle cx={20} cy={20} r={12.5} fill="none" stroke="var(--steel-lo)" strokeWidth={1.5} />
             <circle cx={14} cy={15} r={4.6} fill="var(--haldi)" />

@@ -81,7 +81,11 @@ export function OnboardingFlow({ onComplete, isPremium }: { onComplete?: (data: 
       <div style={{ maxWidth: "800px", margin: "0 auto" }}>
         {/* Welcome Step */}
         {step === "welcome" && (
-          <div style={{ textAlign: "center" }}>
+          // key={step} forces a remount on every step change, which is what
+          // lets .panel-in run at all — a CSS entry animation only fires on
+          // mount, and without the key React would just patch this div in
+          // place and the step would swap with no transition.
+          <div key={step} className="panel-in" style={{ textAlign: "center" }}>
             <h1 style={{ fontSize: "2.5rem", fontWeight: 700, margin: "0 0 20px 0" }}>
               {T({ en: "🥗 Welcome to Poshan", hi: "🥗 पोषण में आपका स्वागत है" })}
             </h1>
@@ -111,7 +115,7 @@ export function OnboardingFlow({ onComplete, isPremium }: { onComplete?: (data: 
 
         {/* TDEE Step */}
         {step === "tdee" && (
-          <div>
+          <div key={step} className="panel-in">
             <h2 style={{ fontSize: "1.5rem", fontWeight: 600, marginBottom: "30px" }}>
               {T({
                 en: "Step 1: Calculate Your Daily Calorie Needs",
@@ -145,7 +149,7 @@ export function OnboardingFlow({ onComplete, isPremium }: { onComplete?: (data: 
 
         {/* Region & Diet Selection */}
         {step === "region-diet" && (
-          <div>
+          <div key={step} className="panel-in">
             <h2 style={{ fontSize: "1.5rem", fontWeight: 600, marginBottom: "30px" }}>
               {T({
                 en: "Step 2: Choose Your Region & Diet",
@@ -233,7 +237,7 @@ export function OnboardingFlow({ onComplete, isPremium }: { onComplete?: (data: 
 
         {/* Macros Step (Premium only) */}
         {step === "macros" && isPremium && (
-          <div>
+          <div key={step} className="panel-in">
             <h2 style={{ fontSize: "1.5rem", fontWeight: 600, marginBottom: "30px" }}>
               {T({
                 en: "Step 3: Personalize Your Macro Targets",
@@ -265,8 +269,12 @@ export function OnboardingFlow({ onComplete, isPremium }: { onComplete?: (data: 
 
         {/* Complete Step */}
         {step === "complete" && (
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "4rem", marginBottom: "20px" }}>✨</div>
+          <div key={step} className="panel-in" style={{ textAlign: "center" }}>
+            {/* The one genuine celebration moment in the whole flow — the
+                Peak-End Rule says this beat and the very first screen are
+                what the user actually remembers, so it earns a flourish the
+                rest of onboarding does not get. */}
+            <div className="onboarding-sparkle" style={{ fontSize: "4rem", marginBottom: "20px" }}>✨</div>
             <h2 style={{ fontSize: "1.8rem", fontWeight: 700, marginBottom: "20px" }}>
               {T({ en: "Your Plate is Ready!", hi: "आपकी थाली तैयार है!" })}
             </h2>

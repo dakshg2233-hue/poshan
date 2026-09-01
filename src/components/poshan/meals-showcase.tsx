@@ -193,7 +193,7 @@ export function MealsShowcase({
 
             {/* Region & Time */}
             <p style={{ margin: "0 0 8px 0", fontSize: "0.8rem", color: "var(--ink-soft)" }}>
-              📍 {meal.region.toUpperCase()} • {meal.time}
+              📍 {meal.region ? meal.region.toUpperCase() : "PAN-INDIAN"} • {meal.time}
             </p>
 
             {/* Calories & Macros */}

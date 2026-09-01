@@ -114,7 +114,7 @@ export function Conditions() {
             <div
               key={i}
               role="alert"
-              className="rounded-2xl p-4 mb-5 flex gap-3"
+              className="card-in rounded-2xl p-4 mb-5 flex gap-3"
               style={{ background: "color-mix(in srgb, var(--mirch) 10%, var(--surface))", border: "1px solid var(--mirch)" }}
             >
               <svg viewBox="0 0 20 20" aria-hidden className="w-5 h-5 shrink-0 mt-0.5">
@@ -201,6 +201,13 @@ export function Conditions() {
                         background: "var(--surface)",
                         border: "1px solid var(--line)",
                         borderLeft: `4px solid ${VERDICT_COLOUR[worst]}`,
+                        /* worst is re-derived from picked conditions, so the
+                           same meal (same key, same DOM node) can switch
+                           verdict colour under a toggle the user just
+                           pressed elsewhere on the page — a transition here
+                           is what makes that change visible as a change
+                           rather than an unexplained flicker. */
+                        transition: "border-left-color 240ms var(--ease)",
                       }}
                     >
                       <div className="flex items-start justify-between gap-3">
@@ -216,7 +223,12 @@ export function Conditions() {
                         </div>
                         <span
                           className="text-[0.68rem] font-extrabold uppercase px-2 py-1 rounded-full whitespace-nowrap shrink-0"
-                          style={{ letterSpacing: "0.08em", background: VERDICT_COLOUR[worst], color: "#fff" }}
+                          style={{
+                            letterSpacing: "0.08em",
+                            background: VERDICT_COLOUR[worst],
+                            color: "#fff",
+                            transition: "background-color 240ms var(--ease)",
+                          }}
                         >
                           {T(VERDICT_LABEL[worst])}
                         </span>

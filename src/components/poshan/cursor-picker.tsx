@@ -93,12 +93,12 @@ export function CursorPicker() {
 
       {open && (
         <ul
-          className="liquid-glass-chrome refract mb-2 w-[178px] rounded-2xl p-2 shadow-2xl grid gap-0.5 list-none"
+          className="liquid-glass-chrome refract popover-in popover-bl mb-2 w-[178px] rounded-2xl p-2 shadow-2xl grid gap-0.5 list-none"
           role="radiogroup"
           aria-label={T({ en: "Choose a cursor", hi: "कर्सर चुनें" })}
         >
-          {FOOD_CURSORS.map((f) => (
-            <li key={f.key}>
+          {FOOD_CURSORS.map((f, i) => (
+            <li key={f.key} className="card-in" style={{ "--i": i } as React.CSSProperties}>
               <button
                 type="button"
                 role="radio"

@@ -236,7 +236,11 @@ export function TDEECalculatorUI({ onComplete }: { onComplete?: (result: TDEERes
 
       {/* Results */}
       {result && (
-        <div style={{ marginTop: "24px", padding: "16px", background: "var(--flag-soft)", borderRadius: "8px" }}>
+        // Card-in, not panel-in: this is a result appearing in response to a
+        // click rather than a whole screen changing, and card-in's added
+        // scale(0.985→1) reads as the card settling into place, which suits
+        // a single result appearing more than panel-in's flatter fade-up.
+        <div className="card-in" style={{ marginTop: "24px", padding: "16px", background: "var(--flag-soft)", borderRadius: "8px" }}>
           <h3 style={{ margin: "0 0 16px 0", color: "var(--flag)", fontSize: "1.1rem" }}>
             {T({ en: "Your Results", hi: "आपके परिणाम" })}
           </h3>

@@ -87,14 +87,24 @@ export function FoodScanner({ isPremium = false }: { isPremium?: boolean }) {
       </p>
       {!showCamera && <button onClick={startCamera} style={{ padding: "10px 16px", background: "var(--consumer)", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}>Start Camera</button>}
       {showCamera && (
-        <>
+        // A fragment can't carry a class, and this mode-switch — camera
+        // replacing the start button — is exactly the "jarring change"
+        // panel-in exists to bridge.
+        <div className="panel-in">
           <video ref={videoRef} autoPlay playsInline style={{ width: "100%", height: "250px", borderRadius: "6px", margin: "12px 0" }} />
           <canvas ref={canvasRef} style={{ display: "none" }} />
           <button onClick={captureMeal} disabled={isScanning} style={{ marginRight: "8px", padding: "10px 16px", background: "var(--consumer)", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}>Capture</button>
           <button onClick={stopCamera} style={{ padding: "10px 16px", background: "var(--line)", border: "none", borderRadius: "6px", cursor: "pointer" }}>Cancel</button>
-        </>
+        </div>
       )}
-      {lastScan && <p style={{ marginTop: "12px", color: "var(--clinical)" }}>✓ Logged: {lastScan.meal} ({lastScan.calories} kcal)</p>}
+      {lastScan && (
+        // Keyed by timestamp so a second scan remounts this paragraph rather
+        // than patching its text in place — the confirmation is feedback for
+        // THIS scan, and should replay every time, not just the first.
+        <p key={lastScan.timestamp} className="card-in" style={{ marginTop: "12px", color: "var(--clinical)" }}>
+          ✓ Logged: {lastScan.meal} ({lastScan.calories} kcal)
+        </p>
+      )}
     </div>
   );
 }

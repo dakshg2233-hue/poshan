@@ -34,10 +34,21 @@ export function StickyCta() {
     };
   }, []);
 
-  if (!show) return null;
-
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[110] p-3 md:hidden print:hidden"
+    /* Stays mounted and slides out of frame rather than unmounting, which is
+       what lets it animate in both directions: an element that is removed
+       from the DOM has nothing left to transition. translateY(100%) is its
+       own height whatever the label wraps to, so it always clears the edge
+       exactly.
+
+       `inert` while hidden keeps it out of the tab order and off screen
+       readers, so the bar parked below the fold is genuinely gone rather
+       than merely invisible. */
+    <div
+      inert={!show}
+      aria-hidden={!show}
+      className="fixed inset-x-0 bottom-0 z-[110] p-3 md:hidden print:hidden sticky-cta"
+      data-show={show ? "true" : "false"}
       style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
       {/* Visible on every tab, so it has to switch to the one holding the
           BMI tool rather than jump to a section that may not be mounted. */}

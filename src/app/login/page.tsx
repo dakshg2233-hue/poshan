@@ -333,7 +333,10 @@ function ErrorNote({ children }: { children: React.ReactNode }) {
   return (
     <p
       role="alert"
-      className="text-[0.85rem] rounded-xl p-3"
+      /* form-shake: a wrong code or a rejected email is exactly what the
+         brief calls an instant-validation moment — three quick pixels of
+         lateral motion say "no" faster than reading the sentence does. */
+      className="form-shake text-[0.85rem] rounded-xl p-3"
       style={{
         background: "color-mix(in srgb, var(--mirch) 10%, var(--surface))",
         border: "1px solid var(--mirch)",
@@ -349,14 +352,28 @@ function SuccessNote({ children }: { children: React.ReactNode }) {
   return (
     <p
       role="status"
-      className="text-[0.85rem] rounded-xl p-3"
+      className="card-in text-[0.85rem] rounded-xl p-3 flex items-center gap-2"
       style={{
         background: "color-mix(in srgb, #22c55e 10%, var(--surface))",
         border: "1px solid #22c55e",
         color: "var(--ink)",
       }}
     >
-      ✓ {children}
+      {/* A drawn checkmark, not a static glyph: the stroke animates in via
+          stroke-dashoffset, which — like transform and opacity — is a
+          paint-only property change, not a layout one. */}
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden className="shrink-0">
+        <path
+          className="checkmark-draw"
+          d="M4 12.5 9.5 18 20 6"
+          fill="none"
+          stroke="#22c55e"
+          strokeWidth={2.6}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      {children}
     </p>
   );
 }

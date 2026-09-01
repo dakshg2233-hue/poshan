@@ -55,7 +55,12 @@ export function Thali({
       onPointerMove={onMove}
       onPointerLeave={() => setTilt({ x: 0, y: 0 })}
       style={{ perspective: "1100px" }}
-      className="select-none"
+      /* thali-breathe drives ITS OWN transform on this wrapper; the SVG
+         child below owns the pointer-tilt transform independently. Two
+         elements, two transforms, composed by ordinary DOM nesting rather
+         than fighting over one property the way the meal-card tilt and its
+         hover lift once did. */
+      className="select-none thali-breathe"
     >
       <svg
         viewBox="-30 -34 460 468"
@@ -137,7 +142,12 @@ export function Thali({
         <g
           style={{
             transform: `translate(${mx.toFixed(1)}px, ${my.toFixed(1)}px)`,
-            transition: "transform .7s var(--ease)",
+            /* The one spring on the page: this marker is dragged live by the
+               height/weight sliders, the definition of a continuous,
+               interruptible gesture the spring easing exists for. Everything
+               else on the site keeps --ease deliberately — a bounce on
+               routine hovers and clicks reads as novelty, not craft. */
+            transition: "transform .6s var(--ease-spring)",
           }}
         >
           <circle r={13.5} fill="var(--roti)" stroke="var(--ink)" strokeWidth={2.5} />

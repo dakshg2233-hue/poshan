@@ -456,7 +456,7 @@ export function Footer() {
               key={l.target}
               to={l.to}
               target={l.target}
-              className="no-underline hover:opacity-70"
+              className="no-underline underline-draw"
               style={{ color: "var(--ink-soft)" }}
             >
               {T({ en: l.en, hi: l.hi })}

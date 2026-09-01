@@ -190,6 +190,12 @@
   --elaichi-fill: #3d6b4f;
   --imli-fill: #6b3a20;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* A back-out spring with real overshoot, for the rare element that should
+     feel alive rather than merely responsive: something arriving under a
+     continuous, interruptible gesture (a dragged slider, a settling
+     marker) — not a general-purpose hover curve. Reserve it; a bounce on
+     every hover reads as novelty, not craft. */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* ==================================================================
@@ -1351,7 +1357,89 @@ main section:not(#hero) .lift {
     0 20px 45px rgb(0 0 0 / 0.19);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  /* One transform, composed from parts, so the hover lift and the pointer
+     tilt can coexist. They used to fight: MotionLayer wrote transform inline
+     per frame, which beat the :hover rule outright and threw the lift away
+     the moment the pointer moved. Now the script writes only --rx/--ry and
+     CSS owns the composition. Both custom properties are set on the card
+     itself, never inherited down, so no child restyles. */
+  --lift: 0px;
+  --rx: 0deg;
+  --ry: 0deg;
+  /* No transform at rest, deliberately. These cards carry backdrop-filter,
+     and a 3D transform on top of that promotes every one of them to its own
+     compositing layer for as long as it exists. At sixty-plus cards that is
+     enough GPU memory to stall the renderer. The transform is declared in
+     the :hover rule below instead, so exactly one card at a time is ever
+     promoted, and interpolating back to none on leave still animates. */
   transition: transform 260ms var(--ease), box-shadow 260ms var(--ease), border-color 260ms var(--ease);
+}
+
+/* While the pointer is actually tracking a card, the tilt has to follow it
+   frame for frame. Transitioning transform here smears the card behind the
+   cursor by a quarter second. The transition returns on pointer-leave, which
+   is what lets the card settle back to flat instead of snapping. */
+main section:not(#hero) .surface-card.is-tilting,
+main section:not(#hero) .lift.is-tilting {
+  transition: box-shadow 260ms var(--ease), border-color 260ms var(--ease);
+}
+
+/* ------------------------------------------------------------------
+   SPECULAR SHEEN
+
+   A card that tilts but does not change how it catches light reads as a
+   picture of a card being tilted. This is the other half of the effect:
+   a highlight that stays put in the room while the card moves under it.
+
+   The gradient is rendered once at a fixed size and then only ever
+   MOVED, by transform. Repositioning it with background-position or with
+   the gradient's own coordinates would repaint a large blurred fill on
+   every pointer event; a transform stays on the compositor.
+   ------------------------------------------------------------------ */
+main section:not(#hero) .surface-card,
+main section:not(#hero) .lift {
+  position: relative;
+}
+
+main section:not(#hero) .surface-card::after,
+main section:not(#hero) .lift::after {
+  content: "";
+  position: absolute;
+  /* Exactly the card, never larger. An oversized overlay here reads as a
+     white sheet across the whole grid: these cards carry backdrop-filter,
+     and a pseudo-element extending past the border box blows the filtered
+     layer out rather than sitting inside it. Bounded is not a compromise,
+     it is the only version that renders. */
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  /* --mx/--my run -1..1 from MotionLayer, moving the highlight's centre
+     rather than the element. This repaints one small card per frame,
+     which is well within budget: only ever a single card is hovered. */
+  background: radial-gradient(
+    circle at calc(50% + var(--mx, 0) * 38%) calc(50% + var(--my, 0) * 38%),
+    rgb(255 255 255 / 0.44) 0%,
+    rgb(255 255 255 / 0.1) 34%,
+    transparent 62%
+  );
+  transition: opacity 260ms var(--ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  main section:not(#hero) .surface-card:hover::after,
+  main section:not(#hero) .lift:hover::after {
+    /* Low. Above roughly 0.5 the sheen stops reading as light on a
+       surface and starts reading as a white shape sitting on top. */
+    opacity: 0.42;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main section:not(#hero) .surface-card::after,
+  main section:not(#hero) .lift::after {
+    display: none;
+  }
 }
 
 main section#plate .surface-card,
@@ -1368,12 +1456,37 @@ main section#meals .lift {
     0 18px 40px color-mix(in srgb, var(--brand-1) 40%, rgb(113 58 28 / 0.14));
 }
 
-@media (hover: hover) {
+/* pointer: fine as well as hover, so a tap on a touch screen does not fire a
+   phantom hover that then sticks until the next tap. */
+@media (hover: hover) and (pointer: fine) {
   main section:not(#hero) .surface-card:hover,
   main section:not(#hero) .lift:hover {
-    transform: translateY(-5px) rotateX(1deg);
+    /* Lift and pointer tilt composed into one transform. They used to be two
+       competing declarations, which is why the lift vanished the moment the
+       pointer moved: MotionLayer's inline transform simply won. */
+    --lift: -5px;
+    transform: perspective(900px) translate3d(0, var(--lift), 0) rotateX(var(--rx)) rotateY(var(--ry));
     border-color: color-mix(in srgb, var(--kesar) 55%, var(--line));
     box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.28), 0 28px 54px rgb(0 0 0 / 0.28);
+  }
+}
+
+/* The Thali's idle breathing — barely perceptible, there so the plate never
+   sits perfectly dead between pointer moves. Same slow ease-in-out alternate
+   family as hero-echo-drift and glass-drift above, on a wrapper the pointer
+   tilt never touches. */
+@keyframes thali-breathe {
+  from { transform: rotateZ(-1deg) translate3d(0, 0, 0); }
+  to { transform: rotateZ(1deg) translate3d(0, -4px, 0); }
+}
+
+.thali-breathe {
+  animation: thali-breathe 16s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thali-breathe {
+    animation: none;
   }
 }
 
@@ -1514,6 +1627,355 @@ main section#meals .lift {
     clip-path 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.05s;
 }
 
+/* ==================================================================
+   MOUNT ENTRANCES
+
+   CSS animations rather than JS transitions throughout this block.
+   Both of these fire at exactly the moment React is busiest — a tab
+   switch mounts a whole section, a filter change rebuilds sixty cards —
+   and a CSS animation keeps running on the compositor while the main
+   thread is tied up. A requestAnimationFrame-driven equivalent would
+   drop frames precisely when it is being watched.
+   ================================================================== */
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+}
+
+.panel-in {
+  /* Short, and capped at 250ms on purpose: a tab switch is a workflow
+     action a visitor can fire in rapid succession while comparing
+     sections, and the content underneath must be legible before the next
+     click, not merely by the time the animation finishes. */
+  animation: panel-in 250ms var(--ease) both;
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    /* Never scale from 0 — nothing in the world appears out of nothing.
+       A card that starts at 0.985 reads as settling, not as inflating. */
+    transform: translate3d(0, 10px, 0) scale(0.985);
+  }
+}
+
+.card-in {
+  animation: card-in 320ms var(--ease) both;
+  /* --i is capped in the component, not here: sixty cards at a true
+     per-item stagger would take a second and a half to finish, long
+     after the reader has started on the first row. It waves across the
+     opening run and the remainder lands together. */
+  animation-delay: calc(var(--i, 0) * 26ms);
+}
+
+/* ------------------------------------------------------------------
+   HERO CURTAIN-UP
+
+   The one place on the site with a real delight budget: seen once per
+   visit, never repeated on tab return (the component spends a module
+   flag). Longer and softer than anything in the UI tier because it is
+   marketing, not a control responding to a click.
+   ------------------------------------------------------------------ */
+@keyframes hero-step {
+  from {
+    opacity: 0;
+    /* Up from below and very slightly back in Z, so the line arrives
+       rather than slides. 14px is under a line-height: enough to read as
+       movement, not so much that the page looks like it is assembling. */
+    transform: translate3d(0, 14px, 0);
+  }
+}
+
+.hero-step {
+  animation: hero-step 620ms var(--ease) both;
+  animation-delay: calc(var(--d, 0) * 78ms);
+}
+
+/* ------------------------------------------------------------------
+   ANCHORED POPOVER
+
+   Grows from the control that opened it, which is what makes the link
+   between button and panel read without a connecting line.
+   ------------------------------------------------------------------ */
+@keyframes popover-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0) scale(0.96);
+  }
+}
+
+.popover-in {
+  /* Small popover: the 125-200ms band. Anything slower and the panel
+     feels like it is deciding whether to open. */
+  animation: popover-in 170ms var(--ease) both;
+  /* Anchored to the search control in the nav bar, up and to the right,
+     rather than blooming from its own middle. */
+  transform-origin: top right;
+}
+.popover-br {
+  /* Overrides the default anchor for a panel that sits ABOVE a
+     bottom-right trigger (the palette switcher) rather than below a
+     top-right one — same entrance, opposite corner. */
+  transform-origin: bottom right;
+}
+.popover-bl {
+  /* The cursor picker's bottom-left trigger — the fourth corner. */
+  transform-origin: bottom left;
+}
+
+/* ------------------------------------------------------------------
+   ONBOARDING CELEBRATION
+
+   The one spot in the whole flow that gets a real flourish, and the
+   .panel-in above already covers the other four steps. A larger
+   overshoot than anything in the UI tier is deliberate: this fires once
+   per account, ever, so the frequency gate that keeps everything else
+   restrained does not apply here.
+   ------------------------------------------------------------------ */
+@keyframes onboarding-sparkle {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotate(-8deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.15) rotate(4deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.onboarding-sparkle {
+  display: inline-block;
+  animation: onboarding-sparkle 640ms var(--ease) 140ms both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-sparkle {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+   CONSENT DIALOG
+
+   Entrance only, no exit: unlike the sticky CTA this component actually
+   unmounts on a decision rather than toggling a data attribute, and it
+   never comes back once dismissed. The click that dismisses it is
+   already its own confirmation — animating an exit as well would add a
+   second, slower acknowledgment of a choice the button press already
+   gave immediate feedback for.
+   ------------------------------------------------------------------ */
+@keyframes consent-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0);
+  }
+}
+
+.consent-in {
+  /* Modal-tier duration: this is a dialog, even though it is docked to
+     an edge rather than centred. */
+  animation: consent-in 360ms var(--ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .consent-in {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+   STICKY CTA
+
+   Enters and leaves through the bottom edge it lives on. A bar that
+   fades in place looks like it was always there and you missed it; one
+   that rises from the edge tells you where it came from, and makes the
+   downward exit read as the same gesture reversed.
+   ------------------------------------------------------------------ */
+.sticky-cta {
+  transition:
+    transform 320ms var(--ease),
+    opacity 220ms var(--ease);
+}
+
+.sticky-cta[data-show="false"] {
+  transform: translate3d(0, 100%, 0);
+  opacity: 0;
+}
+
+.sticky-cta[data-show="true"] {
+  transform: none;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sticky-cta {
+    transition: opacity 200ms ease;
+  }
+  /* Keep it off screen when hidden, but arrive by fade alone. */
+  .sticky-cta[data-show="false"] {
+    transform: translate3d(0, 100%, 0);
+  }
+}
+
+/* ------------------------------------------------------------------
+   GHOST LINK UNDERLINE
+
+   Reserved for navigational text links (the footer), not inline prose
+   or time-sensitive utility actions (resend-code, privacy) that already
+   carry a permanent underline for a reason — this is decoration on top
+   of a link that reads fine without it, not the only affordance saying
+   "this is clickable."
+   ------------------------------------------------------------------ */
+.underline-draw {
+  position: relative;
+}
+.underline-draw::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  /* scaleX, not width: a width transition repaints and reflows on every
+     frame; scaleX is a transform and stays on the compositor. */
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 200ms var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .underline-draw:hover::after {
+    transform: scaleX(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .underline-draw::after {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+   BUTTON SWEEP
+
+   For a solid-fill primary action with no hover colour of its own — this
+   is genuine state indication, not decoration, on a button that would
+   otherwise give no feedback except its own :active press. Buttons that
+   already carry data-magnetic skip this: the cursor itself supplies
+   hover feedback there, and stacking a second effect on top of it is
+   the exact jitter the magnetic buttons were built to avoid.
+   ------------------------------------------------------------------ */
+.sweep {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.sweep > span {
+  position: relative;
+  z-index: 1;
+}
+.sweep::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgb(255 255 255 / 0.16);
+  /* scaleX from the left edge, not a width or background-position
+     animation: this stays a compositor-only transform. */
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 220ms var(--ease);
+  z-index: 0;
+}
+@media (hover: hover) and (pointer: fine) {
+  .sweep:hover::before {
+    transform: scaleX(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sweep::before {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+   FORM VALIDATION FEEDBACK
+
+   Two one-shot cues, both transform/paint-only, both instant enough
+   that neither delays reading the message they accompany.
+   ------------------------------------------------------------------ */
+@keyframes form-shake {
+  10%, 30%, 50% { transform: translate3d(-4px, 0, 0); }
+  20%, 40%, 60% { transform: translate3d(4px, 0, 0); }
+  70% { transform: translate3d(-2px, 0, 0); }
+  80% { transform: translate3d(2px, 0, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+.form-shake {
+  animation: form-shake 380ms var(--ease) both;
+}
+
+@keyframes checkmark-draw {
+  from { stroke-dashoffset: 32; }
+  to { stroke-dashoffset: 0; }
+}
+.checkmark-draw {
+  stroke-dasharray: 32;
+  animation: checkmark-draw 360ms var(--ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .form-shake {
+    animation: none;
+  }
+  .checkmark-draw {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ------------------------------------------------------------------
+   PRESS FEEDBACK
+
+   Deliberately not hover-gated. Confirming that a tap registered matters
+   most on touch, where there is no cursor and no hover state to read it
+   from. Cards are excluded: they compose their own transform from --lift
+   and --rx/--ry above, and a flat scale here would overwrite it.
+   ------------------------------------------------------------------ */
+main button:not(:disabled):not(.lift):not(.surface-card),
+nav button:not(:disabled):not(.lift):not(.surface-card) {
+  transition: transform 120ms var(--ease);
+}
+
+main button:not(:disabled):not(.lift):not(.surface-card):active,
+nav button:not(:disabled):not(.lift):not(.surface-card):active {
+  /* 0.97, not 0.9. At this size the press should be felt more than seen. */
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Reset the state, not just the duration. The blanket
+     animation-duration override further down leaves animation-delay
+     intact, which would hold every card invisible for its full stagger
+     before snapping in — the accessible path must not be the broken one. */
+  .panel-in,
+  .card-in,
+  .hero-step,
+  .popover-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  main button:active,
+  nav button:active {
+    transform: none;
+  }
+}
+
 /* Depth on hover instead of a jump: the card lights up rather than moving.
    Replaces the hover:-translate-y-1 that six places shared. */
 /* Anchor targets must clear the nav bar. Without this every in-page link
@@ -1562,6 +2024,22 @@ html {
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* Scroll-compact logo. transform only: the header's own box never changes
+   size, so nothing about the fixed bar forces a layout pass as the page
+   scrolls — only the mark's paint layer is touched. */
+.nav-logo-mark {
+  transform-origin: left center;
+  transition: transform 300ms var(--ease);
+}
+.nav-logo-mark[data-compact="true"] {
+  transform: scale(0.85);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-logo-mark {
+    transition: none;
+  }
 }
 
 .nav-stowed {

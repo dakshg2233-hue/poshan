@@ -43,27 +43,60 @@ export function MotionLayer() {
     if (window.matchMedia("(hover: none)").matches) return;
 
     let active: HTMLElement | null = null;
+    let raf = 0;
+    let queued: { card: HTMLElement; nx: number; ny: number } | null = null;
+
+    /* Release a card back to CSS: drop the angles and the no-transition flag
+       together, so the 260ms transform transition carries it home to flat
+       instead of snapping. */
+    const release = (card: HTMLElement) => {
+      card.classList.remove("is-tilting");
+      card.style.removeProperty("--rx");
+      card.style.removeProperty("--ry");
+      card.style.removeProperty("--mx");
+      card.style.removeProperty("--my");
+    };
+
+    /* Writes are batched into one frame. pointermove can fire well above
+       60Hz on a high-polling mouse, and styling the card on every one of
+       those events is work the compositor never gets to use. */
+    const flush = () => {
+      raf = 0;
+      if (!queued) return;
+      const { card, nx, ny } = queued;
+      queued = null;
+      /* Deliberately small. Past about 5deg a card stops reading as depth and
+         starts reading as a gimmick, and the nutrition figures on it skew. */
+      card.style.setProperty("--rx", `${(-ny * 3.2).toFixed(2)}deg`);
+      card.style.setProperty("--ry", `${(nx * 3.2).toFixed(2)}deg`);
+      /* Drives the specular sheen. Negated: the highlight is a reflection,
+         so it travels against the tilt the way a real one would, rather
+         than following the cursor around like a spotlight. */
+      card.style.setProperty("--mx", `${(-nx).toFixed(3)}`);
+      card.style.setProperty("--my", `${(-ny).toFixed(3)}`);
+    };
 
     const onMove = (e: PointerEvent) => {
       const card = (e.target as HTMLElement)?.closest?.(".lift") as HTMLElement | null;
       if (card !== active) {
-        if (active) active.style.transform = "";
+        if (active) release(active);
         active = card;
+        if (card) card.classList.add("is-tilting");
       }
       if (!card) return;
       const r = card.getBoundingClientRect();
-      const nx = ((e.clientX - r.left) / r.width) * 2 - 1;
-      const ny = ((e.clientY - r.top) / r.height) * 2 - 1;
-      /* Deliberately small. Past about 5deg a card stops reading as depth and
-         starts reading as a gimmick, and the nutrition figures on it skew. */
-      card.style.transform = `perspective(900px) rotateX(${(-ny * 3.2).toFixed(
-        2
-      )}deg) rotateY(${(nx * 3.2).toFixed(2)}deg) translateZ(0)`;
+      queued = {
+        card,
+        nx: ((e.clientX - r.left) / r.width) * 2 - 1,
+        ny: ((e.clientY - r.top) / r.height) * 2 - 1,
+      };
+      if (!raf) raf = requestAnimationFrame(flush);
     };
 
     const onLeave = () => {
-      if (active) active.style.transform = "";
+      if (active) release(active);
       active = null;
+      queued = null;
     };
 
     document.addEventListener("pointermove", onMove, { passive: true });
@@ -71,7 +104,8 @@ export function MotionLayer() {
     return () => {
       document.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerleave", onLeave);
-      if (active) active.style.transform = "";
+      cancelAnimationFrame(raf);
+      if (active) release(active);
     };
   }, [calm]);
 

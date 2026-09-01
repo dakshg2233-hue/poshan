@@ -110,7 +110,7 @@ export function CheckoutButton({ yearly }: { yearly: boolean }) {
         type="button"
         onClick={pay}
         disabled={busy}
-        className="inline-flex flex-col items-center justify-center w-full min-h-14 px-6 py-2 rounded-full font-extrabold text-[0.94rem] cursor-pointer transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+        className="sweep inline-flex flex-col items-center justify-center w-full min-h-14 px-6 py-2 rounded-full font-extrabold text-[0.94rem] cursor-pointer transition-transform hover:-translate-y-0.5 disabled:opacity-60"
         style={{ background: "var(--kesar-fill)", color: "#fff" }}
       >
         <span>
@@ -128,7 +128,7 @@ export function CheckoutButton({ yearly }: { yearly: boolean }) {
       {status && (
         <p
           role="status"
-          className="text-[0.8rem] mt-2.5 text-center"
+          className="card-in text-[0.8rem] mt-2.5 text-center"
           style={{ color: "color-mix(in srgb, var(--roti) 78%, transparent)" }}
         >
           {status}

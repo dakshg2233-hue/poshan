@@ -7,19 +7,34 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { MEAL_LIBRARY, filterMeals, REGIONS, DIETS } from "@/lib/poshan-data";
+import {
+  MEAL_LIBRARY,
+  COLLECTIONS,
+  filterMeals,
+  countByCollection,
+  REGIONS,
+  DIETS,
+  type RegionKey,
+  type FoodCategory,
+  type MealTime,
+  type CollectionKey,
+} from "@/lib/poshan-data";
 
 export default function DevMealsPage() {
-  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
-  const [selectedDiet, setSelectedDiet] = useState<string | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<RegionKey | null>(null);
+  const [selectedDiet, setSelectedDiet] = useState<FoodCategory | null>(null);
+  const [selectedTime, setSelectedTime] = useState<MealTime | null>(null);
+  const [selectedCollection, setSelectedCollection] = useState<CollectionKey | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const collectionCounts = useMemo(() => countByCollection(), []);
 
   const filteredMeals = useMemo(() => {
     return filterMeals({
-      region: selectedRegion as any,
-      category: selectedDiet as any,
-      time: selectedTime as any,
+      region: selectedRegion,
+      category: selectedDiet,
+      time: selectedTime,
+      collection: selectedCollection,
     }).filter((m) => {
       if (!searchTerm) return true;
       return (
@@ -27,7 +42,7 @@ export default function DevMealsPage() {
         m.name.hi.includes(searchTerm)
       );
     });
-  }, [selectedRegion, selectedDiet, selectedTime, searchTerm]);
+  }, [selectedRegion, selectedDiet, selectedTime, selectedCollection, searchTerm]);
 
   return (
     <div className="min-h-screen p-4" style={{ background: "var(--roti)" }}>
@@ -48,9 +63,36 @@ export default function DevMealsPage() {
 
         {/* Filters */}
         <div
-          className="p-6 rounded-xl mb-6 grid grid-cols-1 md:grid-cols-4 gap-4"
+          className="p-6 rounded-xl mb-6 grid grid-cols-1 md:grid-cols-5 gap-4"
           style={{ background: "var(--surface)", border: "1px solid var(--line)" }}
         >
+          {/* Collection (shelf) Filter */}
+          <div>
+            <label
+              className="block text-sm font-semibold mb-2"
+              style={{ color: "var(--ink-soft)" }}
+            >
+              Shelf
+            </label>
+            <select
+              value={selectedCollection || ""}
+              onChange={(e) => setSelectedCollection((e.target.value || null) as CollectionKey | null)}
+              className="w-full p-2 rounded-lg outline-none"
+              style={{
+                background: "var(--roti)",
+                border: "1px solid var(--line)",
+                color: "var(--ink)",
+              }}
+            >
+              <option value="">All Shelves</option>
+              {COLLECTIONS.map((c) => (
+                <option key={c.key} value={c.key}>
+                  {c.label.en} ({collectionCounts[c.key]})
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Region Filter */}
           <div>
             <label
@@ -61,7 +103,7 @@ export default function DevMealsPage() {
             </label>
             <select
               value={selectedRegion || ""}
-              onChange={(e) => setSelectedRegion(e.target.value || null)}
+              onChange={(e) => setSelectedRegion((e.target.value || null) as RegionKey | null)}
               className="w-full p-2 rounded-lg outline-none"
               style={{
                 background: "var(--roti)",
@@ -88,7 +130,7 @@ export default function DevMealsPage() {
             </label>
             <select
               value={selectedDiet || ""}
-              onChange={(e) => setSelectedDiet(e.target.value || null)}
+              onChange={(e) => setSelectedDiet((e.target.value || null) as FoodCategory | null)}
               className="w-full p-2 rounded-lg outline-none"
               style={{
                 background: "var(--roti)",
@@ -115,7 +157,7 @@ export default function DevMealsPage() {
             </label>
             <select
               value={selectedTime || ""}
-              onChange={(e) => setSelectedTime(e.target.value || null)}
+              onChange={(e) => setSelectedTime((e.target.value || null) as MealTime | null)}
               className="w-full p-2 rounded-lg outline-none"
               style={{
                 background: "var(--roti)",
@@ -182,10 +224,13 @@ export default function DevMealsPage() {
                 style={{ color: "var(--ink-soft)" }}
               >
                 <span className="px-2 py-1 rounded" style={{ background: "var(--roti)" }}>
-                  {meal.region}
+                  {meal.region ?? "pan-indian"}
                 </span>
                 <span className="px-2 py-1 rounded" style={{ background: "var(--roti)" }}>
                   {meal.time}
+                </span>
+                <span className="px-2 py-1 rounded" style={{ background: "var(--roti)" }}>
+                  {meal.collection ?? "classic"}
                 </span>
                 <span className="px-2 py-1 rounded" style={{ background: "var(--roti)" }}>
                   {meal.category}
