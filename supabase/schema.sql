@@ -18,6 +18,14 @@ create table if not exists public.profiles (
   diet            text check (diet in ('veg','nonveg','vegan','jain')),
   goal            text check (goal in ('loss','muscle','diabetes','pcos','thyroid')),
   lang            text default 'en' check (lang in ('en','hi')),
+  -- The three extra inputs a real maintenance-calorie estimate needs beyond
+  -- height/weight. Sex specifically is required, not optional: ICMR-NIN's
+  -- own energy tables are sex-differentiated by ~450 kcal/day at the same
+  -- weight, so there is no honest way to estimate without it.
+  age             smallint check (age between 13 and 120),
+  sex             text check (sex in ('male','female')),
+  activity_level  text check (activity_level in ('sedentary','moderate','heavy')),
+  tdee            integer check (tdee between 500 and 6000),
   created_at      timestamptz default now(),
   updated_at      timestamptz default now()
 );
@@ -97,11 +105,19 @@ create policy "delete own readings"
 create table if not exists public.subscriptions (
   id                  uuid primary key default gen_random_uuid(),
   user_id             uuid not null references auth.users(id) on delete cascade,
+  -- Which product this row is for. Separate from `plan`, which is only ever
+  -- the billing cycle: without this there is no way to tell a Poshan Home
+  -- subscriber from a future Clinic one.
+  product             text not null default 'home'
+                        check (product in ('home','practitioner','clinic','hospital','enterprise')),
   plan                text not null check (plan in ('monthly','yearly')),
   status              text not null default 'active'
                         check (status in ('trialing','active','cancelled','expired')),
   razorpay_order_id   text,
   razorpay_payment_id text unique,          -- unique = replay protection
+  -- Stable across a subscription's whole lifetime, unlike payment_id which
+  -- changes every billing cycle: this is the upsert key for recurring rows.
+  razorpay_subscription_id text unique,
   amount_paise        integer not null check (amount_paise > 0),
   current_period_end  timestamptz,
   created_at          timestamptz default now()
@@ -120,8 +136,10 @@ create policy "read own subscription"
 -- same successful payment cannot be replayed to extend a subscription twice.
 create table if not exists public.payment_events (
   id                  uuid primary key default gen_random_uuid(),
-  razorpay_order_id   text not null,
+  -- Nullable: a subscription-based payment has no order_id at all.
+  razorpay_order_id   text,
   razorpay_payment_id text not null unique,
+  razorpay_subscription_id text,
   signature_valid     boolean not null,
   amount_paise        integer,
   source              text not null check (source in ('client','webhook')),
@@ -133,9 +151,55 @@ alter table public.payment_events enable row level security;
 -- No policies at all: server-only via service role. Nothing client-side
 -- should ever read the payment ledger.
 
+-- ----------------------------------------------------------- clinic leads
+-- Hospital and Enterprise are deliberately not self-serve (PO/invoice, not
+-- card) — see CLINIC_TIERS in poshan-data.ts. Backs the "Talk to us" form.
+create table if not exists public.clinic_leads (
+  id          uuid primary key default gen_random_uuid(),
+  tier        text not null check (tier in ('hospital','enterprise')),
+  name        text not null,
+  org         text not null,
+  email       text not null,
+  phone       text,
+  message     text,
+  created_at  timestamptz default now()
+);
+
+alter table public.clinic_leads enable row level security;
+-- No policies: written only by the API route via the service-role key. A
+-- signed-out visitor submits this form, and even a signed-in one must never
+-- read another lead's submission.
+
+-- ---------------------------------------------------------- chat messages
+-- Both chatbots ("Ask Poshan" for food/nutrition, "Health Companion" for
+-- condition-focused guidance) share this table: one shared daily message
+-- pool across both, one history store, one place to enforce the free-tier
+-- limit.
+create table if not exists public.chat_messages (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  chatbot    text not null check (chatbot in ('nutrition','health')),
+  role       text not null check (role in ('user','assistant')),
+  content    text not null,
+  created_at timestamptz default now()
+);
+
+alter table public.chat_messages enable row level security;
+
+create policy "read own chat history"
+  on public.chat_messages for select
+  to authenticated using ((select auth.uid()) = user_id);
+-- No insert/update/delete policy: written only by the API route via the
+-- service-role key, so the daily quota can't be bypassed by writing rows
+-- directly.
+
+create index if not exists idx_chat_messages_user_day
+  on public.chat_messages(user_id, chatbot, created_at desc);
+
 create index if not exists idx_conditions_user on public.user_conditions(user_id);
 create index if not exists idx_readings_user on public.biomarker_readings(user_id, taken_on desc);
 create index if not exists idx_subs_user on public.subscriptions(user_id);
+create index if not exists idx_subs_user_product on public.subscriptions(user_id, product);
 
 -- --------------------------------------------------------------- profile hook
 create or replace function public.handle_new_user()

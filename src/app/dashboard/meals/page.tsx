@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { DashboardNavbar } from "@/components/poshan/dashboard-navbar";
 import { MealsShowcase } from "@/components/poshan/meals-showcase";
 import type { User } from "@supabase/supabase-js";
+import { FORCE_PREMIUM } from "@/lib/dev-flags";
 
 export default function MealsPage() {
   const router = useRouter();
@@ -53,12 +54,14 @@ export default function MealsPage() {
         .from("subscriptions")
         .select("*")
         .eq("user_id", userId)
-        .eq("plan", "home")
+        .eq("product", "home")
+        .in("status", ["trialing", "active"])
         .single();
 
-      setIsPremium(!!subscription);
+      setIsPremium(FORCE_PREMIUM || !!subscription);
     } catch (error) {
       console.error("Failed to load user data:", error);
+      setIsPremium(FORCE_PREMIUM);
     }
   }
 

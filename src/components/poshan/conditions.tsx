@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { useLang, useReveal } from "./lang-provider";
 import { FoodMark } from "./meal-library";
+import { FoodScanner } from "./food-scanner";
 import { MEAL_LIBRARY, PREMIUM } from "@/lib/poshan-data";
 import {
   CONDITIONS,
@@ -19,11 +20,18 @@ export function Conditions() {
   const { T, lang } = useLang();
   const reveal = useReveal<HTMLDivElement>();
   const [picked, setPicked] = useState<ConditionKey[]>(["diabetes"]);
+  const [scannedId, setScannedId] = useState<string | null>(null);
 
   const toggle = (k: ConditionKey) =>
     setPicked((p) => (p.includes(k) ? p.filter((x) => x !== k) : [...p, k]));
 
   const active = picked.map(conditionByKey);
+
+  const scannedMeal = scannedId ? MEAL_LIBRARY.find((m) => m.id === scannedId) : undefined;
+  const scannedCheck = useMemo(
+    () => (scannedMeal && picked.length ? checkMealAll(scannedMeal.id, picked) : null),
+    [scannedMeal, picked]
+  );
 
   /* Surface clashing advice rather than silently picking a winner. */
   const conflicts = useMemo(
@@ -190,14 +198,62 @@ export function Conditions() {
                 </p>
               </div>
 
+              {/* ---------- scan what's actually on your plate ---------- */}
+              <div className="surface-card rounded-2xl p-5 mb-6">
+                <p className="text-[0.95rem] font-semibold mb-1">
+                  {T({ en: "Or point your camera at it", hi: "या इसे कैमरे से दिखाएँ" })}
+                </p>
+                <p className="text-[0.8rem] mb-3" style={{ color: "var(--ink-soft)" }}>
+                  {T({
+                    en: "Scan a real plate and Poshan checks it against every condition you picked above.",
+                    hi: "असली थाली स्कैन करें, पोषण उसे आपकी चुनी हर स्थिति के हिसाब से जाँचेगा।",
+                  })}
+                </p>
+                <FoodScanner onScanned={setScannedId} />
+
+                {scannedMeal && scannedCheck && (
+                  <div
+                    key={scannedMeal.id}
+                    className="card-in rounded-xl p-4 mt-4"
+                    style={{
+                      background: "var(--surface)",
+                      border: "1px solid var(--line)",
+                      borderLeft: `4px solid ${VERDICT_COLOUR[scannedCheck.worst]}`,
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="text-[1.05rem] leading-tight" style={{ fontFamily: "var(--font-display)" }}>
+                        {T(scannedMeal.name)}
+                      </span>
+                      <span
+                        className="text-[0.68rem] font-extrabold uppercase px-2 py-1 rounded-full whitespace-nowrap shrink-0"
+                        style={{ letterSpacing: "0.08em", background: VERDICT_COLOUR[scannedCheck.worst], color: "#fff" }}
+                      >
+                        {T(VERDICT_LABEL[scannedCheck.worst])}
+                      </span>
+                    </div>
+                    {scannedCheck.results
+                      .flatMap((r) => r.reasons.map((reason) => ({ condition: r.condition, ...reason })))
+                      .filter((r) => r.verdict === scannedCheck.worst)
+                      .map((r, i) => (
+                        <p key={i} className="text-[0.8rem] mt-2" style={{ color: "var(--ink-soft)" }}>
+                          <span className="font-semibold">{T(conditionByKey(r.condition).name)}: </span>
+                          {T(r.why)}
+                        </p>
+                      ))}
+                  </div>
+                )}
+              </div>
+
               <ul className="grid gap-2.5 list-none p-0 m-0 [grid-template-columns:repeat(auto-fit,minmax(300px,1fr))]">
-                {checked.map(({ meal, worst, results }) => {
+                {checked.map(({ meal, worst, results }, i) => {
                   const reasons = results.flatMap((r) => r.reasons).filter((r) => r.verdict === worst);
                   return (
                     <li
                       key={meal.id}
-                      className="rounded-xl p-4"
+                      className="rounded-xl p-4 card-in"
                       style={{
+                        "--i": Math.min(i, 12),
                         background: "var(--surface)",
                         border: "1px solid var(--line)",
                         borderLeft: `4px solid ${VERDICT_COLOUR[worst]}`,
@@ -206,9 +262,14 @@ export function Conditions() {
                            verdict colour under a toggle the user just
                            pressed elsewhere on the page — a transition here
                            is what makes that change visible as a change
-                           rather than an unexplained flicker. */
+                           rather than an unexplained flicker. card-in itself
+                           only plays once, on this <li>'s first mount (React
+                           reuses the same keyed node across a toggle rather
+                           than remounting it), so the two coexist rather
+                           than fighting: one settles the list in the first
+                           time, the other marks a change after. */
                         transition: "border-left-color 240ms var(--ease)",
-                      }}
+                      } as React.CSSProperties}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-2 min-w-0">

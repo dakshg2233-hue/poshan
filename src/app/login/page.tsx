@@ -95,6 +95,14 @@ function LoginForm() {
 
     setBusy(true);
     const supabase = browserClient()!;
+    /* Supabase generates, stores and later checks this code itself — it is
+       also the one that emails it. A second, independently-generated code
+       used to be sent here through a custom Resend email as a "nicer"
+       notification: that code was never registered with Supabase, so it
+       could never pass verifyOtp below. Anyone who used the nicer-looking
+       email instead of Supabase's own got a permanently wrong code and a
+       login that looked broken. Only Supabase's own email carries a code
+       that actually works. */
     const { error: err } = await supabase.auth.signInWithOtp({
       email,
       options: { shouldCreateUser: true },
@@ -104,18 +112,6 @@ function LoginForm() {
     if (err) {
       setError(err.message);
       return;
-    }
-
-    // Send email notification (non-blocking)
-    try {
-      await fetch("/api/auth/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, isNewUser: false }),
-      });
-    } catch (emailErr) {
-      console.error("Email notification failed:", emailErr);
-      // Don't block sign-in if email fails
     }
 
     setCooldown(RESEND_SECONDS);

@@ -12,7 +12,7 @@
  * advice (see the CKD / hypertension conflict below).
  */
 
-import type { Bi } from "./poshan-data";
+import { MEAL_LIBRARY, type Bi, type MealPlanItem } from "./poshan-data";
 
 export type ConditionKey =
   | "diabetes"
@@ -500,6 +500,34 @@ export const MEAL_ATTRS: Record<string, FoodAttr[]> = {
   "masala-egg-pav": ["egg", "leanProtein", "vitaminC"],
 };
 
+/**
+ * A conservative baseline for the ~1,063 meals above with no hand-curated
+ * entry. Derived only from fields already verified elsewhere in the meal
+ * record (diet tags, macros) — never a guess about ingredients this file
+ * has no source for.
+ *
+ * Deliberately covers only *good*-triggering attributes (ironRich, lowGI,
+ * highFibre, leanProtein, egg), never wheat, highSodium, highPurine,
+ * highPotassium, highPhosphorus, goitrogenRaw, fried or saturatedFat: those
+ * need real per-dish ingredient knowledge this app doesn't have yet, and a
+ * false "safe" verdict on a CKD or coeliac plate is worse than an honest
+ * "careful". This can only push a meal toward "good"; it can never
+ * manufacture an "avoid" the way a wrong ingredient guess could.
+ */
+function deriveAttrs(meal: MealPlanItem): FoodAttr[] {
+  const attrs: FoodAttr[] = [];
+  if (meal.tags?.includes("ironRich")) attrs.push("ironRich");
+  if (meal.tags?.includes("lowGi")) attrs.push("lowGI");
+  if (meal.tags?.includes("highProtein")) attrs.push("leanProtein");
+  if (meal.tags?.includes("egg")) attrs.push("egg");
+  if (meal.macros.fibre >= 5) attrs.push("highFibre");
+  return attrs;
+}
+
+const DERIVED_ATTRS: Record<string, FoodAttr[]> = Object.fromEntries(
+  MEAL_LIBRARY.map((m) => [m.id, deriveAttrs(m)])
+);
+
 export type MealCheck = {
   verdict: Verdict;
   reasons: { verdict: Verdict; why: Bi }[];
@@ -510,7 +538,7 @@ export type MealCheck = {
  * reason is returned so the answer can be explained rather than asserted.
  */
 export function checkMeal(mealId: string, condition: ConditionKey): MealCheck {
-  const attrs = MEAL_ATTRS[mealId] ?? [];
+  const attrs = [...new Set([...(MEAL_ATTRS[mealId] ?? []), ...(DERIVED_ATTRS[mealId] ?? [])])];
   const cond = conditionByKey(condition);
   const reasons = cond.rules
     .filter((r) => attrs.includes(r.attr))

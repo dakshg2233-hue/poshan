@@ -45,3 +45,9 @@ next-env.d.ts
 # Gemini source renders — 55MB of PNG. The shipped, converted JPGs
 # live in public/ and are committed; these originals stay local.
 Gemini_Generated_Image_*.png
+
+# Supabase CLI's own local cache/temp state — not project source.
+supabase/.temp/
+
+# Pitch deck — kept out of this public repo deliberately, not an oversight.
+Poshan-Pre-Seed-Deck.pdf

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useLang } from "./lang-provider";
 import { LangHint } from "./lang-hint";
 import { TabBar } from "./tabs";
@@ -37,7 +38,7 @@ function useCompactNav() {
    single continuous scroll; navigation is the tab strip now, and TABS in
    tabs.tsx is the one place the sections are named. */
 
-export function Nav() {
+export function Nav({ signedIn = false }: { signedIn?: boolean }) {
   const { lang, setLang, T } = useLang();
   const compact = useCompactNav();
 
@@ -79,18 +80,16 @@ export function Nav() {
               the header shrinking, which would force a layout pass on every
               scroll frame. data-compact carries the state; the transition
               lives in CSS so a hover on this same link doesn't fight it. */}
-          <svg
-            viewBox="0 0 40 40"
+          <Image
+            src="/brand/logo-mark.png"
+            alt=""
             aria-hidden
+            width={328}
+            height={390}
+            priority
             data-compact={compact}
-            className="nav-logo-mark w-[30px] h-[30px] shrink-0"
-          >
-            <circle cx={20} cy={20} r={18} fill="none" stroke="var(--steel)" strokeWidth={2.5} />
-            <circle cx={20} cy={20} r={12.5} fill="none" stroke="var(--steel-lo)" strokeWidth={1.5} />
-            <circle cx={14} cy={15} r={4.6} fill="var(--haldi)" />
-            <circle cx={26} cy={15} r={4.6} fill="var(--elaichi)" />
-            <ellipse cx={20} cy={27} rx={7.5} ry={4.4} fill="var(--kesar)" />
-          </svg>
+            className="nav-logo-mark w-[26px] h-auto shrink-0"
+          />
           {/* The wordmark goes below xl. Five tabs, a search and a language
               toggle do not fit beside it, and the tab strip is the thing that
               has to survive: the mark alone still identifies the site and
@@ -141,6 +140,27 @@ export function Nav() {
               </button>
             ))}
           </div>
+          {/* Account, on the main site's own nav: signed in goes straight to
+              the profile, signed out to sign-in. Before this the only path
+              to /profile ran through the dashboard's own bar, so a visitor
+              browsing the marketing site had no way to reach their account
+              at all. Icon-only — the bar already scrolls sideways under
+              five tabs, search and the language toggle. */}
+          <a
+            href={signedIn ? "/profile" : "/login"}
+            aria-label={
+              signedIn
+                ? T({ en: "Your account", hi: "आपका खाता" })
+                : T({ en: "Sign in", hi: "साइन इन करें" })
+            }
+            className="flex h-9 w-9 items-center justify-center rounded-full shrink-0 no-underline"
+            style={{ color: "#fff", border: "1px solid rgb(255 255 255 / .28)" }}
+          >
+            <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21a8 8 0 0 0-16 0" />
+              <circle cx="12" cy="8" r="4.5" />
+            </svg>
+          </a>
         </div>
       </div>
     </header>

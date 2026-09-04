@@ -84,6 +84,10 @@ export async function POST(request: NextRequest) {
     "diet",
     "goal",
     "lang",
+    "age",
+    "sex",
+    "activity_level",
+    "tdee",
   ] as const;
 
   const updates = Object.fromEntries(

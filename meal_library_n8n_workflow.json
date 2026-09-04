@@ -1,0 +1,227 @@
+{
+  "name": "Poshan - Meal Library Automated Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "meal-library",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "f8a1c001-0001-4000-8000-000000000001",
+      "name": "Webhook: Ingest Meals",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [180, 300],
+      "webhookId": "poshan-meal-library-webhook"
+    },
+    {
+      "parameters": {},
+      "id": "f8a1c001-0001-4000-8000-000000000002",
+      "name": "Manual Trigger: Test Run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [180, 500]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Sample test batch containing Phase 1 raw, Phase 2 Excel, and Phase 4 High-Protein dishes\nreturn [\n  {\n    json: {\n      name: \"Paneer Tikka Power Bowl\",\n      region: \"north\",\n      time: \"lunch\",\n      category: \"veg\",\n      calories: 420,\n      protein: 34,\n      carbs: 28,\n      fat: 16,\n      fiber: 9,\n      ingredients: [\"paneer\", \"bell peppers\", \"curd\", \"quinoa\", \"spinach\"],\n      source: \"101_high_protein_meals.docx\"\n    }\n  },\n  {\n    json: {\n      name: \"Chettinad Fish Curry with Brown Rice\",\n      region: \"south\",\n      time: \"dinner\",\n      category: \"nonveg\",\n      calories: 460,\n      protein: 32,\n      carbs: 45,\n      fat: 14,\n      fiber: 6,\n      meat_type: \"fish\",\n      ingredients: [\"seer fish\", \"chettinad spices\", \"coconut\", \"brown rice\"],\n      source: \"india_784_meal_card_nutrition.xlsx\"\n    }\n  },\n  {\n    json: {\n      name: \"north Meal 45\",\n      region: \"north\",\n      time: \"breakfast\",\n      category: \"veg\",\n      calories: 320,\n      protein: 8,\n      carbs: 52,\n      fat: 9,\n      fiber: 4,\n      suggested_authentic_name: \"Moong Dal Chilla with Mint Chutney\",\n      source: \"initial_expansion_phase1\"\n    }\n  },\n  {\n    json: {\n      name: \"Gulab Jamun with Rabri\",\n      region: \"north\",\n      time: \"snack\",\n      category: \"nonveg\",\n      calories: 380,\n      protein: 7,\n      carbs: 62,\n      fat: 15,\n      fiber: 1,\n      ingredients: [\"khoya\", \"sugar syrup\", \"milk\", \"pistachio\"],\n      source: \"categorization_test\"\n    }\n  },\n  {\n    json: {\n      name: \"Sprouted Moong & Paneer Chaat\",\n      region: \"west\",\n      time: \"snack\",\n      category: \"veg\",\n      calories: 260,\n      protein: 26,\n      carbs: 24,\n      fat: 6,\n      fiber: 8,\n      ingredients: [\"sprouted moong\", \"paneer\", \"lemon\", \"chaat masala\", \"coriander\"],\n      source: \"101_high_protein_meals.docx\"\n    }\n  }\n];"
+      },
+      "id": "f8a1c001-0001-4000-8000-000000000003",
+      "name": "Generate Test Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [400, 500]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalizes input meal data from different ingestion sources (Webhook payload, Excel rows, or JSON files)\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  let raw = item.json;\n  \n  // Support nested body if incoming from webhook\n  if (raw.body && typeof raw.body === 'object') {\n    raw = Array.isArray(raw.body) ? raw.body : (raw.body.meals || [raw.body]);\n  }\n  \n  const rawArray = Array.isArray(raw) ? raw : [raw];\n  \n  for (const meal of rawArray) {\n    let nameEn = (meal.name?.en || meal.name || meal.dish_name || meal.dishName || meal.Dish || '').trim();\n    let nameHi = (meal.name?.hi || meal.name_hindi || meal.dish_name_hi || '').trim();\n    \n    // Handle placeholder names from Phase 1\n    if (/^(north|south|east|west)\\s*meal\\s*\\d+/i.test(nameEn) && meal.suggested_authentic_name) {\n      nameEn = meal.suggested_authentic_name.trim();\n    }\n    \n    // Generate kebab-case unique ID slug\n    const baseSlug = nameEn\n      .toLowerCase()\n      .replace(/[^a-z0-9]+/g, '-')\n      .replace(/^-+|-+$/g, '');\n      \n    const id = meal.id || baseSlug || `meal-${Date.now()}-${Math.floor(Math.random()*1000)}`;\n    \n    // Normalize Region\n    let region = (meal.region || meal.Region || 'north').toLowerCase().trim();\n    if (!['north', 'south', 'east', 'west'].includes(region)) {\n      region = 'north';\n    }\n    \n    // Normalize Meal Time\n    let time = (meal.time || meal.meal_time || meal.mealTime || meal.MealTime || 'lunch').toLowerCase().trim();\n    if (!['breakfast', 'lunch', 'dinner', 'snack'].includes(time)) {\n      time = 'lunch';\n    }\n    \n    // Extract & Parse Macros\n    const protein = parseFloat(meal.protein ?? meal.macros?.protein ?? meal.Protein_g ?? 0) || 0;\n    const carbohydrate = parseFloat(meal.carbs ?? meal.carbohydrate ?? meal.macros?.carbohydrate ?? meal.Carbs_g ?? 0) || 0;\n    const fat = parseFloat(meal.fat ?? meal.macros?.fat ?? meal.Fat_g ?? 0) || 0;\n    const fibre = parseFloat(meal.fiber ?? meal.fibre ?? meal.macros?.fibre ?? meal.Fiber_g ?? 0) || 0;\n    \n    // Extract or calculate calories\n    let kcal = parseInt(meal.kcal ?? meal.calories ?? meal.Calories ?? meal.Energy_kcal ?? 0, 10);\n    if (!kcal || kcal <= 0) {\n      kcal = Math.round((protein * 4) + (carbohydrate * 4) + (fat * 9));\n    }\n    \n    // Normalize Category\n    let category = (meal.category || meal.diet_category || meal.Category || 'veg').toLowerCase().trim();\n    if (category.includes('non') || category === 'nv' || category === 'non-veg') {\n      category = 'nonveg';\n    } else {\n      category = 'veg';\n    }\n    \n    // Extract raw tags\n    let tags = Array.isArray(meal.tags) ? [...meal.tags] : [];\n    \n    results.push({\n      json: {\n        id,\n        nameEn,\n        nameHi,\n        region,\n        time,\n        category,\n        tags,\n        kcal,\n        macros: {\n          protein: Math.round(protein * 10) / 10,\n          carbohydrate: Math.round(carbohydrate * 10) / 10,\n          fat: Math.round(fat * 10) / 10,\n          fibre: Math.round(fibre * 10) / 10\n        },\n        meat_type: meal.meat_type || meal.meatType || '',\n        ingredients: Array.isArray(meal.ingredients) ? meal.ingredients : [],\n        noteEn: meal.note?.en || meal.note || meal.description || '',\n        noteHi: meal.note?.hi || meal.description_hi || '',\n        source: meal.source || 'n8n_pipeline',\n        photo: meal.photo || undefined\n      }\n    });\n  }\n}\n\nreturn results;"
+      },
+      "id": "f8a1c001-0001-4000-8000-000000000004",
+      "name": "Normalize Meal Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [620, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Quality Assurance & Nutrition Verification Engine (Implements Poshan Phases 3 & 4 Rules)\nconst items = $input.all();\nconst validatedMeals = [];\nconst auditLog = [];\n\n// Common Indian dish dictionary for bilingual fallback\nconst HINDI_DISH_MAP = {\n  'poha': 'पोहा',\n  'aloo paratha': 'आलू पराठा',\n  'rajma chawal': 'राजमा चावल',\n  'chole': 'छोले',\n  'palak paneer': 'पालक पनीर',\n  'paneer tikka': 'पनीर टिक्का',\n  'paneer tikka power bowl': 'पनीर टिक्का पावर बाउल',\n  'idli': 'इडली',\n  'masala dosa': 'मसाला डोसा',\n  'sambar': 'सांबर',\n  'rasam': 'रसम',\n  'curd rice': 'दही चावल',\n  'chettinad fish curry': 'चेट्टीनाड मछली करी',\n  'chettinad fish curry with brown rice': 'ब्राउन राइस के साथ चेट्टीनाड मछली करी',\n  'machher jhol': 'माछेर झोल',\n  'litti chokha': 'लिट्टी चोखा',\n  'dhokla': 'ढोकला',\n  'thepla': 'थेपला',\n  'khichdi': 'खिचड़ी',\n  'moong dal chilla with mint chutney': 'पुदीना चटनी के साथ मूंग दाल चीला',\n  'sprouted moong & paneer chaat': 'अंकुरित मूंग और पनीर चाट',\n  'gulab jamun': 'गुलाब जामुन'\n};\n\nfor (const item of items) {\n  const meal = item.json;\n  const logEntries = [];\n  \n  // 1. Placeholder Name Detection & Cleanup\n  if (/^(north|south|east|west)\\s*meal/i.test(meal.nameEn)) {\n    logEntries.push(`WARN: Generic placeholder name detected: ${meal.nameEn}`);\n  }\n  \n  // 2. Hindi Translation Enrichment\n  if (!meal.nameHi || meal.nameHi === '') {\n    const lower = meal.nameEn.toLowerCase();\n    if (HINDI_DISH_MAP[lower]) {\n      meal.nameHi = HINDI_DISH_MAP[lower];\n    } else {\n      // Transliteration placeholder\n      meal.nameHi = meal.nameEn;\n    }\n    logEntries.push(`Enriched Hindi translation for ${meal.nameEn}`);\n  }\n  \n  // 3. Indian Dietary Sanity & Categorization Corrections (Phase 4 QA)\n  const dishLower = meal.nameEn.toLowerCase();\n  const isSweet = /gulab jamun|rasgulla|jalebi|kheer|halwa|laddu|barfi|rabri|peda|mysore pak/i.test(dishLower);\n  \n  if (isSweet && meal.category === 'nonveg') {\n    meal.category = 'veg';\n    logEntries.push(`FIXED: Corrected sweet dish '${meal.nameEn}' from non-veg to veg.`);\n  }\n  \n  // Permitted meats verification for Indian context (Chicken, Mutton, Fish, Prawn, Egg)\n  if (meal.category === 'nonveg') {\n    const hasDisallowedMeat = /beef|pork|bacon|ham|turkey|veal/i.test(dishLower) || /beef|pork|turkey/i.test(meal.meat_type);\n    if (hasDisallowedMeat) {\n      logEntries.push(`REJECTED: Dish '${meal.nameEn}' contains disallowed meat type.`);\n      continue; // Discard invalid meal\n    }\n    \n    // Auto tag egg if non-veg is purely egg based\n    if (/egg|anda|omelet|bhurji/i.test(dishLower) && !/chicken|mutton|fish|prawn/i.test(dishLower)) {\n      if (!meal.tags.includes('egg')) meal.tags.push('egg');\n    }\n  }\n  \n  // 4. Macro Calculation & Caloric Balance Verification\n  const p = meal.macros.protein;\n  const c = meal.macros.carbohydrate;\n  const f = meal.macros.fat;\n  const calculatedKcal = Math.round((p * 4) + (c * 4) + (f * 9));\n  \n  const diff = Math.abs(meal.kcal - calculatedKcal);\n  if (diff > 50 && calculatedKcal > 0) {\n    logEntries.push(`Adjusted calorie count for ${meal.nameEn} from ${meal.kcal} to ${calculatedKcal} based on 4P+4C+9F`);\n    meal.kcal = calculatedKcal;\n  }\n  \n  // 5. Automated Poshan Tagging Engine\n  const tagSet = new Set(meal.tags || []);\n  \n  // High Protein tag (25g+ protein as per Phase 4 standard)\n  if (p >= 25) {\n    tagSet.add('highProtein');\n    logEntries.push(`Tagged as highProtein (${p}g protein)`);\n  }\n  \n  // Low GI tag (High fiber, controlled carbs)\n  if (meal.macros.fibre >= 6 && c <= 35) {\n    tagSet.add('lowGi');\n  }\n  \n  // Iron Rich tag\n  if (/palak|spinach|rajma|chole|chana|beetroot|mooli|liver|methi|ragi|sarson/i.test(dishLower)) {\n    tagSet.add('ironRich');\n  }\n  \n  // Vegan & Jain categorization\n  if (meal.category === 'veg') {\n    const hasDairy = /paneer|dahi|curd|milk|ghee|butter|cheese|cream|khoya|chaas|buttermilk/i.test(dishLower);\n    const hasEgg = tagSet.has('egg') || /egg|anda/i.test(dishLower);\n    \n    if (!hasDairy && !hasEgg && !meal.source.includes('dairy')) {\n      tagSet.add('vegan');\n    }\n    \n    const hasRootVeg = /potato|aloo|onion|pyaz|garlic|lahsun|ginger|adrak|carrot|gajar|radish|mooli/i.test(dishLower);\n    if (!hasRootVeg && !hasEgg && (dishLower.includes('jain') || meal.time === 'lunch')) {\n      // Only tag Jain if strictly verified or explicitly specified\n      if (dishLower.includes('jain')) tagSet.add('jain');\n    }\n  }\n  \n  meal.tags = Array.from(tagSet);\n  \n  // 6. Subscription Tier Assignment\n  // Premium: 25g+ protein, clinical support meals, or condition-specific cards\n  // Free: standard everyday Indian staples\n  if (tagSet.has('highProtein') || meal.source.includes('docx') || p >= 25) {\n    meal.tier = 'premium';\n  } else {\n    meal.tier = meal.tier || 'free';\n  }\n  \n  // 7. Note Generation (Bilingual default if empty)\n  if (!meal.noteEn) {\n    meal.noteEn = `${meal.nameEn} prepared in traditional ${meal.region} Indian style with balanced macros (${p}g protein, ${meal.macros.fibre}g fibre).`;\n  }\n  if (!meal.noteHi) {\n    meal.noteHi = `${meal.nameHi} पारंपरिक ${meal.region === 'north' ? 'उत्तर' : meal.region === 'south' ? 'दक्षिण' : meal.region === 'east' ? 'पूर्व' : 'पश्चिम'} भारतीय शैली में तैयार, संतुलित पोषण के साथ।`;\n  }\n  \n  // Build final Poshan MealPlanItem structure\n  const finalMealCard = {\n    id: meal.id,\n    name: {\n      en: meal.nameEn,\n      hi: meal.nameHi\n    },\n    region: meal.region,\n    time: meal.time,\n    category: meal.category,\n    tags: meal.tags,\n    kcal: meal.kcal,\n    macros: meal.macros,\n    note: {\n      en: meal.noteEn,\n      hi: meal.noteHi\n    },\n    tier: meal.tier\n  };\n  \n  if (meal.photo) {\n    finalMealCard.photo = meal.photo;\n  }\n  \n  validatedMeals.push({\n    json: finalMealCard\n  });\n  \n  auditLog.push({\n    dish: meal.nameEn,\n    logs: logEntries\n  });\n}\n\nreturn validatedMeals;"
+      },
+      "id": "f8a1c001-0001-4000-8000-000000000005",
+      "name": "Nutrition QA & Tagging Rules",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [860, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate results and prepare summary statistics for Poshan app & audit reports\nconst items = $input.all();\nconst meals = items.map(i => i.json);\n\n// Deduplicate meals by ID\nconst uniqueMap = new Map();\nfor (const m of meals) {\n  uniqueMap.set(m.id, m);\n}\nconst uniqueMeals = Array.from(uniqueMap.values());\n\n// Compute statistics matching Poshan Meal Library metrics\nconst stats = {\n  totalMeals: uniqueMeals.length,\n  vegetarian: uniqueMeals.filter(m => m.category === 'veg').length,\n  nonVegetarian: uniqueMeals.filter(m => m.category === 'nonveg').length,\n  highProtein: uniqueMeals.filter(m => m.tags.includes('highProtein')).length,\n  vegan: uniqueMeals.filter(m => m.tags.includes('vegan')).length,\n  lowGi: uniqueMeals.filter(m => m.tags.includes('lowGi')).length,\n  ironRich: uniqueMeals.filter(m => m.tags.includes('ironRich')).length,\n  regions: {\n    north: uniqueMeals.filter(m => m.region === 'north').length,\n    south: uniqueMeals.filter(m => m.region === 'south').length,\n    east: uniqueMeals.filter(m => m.region === 'east').length,\n    west: uniqueMeals.filter(m => m.region === 'west').length\n  },\n  tiers: {\n    free: uniqueMeals.filter(m => m.tier === 'free').length,\n    premium: uniqueMeals.filter(m => m.tier === 'premium').length\n  }\n};\n\nreturn [{\n  json: {\n    status: 'success',\n    timestamp: new Date().toISOString(),\n    stats,\n    count: uniqueMeals.length,\n    meals: uniqueMeals\n  }\n}];"
+      },
+      "id": "f8a1c001-0001-4000-8000-000000000006",
+      "name": "Deduplicate & Aggregate Stats",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "f8a1c001-0001-4000-8000-000000000007",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "sync-condition-1",
+              "leftValue": "={{ $json.count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f8a1c001-0001-4000-8000-000000000008",
+      "name": "Check Valid Meals Count",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1340, 500]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/dev/meals-sync",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"meals\": {{ JSON.stringify($json.meals) }},\n  \"stats\": {{ JSON.stringify($json.stats) }}\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "f8a1c001-0001-4000-8000-000000000009",
+      "name": "Sync to Poshan App API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1580, 500]
+    }
+  ],
+  "connections": {
+    "Webhook: Ingest Meals": {
+      "main": [
+        [
+          {
+            "node": "Normalize Meal Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger: Test Run": {
+      "main": [
+        [
+          {
+            "node": "Generate Test Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Test Data": {
+      "main": [
+        [
+          {
+            "node": "Normalize Meal Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Meal Data": {
+      "main": [
+        [
+          {
+            "node": "Nutrition QA & Tagging Rules",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nutrition QA & Tagging Rules": {
+      "main": [
+        [
+          {
+            "node": "Deduplicate & Aggregate Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deduplicate & Aggregate Stats": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Valid Meals Count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Valid Meals Count": {
+      "main": [
+        [
+          {
+            "node": "Sync to Poshan App API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "Poshan"
+    },
+    {
+      "name": "Nutrition"
+    },
+    {
+      "name": "Meal Library"
+    }
+  ]
+}

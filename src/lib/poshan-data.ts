@@ -372,8 +372,11 @@ export const CLINIC_TIERS: ClinicTier[] = [
   {
     key: "hospital",
     name: { en: "Hospital", hi: "अस्पताल" },
-    monthly: 14999,
-    yearly: 149999,
+    /* yearly = monthly × 10 + 9, the same ~17%-off annual pattern every
+       other paid tier already uses (Practitioner: 999→9999, Clinic:
+       3999→39999) — kept consistent rather than picked fresh. */
+    monthly: 39999,
+    yearly: 399999,
     seats: { en: "Unlimited clinicians", hi: "असीमित चिकित्सक" },
     patients: { en: "Up to 750 active patients", hi: "750 सक्रिय मरीज़ तक" },
     selfServe: false,
@@ -406,10 +409,18 @@ export const CLINIC_TIERS: ClinicTier[] = [
   },
 ];
 
-/** Honest about what is not built yet: shown under the clinic tiers. */
+/** Honest about what is not built yet: shown under the clinic tiers.
+ *
+ * The previous wording said lab reports "are entered by hand or by CSV
+ * today" — stated as a present-tense fact. Nothing in this codebase
+ * implements patient-clinician linking, lab entry, or CSV upload; only the
+ * lead-capture form (clinic-lead-form.tsx / clinic_leads table) exists.
+ * A roadmap line describing unbuilt functionality as already working is the
+ * same mistake the privacy and terms pages deliberately avoid elsewhere in
+ * this app — corrected here to match. */
 export const CLINIC_ROADMAP: Bi[] = [
+  { en: "The clinician platform — patient-linked accounts, lab entry, plan drafting and approval — is not built yet. Today this tier is a waitlist: tell us you're interested and we'll reach out as it ships.", hi: "चिकित्सक मंच — मरीज़ से जुड़े खाते, जाँच प्रविष्टि, प्लान बनाना और मंज़ूरी — अभी नहीं बना है। फ़िलहाल यह स्तर एक प्रतीक्षा सूची है: अपनी रुचि बताएं, बनते ही हम संपर्क करेंगे।" },
   { en: "ABDM / ABHA integration is in certification, not live yet", hi: "ABDM / ABHA एकीकरण प्रमाणन में है, अभी चालू नहीं" },
-  { en: "Lab reports are entered by hand or by CSV today; PDF parsing is not built", hi: "अभी जाँच रिपोर्ट हाथ से या CSV से भरी जाती है; PDF पढ़ना अभी नहीं बना" },
   { en: "Founding-partner pricing is held for 12 months from signup", hi: "फ़ाउंडिंग-पार्टनर मूल्य साइनअप से 12 महीने तक स्थिर" },
 ];
 

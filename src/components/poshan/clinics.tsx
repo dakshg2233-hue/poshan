@@ -3,6 +3,7 @@
 import { useLang, useReveal } from "./lang-provider";
 import { CLINIC_TIERS, CLINIC_ROADMAP, type ClinicTier } from "@/lib/poshan-data";
 import { BlurText } from "@/components/ui/blur-text";
+import { ClinicLeadForm } from "./clinic-lead-form";
 
 /**
  * Poshan for Clinics, the B2B tier.
@@ -156,26 +157,26 @@ function TierCard({ tier }: { tier: ClinicTier }) {
         ))}
       </ul>
 
-      <a
-        /* Both of these were #clinic-signup / #clinic-contact, and neither
-           target has ever existed, every tier's CTA was a link to nowhere.
-           /login is the real path: it is where an account actually starts.
-           The enterprise tier still wants a genuine contact route (a form or
-           a published address); until there is one, sending it somewhere
-           real beats sending it to a missing anchor. */
-        href="/login"
-        data-magnetic
-        className="inline-flex items-center justify-center min-h-11 px-5 rounded-full font-extrabold text-[0.86rem] no-underline"
-        style={
-          tier.selfServe
-            ? { background: "var(--kesar-fill)", color: "#fff" }
-            : { border: "1.5px solid var(--ink)", color: "var(--ink)" }
-        }
-      >
-        {tier.selfServe
-          ? T({ en: "Start 14-day trial", hi: "14-दिन का ट्रायल शुरू करें" })
-          : T({ en: "Talk to us", hi: "हमसे बात करें" })}
-      </a>
+      {tier.selfServe ? (
+        /* Practitioner/Clinic checkout is scoped separately: the underlying
+           clinic features (patient accounts, CSV upload, adherence view)
+           don't exist yet, so this still points at /login rather than a
+           payment button for a product that isn't real yet. */
+        <a
+          href="/login"
+          data-magnetic
+          className="inline-flex items-center justify-center min-h-11 px-5 rounded-full font-extrabold text-[0.86rem] no-underline"
+          style={{ background: "var(--kesar-fill)", color: "#fff" }}
+        >
+          {T({ en: "Start 14-day trial", hi: "14-दिन का ट्रायल शुरू करें" })}
+        </a>
+      ) : (
+        <ClinicLeadForm
+          tier={tier.key as "hospital" | "enterprise"}
+          ctaClassName="inline-flex items-center justify-center min-h-11 px-5 rounded-full font-extrabold text-[0.86rem] no-underline"
+          ctaStyle={{ border: "1.5px solid var(--ink)", color: "var(--ink)" }}
+        />
+      )}
     </div>
   );
 }

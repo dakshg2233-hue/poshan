@@ -1,8 +1,9 @@
 import crypto from "node:crypto";
 import { serviceClient } from "@/lib/supabase";
+import { provisionRecurringCharge } from "@/lib/razorpay-provision";
 
 /**
- * Razorpay webhook: the actual source of truth for payments.
+ * Razorpay webhook: the actual source of truth for billing.
  *
  * Why this route exists: the browser `handler` callback in checkout only runs
  * if the customer's tab survives the payment. Close it, lose signal, or hit a
@@ -11,7 +12,18 @@ import { serviceClient } from "@/lib/supabase";
  * reconcile against, never the client.
  *
  * Set the endpoint and secret in the Razorpay dashboard, subscribe to
- * `payment.captured` and `payment.failed`.
+ * `subscription.charged` (moves status to "active" on every real billing
+ * cycle, initial or renewal) — `subscription.cancelled` and
+ * `subscription.halted` are real gaps this does not yet close: neither is
+ * handled here, so a cancelled-in-Razorpay subscription stays "active" in
+ * Poshan's own database until someone adds that.
+ *
+ * ⚠ The payload shape below (`payload.subscription.entity` +
+ * `payload.payment.entity`) follows Razorpay's documented resource.action
+ * webhook convention but was not confirmed against a live delivery while
+ * writing this — no Razorpay account is configured yet. Check an actual
+ * `subscription.charged` payload once one exists and fix the field paths
+ * below if they differ.
  */
 
 export async function POST(request: Request) {
@@ -42,7 +54,10 @@ export async function POST(request: Request) {
 
   let event: {
     event?: string;
-    payload?: { payment?: { entity?: Record<string, unknown> } };
+    payload?: {
+      payment?: { entity?: Record<string, unknown> };
+      subscription?: { entity?: Record<string, unknown> };
+    };
   };
   try {
     event = JSON.parse(raw);
@@ -51,11 +66,12 @@ export async function POST(request: Request) {
   }
 
   const payment = event.payload?.payment?.entity;
+  const subscription = event.payload?.subscription?.entity;
   const paymentId = payment?.id as string | undefined;
-  const orderId = payment?.order_id as string | undefined;
+  const subscriptionId = (subscription?.id ?? payment?.subscription_id) as string | undefined;
   const amount = payment?.amount as number | undefined;
 
-  if (!paymentId || !orderId) {
+  if (!paymentId || !subscriptionId) {
     return Response.json({ ok: true, ignored: true });
   }
 
@@ -66,7 +82,7 @@ export async function POST(request: Request) {
        a second time. */
     await db.from("payment_events").upsert(
       {
-        razorpay_order_id: orderId,
+        razorpay_subscription_id: subscriptionId,
         razorpay_payment_id: paymentId,
         signature_valid: true,
         amount_paise: amount ?? null,
@@ -75,6 +91,14 @@ export async function POST(request: Request) {
       },
       { onConflict: "razorpay_payment_id", ignoreDuplicates: true }
     );
+  }
+
+  /* The source of truth: grants/renews access even if the customer's tab
+     never survived long enough for /verify to fire, and moves a trialing
+     row to "active" once real money has actually moved. Every other
+     subscribed event reaches here too and must not grant anything. */
+  if (event.event === "subscription.charged" && amount) {
+    await provisionRecurringCharge(subscriptionId, paymentId, amount);
   }
 
   /* Always 2xx on a verified event, otherwise Razorpay retries forever. */

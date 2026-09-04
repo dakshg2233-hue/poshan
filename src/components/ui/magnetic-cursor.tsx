@@ -203,13 +203,17 @@ export const MagneticCursor: FC<MagneticCursorProps> = ({
 
     const magneticElements = gsap.utils.toArray<HTMLElement>(`[${hoverAttribute}]`);
     magneticElements.forEach((el) => {
-      const xTo = gsap.quickTo(el, 'x', { duration: 1, ease: 'elastic.out(1, 0.3)' });
-      const yTo = gsap.quickTo(el, 'y', { duration: 1, ease: 'elastic.out(1, 0.3)' });
+      const xTo = prefersReducedMotion
+        ? null
+        : gsap.quickTo(el, 'x', { duration: 1, ease: 'elastic.out(1, 0.3)' });
+      const yTo = prefersReducedMotion
+        ? null
+        : gsap.quickTo(el, 'y', { duration: 1, ease: 'elastic.out(1, 0.3)' });
 
       const handlePointerEnter = () => {
         const state = cursorStateRef.current;
         if (!state) return;
-        const { magneticFactor, hoverPadding } = configRef.current;
+        const { magneticFactor, hoverPadding, cursorSize } = configRef.current;
 
         state.hover.isHovered = true;
         state.isDetaching = false;
@@ -220,17 +224,17 @@ export const MagneticCursor: FC<MagneticCursorProps> = ({
         const dynamicPadding = hoverPadding * (1 + magneticFactor);
         const centerX = bounds.left + bounds.width / 2;
         const centerY = bounds.top + bounds.height / 2;
+        const targetWidth = bounds.width + dynamicPadding * 2;
+        const targetHeight = bounds.height + dynamicPadding * 2;
 
         gsap.killTweensOf(cursorEl);
         gsap.to(cursorEl, {
           x: centerX,
           y: centerY,
-          width: bounds.width + dynamicPadding * 2,
-          height: bounds.height + dynamicPadding * 2,
+          scaleX: targetWidth / cursorSize,
+          scaleY: targetHeight / cursorSize,
           borderRadius: computedStyle.borderRadius,
           backgroundColor: magneticColor,
-          scaleX: 1,
-          scaleY: 1,
           rotate: 0,
           duration: 0.3,
           ease: 'power3.out',
@@ -252,17 +256,14 @@ export const MagneticCursor: FC<MagneticCursorProps> = ({
         state.hover.isHovered = false;
         state.isDetaching = true;
 
-        const { cursorSize } = configRef.current;
         const shapeBorderRadius = shape === 'circle' ? '50%' : shape === 'square' ? '0' : '8px';
 
         gsap.killTweensOf(cursorEl);
         gsap.to(cursorEl, {
-          width: cursorSize,
-          height: cursorSize,
-          borderRadius: shapeBorderRadius,
-          backgroundColor: cursorColor,
           scaleX: 1,
           scaleY: 1,
+          borderRadius: shapeBorderRadius,
+          backgroundColor: cursorColor,
           duration: detachDuration,
           ease: 'power3.out',
           overwrite: true,
@@ -274,6 +275,7 @@ export const MagneticCursor: FC<MagneticCursorProps> = ({
 
       let rafId: number | null = null;
       const handlePointerMove = (event: PointerEvent) => {
+        if (prefersReducedMotion || !xTo || !yTo) return;
         if (rafId) return;
         rafId = requestAnimationFrame(() => {
           const { clientX, clientY } = event;
@@ -286,8 +288,8 @@ export const MagneticCursor: FC<MagneticCursorProps> = ({
       };
 
       const handlePointerOut = () => {
-        xTo(0);
-        yTo(0);
+        xTo?.(0);
+        yTo?.(0);
       };
 
       el.addEventListener('pointerenter', handlePointerEnter);
@@ -323,7 +325,7 @@ export const MagneticCursor: FC<MagneticCursorProps> = ({
     left: 0,
     zIndex: 9999,
     pointerEvents: 'none',
-    willChange: 'transform, width, height, border-radius',
+    willChange: 'transform, border-radius',
     backgroundColor: cursorColor,
     mixBlendMode: blendMode,
     width: cursorSize,

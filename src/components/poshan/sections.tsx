@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useLang, useReveal } from "./lang-provider";
 import { DishArt } from "./dish-art";
 import { TabLink } from "./tabs";
@@ -41,10 +42,12 @@ export function Bands() {
             </p>
           </div>
 
-          <div
-            className="surface-card rounded-2xl p-6 overflow-x-auto"
-          >
-            <div className="grid grid-cols-4 min-w-[520px]">
+          <div className="surface-card rounded-2xl p-6">
+            {/* 2 columns on mobile so all four bands — Overweight included —
+               are visible without a swipe; a forced 4-col min-width here
+               used to push "Overweight 23.0-24.9" off-screen with no
+               scroll affordance, hiding the site's entire thesis. */}
+            <div className="grid grid-cols-2 gap-y-4 sm:grid-cols-4 sm:gap-y-0">
               {BANDS.map((b) => (
                 <div key={b.key} className="px-4 py-3.5" style={{ borderLeft: `3px solid ${b.color}` }}>
                   <div
@@ -66,7 +69,7 @@ export function Bands() {
               ))}
             </div>
             <p
-              className="mt-5 pt-4 text-[0.85rem] min-w-[520px]"
+              className="mt-5 pt-4 text-[0.85rem]"
               style={{ borderTop: "1px solid var(--line)", color: "var(--ink-soft)" }}
             >
               {T({
@@ -463,6 +466,28 @@ export function Footer() {
             </TabLink>
           ))}
         </nav>
+      </div>
+      {/* Separate row: real routes (/faq, /privacy, /terms), not tab
+          switches, so plain next/link rather than TabLink. */}
+      <div
+        className={`${SHELL} mt-6 pt-6 flex flex-wrap gap-6 text-[0.82rem]`}
+        style={{ borderTop: "1px solid var(--line)" }}
+      >
+        {[
+          { href: "/faq", en: "FAQ", hi: "सवाल-जवाब" },
+          { href: "/privacy", en: "Privacy", hi: "निजता" },
+          { href: "/terms", en: "Terms", hi: "शर्तें" },
+          { href: "/contact", en: "Contact", hi: "संपर्क" },
+        ].map((l) => (
+          <Link
+            key={l.href}
+            href={l.href}
+            className="no-underline underline-draw"
+            style={{ color: "var(--ink-soft)" }}
+          >
+            {T({ en: l.en, hi: l.hi })}
+          </Link>
+        ))}
       </div>
     </footer>
   );

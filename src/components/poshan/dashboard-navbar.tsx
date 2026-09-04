@@ -56,9 +56,9 @@ export function DashboardNavbar() {
               🍛 Meals (130+)
             </Link>
             <Link
-              href="/dashboard/profile"
+              href="/profile"
               className={`text-sm font-medium transition ${
-                isActive("/dashboard/profile")
+                isActive("/profile")
                   ? "text-orange-600"
                   : "text-gray-700 dark:text-gray-300 hover:text-orange-600"
               }`}
@@ -103,7 +103,7 @@ export function DashboardNavbar() {
               🍛 Meals (130+)
             </Link>
             <Link
-              href="/dashboard/profile"
+              href="/profile"
               className="block px-4 py-2 text-sm font-medium hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded"
               onClick={() => setIsOpen(false)}
             >

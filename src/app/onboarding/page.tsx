@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { browserClient } from "@/lib/supabase-browser";
 import { OnboardingFlow } from "@/components/poshan/onboarding-flow";
 import type { User } from "@supabase/supabase-js";
+import { FORCE_PREMIUM } from "@/lib/dev-flags";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -40,12 +41,13 @@ export default function OnboardingPage() {
         .from("subscriptions")
         .select("*")
         .eq("user_id", userId)
-        .eq("plan", "home")
+        .eq("product", "home")
+        .in("status", ["trialing", "active"])
         .single();
 
-      setIsPremium(!!data);
+      setIsPremium(FORCE_PREMIUM || !!data);
     } catch {
-      setIsPremium(false);
+      setIsPremium(FORCE_PREMIUM);
     }
   }
 

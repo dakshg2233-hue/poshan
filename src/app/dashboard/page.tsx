@@ -9,8 +9,13 @@ import { useConditions } from "@/lib/hooks/use-conditions"
 import { DashboardNavbar } from "@/components/poshan/dashboard-navbar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MacroPersonalizer } from "@/components/poshan/macro-personalizer"
+import type { GoalKey } from "@/lib/poshan-data"
+import { TodayWidget } from "@/components/poshan/today-widget"
+import { FamilyProfiles } from "@/components/poshan/family-profiles"
+import { PatientCare } from "@/components/poshan/patient-care"
 import { Activity, Heart, Droplet, TrendingUp } from "lucide-react"
 import type { User } from "@supabase/supabase-js"
+import { FORCE_PREMIUM } from "@/lib/dev-flags"
 
 export default function Dashboard() {
   const router = useRouter()
@@ -28,6 +33,25 @@ export default function Dashboard() {
       return
     }
 
+    async function checkSubscription(userId: string) {
+      const supabase = browserClient()
+      if (!supabase) return
+
+      try {
+        const { data } = await supabase
+          .from("subscriptions")
+          .select("*")
+          .eq("user_id", userId)
+          .eq("product", "home")
+          .in("status", ["trialing", "active"])
+          .single()
+
+        setIsPremium(FORCE_PREMIUM || !!data)
+      } catch {
+        setIsPremium(FORCE_PREMIUM)
+      }
+    }
+
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) {
         router.push("/login")
@@ -39,30 +63,12 @@ export default function Dashboard() {
     })
   }, [router])
 
-  async function checkSubscription(userId: string) {
-    const supabase = browserClient()
-    if (!supabase) return
-
-    try {
-      const { data } = await supabase
-        .from("subscriptions")
-        .select("*")
-        .eq("user_id", userId)
-        .eq("plan", "home")
-        .single()
-
-      setIsPremium(!!data)
-    } catch {
-      setIsPremium(false)
-    }
-  }
-
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-[var(--paper)]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your dashboard...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--kesar)] mx-auto mb-4"></div>
+          <p className="text-[var(--ink-soft)]">Loading your dashboard...</p>
         </div>
       </div>
     )
@@ -70,112 +76,110 @@ export default function Dashboard() {
 
   if (!user) return null
 
+  const statCards = [
+    { icon: Heart, label: "Height", value: `${profile?.height_cm || "--"} cm` },
+    { icon: Activity, label: "Weight", value: `${profile?.weight_kg || "--"} kg` },
+    { icon: TrendingUp, label: "Biomarkers", value: biomarkers.length },
+    { icon: Droplet, label: "Conditions", value: conditions.length },
+  ]
+
   return (
     <>
       <DashboardNavbar />
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+      <div className="min-h-screen bg-[var(--paper)]">
         <div className="max-w-7xl mx-auto px-4 py-8">
           {/* Header */}
+          <div className="mb-8 rise">
+            <h1 className="text-3xl font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--ink)" }}>
+              Welcome back, {profile?.full_name || user.email}
+            </h1>
+            <p className="text-[var(--ink-soft)] mt-2">Track your health and wellness journey</p>
+          </div>
+
+          {/* Glanceable summary — the one card meant to answer "where do I
+              stand today" without scrolling further. */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold">Welcome back, {profile?.full_name || user.email}</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">Track your health and wellness journey</p>
+            <TodayWidget profile={profile} />
           </div>
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                  <Heart className="w-4 h-4" />
-                  Height
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">{profile?.height_cm || "--"} cm</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                  <Activity className="w-4 h-4" />
-                  Weight
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">{profile?.weight_kg || "--"} kg</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4" />
-                  Biomarkers
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">{biomarkers.length}</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                  <Droplet className="w-4 h-4" />
-                  Conditions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">{conditions.length}</p>
-              </CardContent>
-            </Card>
+            {statCards.map(({ icon: Icon, label, value }, i) => (
+              <Card
+                key={label}
+                className="card-in border-[var(--line)] bg-[var(--surface)]"
+                style={{ "--i": i } as React.CSSProperties}
+              >
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-[var(--ink-soft)] flex items-center gap-2">
+                    <Icon className="w-4 h-4" style={{ color: "var(--kesar)" }} />
+                    {label}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold" style={{ color: "var(--ink)" }}>{value}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
 
           {/* Biomarkers Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <Card>
+            <Card className="card-in border-[var(--line)] bg-[var(--surface)]" style={{ "--i": 4 } as React.CSSProperties}>
               <CardHeader>
-                <CardTitle>Recent Biomarkers</CardTitle>
+                <CardTitle style={{ color: "var(--ink)", fontFamily: "var(--font-display)" }}>Recent Biomarkers</CardTitle>
               </CardHeader>
               <CardContent>
                 {biomarkers.length > 0 ? (
                   <div className="space-y-4">
                     {biomarkers.slice(0, 5).map((b) => (
-                      <div key={b.id} className="flex justify-between items-center pb-4 border-b last:border-b-0">
+                      <div key={b.id} className="flex justify-between items-center pb-4 border-b last:border-b-0" style={{ borderColor: "var(--line)" }}>
                         <div>
-                          <p className="font-medium">{b.marker}</p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">{b.taken_on}</p>
+                          <p className="font-medium" style={{ color: "var(--ink)" }}>{b.marker}</p>
+                          <p className="text-sm text-[var(--ink-soft)]">{b.taken_on}</p>
                         </div>
-                        <p className="text-lg font-bold">{b.value} {b.unit}</p>
+                        <p className="text-lg font-bold" style={{ color: "var(--ink)" }}>{b.value} {b.unit}</p>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-600 dark:text-gray-400">No biomarkers recorded yet. Add one to get started!</p>
+                  <p className="text-[var(--ink-soft)]">No biomarkers recorded yet. Add one to get started!</p>
                 )}
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-in border-[var(--line)] bg-[var(--surface)]" style={{ "--i": 5 } as React.CSSProperties}>
               <CardHeader>
-                <CardTitle>Health Conditions</CardTitle>
+                <CardTitle style={{ color: "var(--ink)", fontFamily: "var(--font-display)" }}>Health Conditions</CardTitle>
               </CardHeader>
               <CardContent>
                 {conditions.length > 0 ? (
                   <div className="space-y-2">
                     {conditions.map((c) => (
-                      <div key={c.id} className="flex items-center gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
-                        <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                        <span className="capitalize">{c.condition}</span>
+                      <div key={c.id} className="flex items-center gap-2 p-2 rounded" style={{ background: "var(--roti-2)" }}>
+                        <span className="w-2 h-2 rounded-full" style={{ background: "var(--kesar)" }}></span>
+                        <span className="capitalize" style={{ color: "var(--ink)" }}>{c.condition}</span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-600 dark:text-gray-400">No conditions recorded. Add one if applicable.</p>
+                  <p className="text-[var(--ink-soft)]">No conditions recorded. Add one if applicable.</p>
                 )}
               </CardContent>
             </Card>
+          </div>
+
+          {/* Family profiles (Premium only — the gate itself is enforced
+              server-side in /api/family, this just reflects it). */}
+          <div className="mt-8">
+            <FamilyProfiles isPremium={isPremium} />
+          </div>
+
+          {/* Clinician links — free for every account, not a Premium
+              feature: a patient shouldn't have to pay Poshan to accept
+              their own doctor's invite. */}
+          <div className="mt-8">
+            <PatientCare userId={user.id} />
           </div>
 
           {/* Macro Personalizer (Premium Only) */}
@@ -183,7 +187,7 @@ export default function Dashboard() {
             <div className="mt-8">
               <MacroPersonalizer
                 tdee={profile.tdee}
-                goal={profile.goal as any}
+                goal={profile.goal as GoalKey}
                 isPremium={true}
               />
             </div>

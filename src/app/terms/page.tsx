@@ -57,8 +57,10 @@ export default function Terms() {
 
         <h2 className="mt-6 text-[1.3rem]" style={{ fontFamily: "var(--font-display)" }}>Governing law</h2>
         <p>
-          Poshan is operated by <strong>Poshan Limited</strong>, x Street, B Block.
           These terms are governed by the laws of India.
+          {" "}
+          [TO CONFIRM: the operating entity&apos;s registered name and address —
+          removed a placeholder that was standing in as fact rather than a stub.]
         </p>
 
         <h2 className="mt-6 text-[1.3rem]" style={{ fontFamily: "var(--font-display)" }}>Contact</h2>
@@ -66,6 +68,10 @@ export default function Terms() {
           <a href="mailto:dakshg2233@gmail.com" style={{ color: "var(--kesar)" }}>dakshg2233@gmail.com</a>
           {" · "}
           <a href="tel:+918595607565" style={{ color: "var(--kesar)" }}>+91 85956 07565</a>
+          {" · "}
+          <a href="tel:+919773974039" style={{ color: "var(--kesar)" }}>+91 97739 74039</a>
+          <br />
+          Full contact details: <Link href="/contact" style={{ color: "var(--kesar)" }}>/contact</Link>.
         </p>
       </section>
     </main>

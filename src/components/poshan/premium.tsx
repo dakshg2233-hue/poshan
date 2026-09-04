@@ -349,7 +349,7 @@ export function Premium({
               ))}
             </ol>
 
-            <CheckoutButton yearly={yearly} />
+            <CheckoutButton yearly={yearly} signedIn={signedIn} />
 
             <CancelAnytime />
 

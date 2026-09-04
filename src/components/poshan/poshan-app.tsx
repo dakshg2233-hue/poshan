@@ -22,9 +22,10 @@ import { PaletteControl } from "./palette-control";
 import { PointerLight } from "./pointer-light";
 import { StickyCta } from "./sticky-cta";
 import { Consent } from "./consent";
+import { ChatWidget } from "./chat-widget";
 import { GlassFilter } from "@/components/ui/glass-filter";
 import { MagneticCursor } from "@/components/ui/magnetic-cursor";
-import { TabProvider, TabPanel } from "./tabs";
+import { TabProvider, TabPanel, useSwipeNav } from "./tabs";
 import { Bands, Meals, Biomarkers, Testimonials, ClosingCta, Footer } from "./sections";
 import {
   bandFor,
@@ -32,7 +33,10 @@ import {
   type GoalKey,
   type DietKey,
   type RegionKey,
+  type Band,
+  type Plan,
 } from "@/lib/poshan-data";
+import type { Sex, ActivityLevel } from "@/lib/energy-requirement";
 
 /**
  * Resolves stored values first, then mounts the app seeded from them.
@@ -75,13 +79,16 @@ function PoshanAppInner({
   signedIn: boolean;
 }) {
   const { body, set } = useBodyState(initial, save);
-  const { height, weight, goal, diet, region } = body;
+  const { height, weight, goal, diet, region, age, sex, activityLevel } = body;
 
   const setHeight = (v: number) => set("height", v);
   const setWeight = (v: number) => set("weight", v);
   const setGoal = (v: GoalKey) => set("goal", v);
   const setDiet = (v: DietKey) => set("diet", v);
   const setRegion = (v: RegionKey) => set("region", v);
+  const setAge = (v: number) => set("age", v);
+  const setSex = (v: Sex) => set("sex", v);
+  const setActivityLevel = (v: ActivityLevel) => set("activityLevel", v);
 
   const bmi = useMemo(() => weight / Math.pow(height / 100, 2), [height, weight]);
   const band = useMemo(() => bandFor(bmi), [bmi]);
@@ -108,58 +115,29 @@ function PoshanAppInner({
       {/* Wraps Nav as well as main, because the tab strip and the site search
           both live in the bar and both drive the same active tab. */}
       <TabProvider>
-      <Nav />
-      <main id="top" className="flex-1">
-        {/* One tab mounts at a time. The sections themselves are unchanged;
-            only which of them is in the document at once has moved. */}
-        <TabPanel tab="home">
-          {/* Photographic opener. The BMI tool below is untouched: it is the
-              core interaction and does not belong buried under a hero. */}
-          <HeroVideo />
-          <Hero
-            height={height}
-            weight={weight}
-            setHeight={setHeight}
-            setWeight={setWeight}
-            bmi={bmi}
-            band={band}
-            plan={plan}
-          />
-          <Bands />
-        </TabPanel>
-
-        <TabPanel tab="plate">
-          <Meals band={band} plan={plan} />
-        </TabPanel>
-
-        <TabPanel tab="meals">
-          <MealLibrary goal={goal} />
-          <FoodScanner />
-        </TabPanel>
-
-        <TabPanel tab="health">
-          <Conditions />
-          <Biomarkers />
-        </TabPanel>
-
-        <TabPanel tab="premium">
-          {/* diet and region now live here too, so all five values persist
-              together rather than the customiser holding two of them privately. */}
-          <Premium
-            baseKcal={plan.kcal}
-            goal={goal}
-            setGoal={setGoal}
-            diet={diet}
-            setDiet={setDiet}
-            region={region}
-            setRegion={setRegion}
-            signedIn={signedIn}
-          />
-          <Clinics />
-          <Testimonials />
-          <ClosingCta />
-        </TabPanel>
-      </main>
+      <Nav signedIn={signedIn} />
+      <MainContent
+        height={height}
+        weight={weight}
+        setHeight={setHeight}
+        setWeight={setWeight}
+        age={age}
+        setAge={setAge}
+        sex={sex}
+        setSex={setSex}
+        activityLevel={activityLevel}
+        setActivityLevel={setActivityLevel}
+        bmi={bmi}
+        band={band}
+        plan={plan}
+        goal={goal}
+        setGoal={setGoal}
+        diet={diet}
+        setDiet={setDiet}
+        region={region}
+        setRegion={setRegion}
+        signedIn={signedIn}
+      />
       {/* Inside the provider: the footer links switch tabs too. */}
       <Footer />
       {/* Chrome, not content, so it sits outside <main>. Still inside the
@@ -170,14 +148,131 @@ function PoshanAppInner({
           now, so it is reachable without landing on the composition. */}
       <CursorPicker />
       {/* Fixed chrome, not nav furniture: the header stows over the hero,
-          which used to take the only palette control off screen with it. */}
-      <PaletteControl />
+          which used to take the only palette control off screen with it.
+          Dev-only: this was always meant to be removed once a palette was
+          chosen (sindoor, the bare :root, already is that choice) — a raw
+          theme-tester floating on every page reads as unfinished to a real
+          visitor, not premium. Kept for the team, gone from production. */}
+      {process.env.NODE_ENV === "development" && <PaletteControl />}
       {/* The hero's pointer spotlight, carried down the whole page. */}
       <PointerLight />
       <StickyCta />
+      <ChatWidget signedIn={signedIn} />
       {/* Nothing is loaded and no id is set until this is accepted. */}
       <Consent />
       </TabProvider>
     </MagneticCursor>
+  );
+}
+
+/**
+ * Split out from PoshanAppInner for one reason: useSwipeNav() reads tab
+ * context, and a component can't consume the context that its own render
+ * also creates — the TabProvider has to be an ancestor of the component
+ * calling the hook, not the same function that renders <TabProvider>.
+ */
+function MainContent({
+  height,
+  weight,
+  setHeight,
+  setWeight,
+  age,
+  setAge,
+  sex,
+  setSex,
+  activityLevel,
+  setActivityLevel,
+  bmi,
+  band,
+  plan,
+  goal,
+  setGoal,
+  diet,
+  setDiet,
+  region,
+  setRegion,
+  signedIn,
+}: {
+  height: number;
+  weight: number;
+  setHeight: (v: number) => void;
+  setWeight: (v: number) => void;
+  age?: number;
+  setAge: (v: number) => void;
+  sex?: Sex;
+  setSex: (v: Sex) => void;
+  activityLevel?: ActivityLevel;
+  setActivityLevel: (v: ActivityLevel) => void;
+  bmi: number;
+  band: Band;
+  plan: Plan;
+  goal: GoalKey;
+  setGoal: (v: GoalKey) => void;
+  diet: DietKey;
+  setDiet: (v: DietKey) => void;
+  region: RegionKey;
+  setRegion: (v: RegionKey) => void;
+  signedIn: boolean;
+}) {
+  const swipeRef = useSwipeNav<HTMLElement>();
+
+  return (
+    <main id="top" className="flex-1" ref={swipeRef}>
+      {/* One tab mounts at a time. The sections themselves are unchanged;
+          only which of them is in the document at once has moved. */}
+      <TabPanel tab="home">
+        {/* Photographic opener. The BMI tool below is untouched: it is the
+            core interaction and does not belong buried under a hero. */}
+        <HeroVideo />
+        <Hero
+          height={height}
+          weight={weight}
+          setHeight={setHeight}
+          setWeight={setWeight}
+          age={age}
+          setAge={setAge}
+          sex={sex}
+          setSex={setSex}
+          activityLevel={activityLevel}
+          setActivityLevel={setActivityLevel}
+          bmi={bmi}
+          band={band}
+          plan={plan}
+        />
+        <Bands />
+      </TabPanel>
+
+      <TabPanel tab="plate">
+        <Meals band={band} plan={plan} />
+      </TabPanel>
+
+      <TabPanel tab="meals">
+        <MealLibrary goal={goal} />
+        <FoodScanner />
+      </TabPanel>
+
+      <TabPanel tab="health">
+        <Biomarkers />
+        <Conditions />
+      </TabPanel>
+
+      <TabPanel tab="premium">
+        {/* diet and region now live here too, so all five values persist
+            together rather than the customiser holding two of them privately. */}
+        <Premium
+          baseKcal={plan.kcal}
+          goal={goal}
+          setGoal={setGoal}
+          diet={diet}
+          setDiet={setDiet}
+          region={region}
+          setRegion={setRegion}
+          signedIn={signedIn}
+        />
+        <Clinics />
+        <Testimonials />
+        <ClosingCta />
+      </TabPanel>
+    </main>
   );
 }

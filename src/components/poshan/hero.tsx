@@ -6,6 +6,12 @@ import { Thali } from "./thali";
 import { TabLink } from "./tabs";
 import { usePrefersReducedMotion } from "@/lib/use-media-query";
 import type { Band, Plan } from "@/lib/poshan-data";
+import {
+  estimateMaintenanceKcal,
+  ACTIVITY_LEVELS,
+  type Sex,
+  type ActivityLevel,
+} from "@/lib/energy-requirement";
 
 const feetInches = (cm: number) => {
   const total = Math.round(cm / 2.54);
@@ -56,6 +62,12 @@ export function Hero({
   weight,
   setHeight,
   setWeight,
+  age,
+  setAge,
+  sex,
+  setSex,
+  activityLevel,
+  setActivityLevel,
   bmi,
   band,
   plan,
@@ -64,6 +76,12 @@ export function Hero({
   weight: number;
   setHeight: (n: number) => void;
   setWeight: (n: number) => void;
+  age?: number;
+  setAge: (n: number) => void;
+  sex?: Sex;
+  setSex: (s: Sex) => void;
+  activityLevel?: ActivityLevel;
+  setActivityLevel: (a: ActivityLevel) => void;
   bmi: number;
   band: Band;
   plan: Plan;
@@ -71,6 +89,11 @@ export function Hero({
   const { T } = useLang();
   const shown = useCounter(bmi);
   const calm = usePrefersReducedMotion();
+
+  const maintenanceKcal =
+    age !== undefined && sex && activityLevel
+      ? estimateMaintenanceKcal(weight, age, sex, activityLevel)
+      : null;
 
   /* Read once at mount, then burn it, so the first render of this session
      stages in and every later one does not. */
@@ -213,6 +236,75 @@ export function Hero({
               />
             </div>
           </div>
+
+          {/* Personalised maintenance calories: additive to the BMI tool
+              above, which works fully without any of this. Age and sex
+              default to nothing rather than a guess — a defaulted sex would
+              silently change the answer by ~450 kcal/day (ICMR-NIN, 2020),
+              which is worse than showing no number until asked. */}
+          <div className="surface-card mt-5 p-5 rounded-2xl max-w-[520px] mx-auto">
+            <p
+              className="text-[0.7rem] font-extrabold uppercase mb-3"
+              style={{ letterSpacing: "0.15em", color: "var(--ink-soft)" }}
+            >
+              {T({ en: "Your maintenance calories", hi: "आपकी मेंटेनेंस कैलोरीज़" })}
+            </p>
+
+            <Slider
+              id="age"
+              label={T({ en: "Age", hi: "उम्र" })}
+              value={age !== undefined ? T({ en: `${age} years`, hi: `${age} वर्ष` }) : T({ en: "Not set", hi: "तय नहीं" })}
+              min={19}
+              max={90}
+              current={age ?? 30}
+              onChange={setAge}
+            />
+
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              <SegmentedPicker
+                label={T({ en: "Sex", hi: "लिंग" })}
+                value={sex}
+                onChange={setSex}
+                options={[
+                  { key: "male", label: T({ en: "Male", hi: "पुरुष" }) },
+                  { key: "female", label: T({ en: "Female", hi: "महिला" }) },
+                ]}
+              />
+              <SegmentedPicker
+                label={T({ en: "Activity", hi: "गतिविधि" })}
+                value={activityLevel}
+                onChange={setActivityLevel}
+                options={ACTIVITY_LEVELS.map((a) => ({ key: a.key, label: T(a.label), description: T(a.hint) }))}
+              />
+            </div>
+
+            {maintenanceKcal !== null ? (
+              <p className="mt-5 text-[0.92rem]" style={{ color: "var(--ink)" }}>
+                <span className="text-[1.7rem] tabular-nums" style={{ fontFamily: "var(--font-data)", fontWeight: 500 }}>
+                  {maintenanceKcal.toLocaleString("en-IN")}
+                </span>{" "}
+                {T({ en: "kcal/day to hold your current weight.", hi: "कैलोरी/दिन, मौजूदा वज़न बनाए रखने के लिए।" })}{" "}
+                <span className="text-[0.78rem]" style={{ color: "var(--ink-soft)" }}>
+                  {T({
+                    en: "Per ICMR-NIN's 2020 energy requirements for Indians, adjusted to your weight — not a Western formula.",
+                    hi: "ICMR-NIN के 2020 भारतीय ऊर्जा मानकों के अनुसार, आपके वज़न पर आधारित — पश्चिमी फ़ॉर्मूला नहीं।",
+                  })}
+                </span>
+              </p>
+            ) : (
+              <p className="mt-5 text-[0.82rem]" style={{ color: "var(--ink-soft)" }}>
+                {age !== undefined && age < 19
+                  ? T({
+                      en: "This estimate is calibrated for adults (19+) — ICMR-NIN gives children a different, non-scaling figure.",
+                      hi: "यह अनुमान वयस्कों (19+) के लिए है — बच्चों के लिए ICMR-NIN अलग मान देता है।",
+                    })
+                  : T({
+                      en: "Set your age, sex and activity level for a real maintenance-calorie number, sourced from ICMR-NIN, not guessed.",
+                      hi: "असली मेंटेनेंस कैलोरी जानने के लिए उम्र, लिंग और गतिविधि चुनें — ICMR-NIN से, अंदाज़े से नहीं।",
+                    })}
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </section>
@@ -260,6 +352,68 @@ function Slider({
         onChange={(e) => onChange(+e.target.value)}
         className="poshan-range w-full h-[34px] block cursor-pointer bg-transparent"
       />
+    </div>
+  );
+}
+
+/** A small labelled button group. Nothing selected reads as nothing chosen
+    yet, not a coerced first option — matches Slider's own convention of
+    showing "Not set" rather than picking a value for the visitor. */
+function SegmentedPicker<T extends string>({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: T | undefined;
+  onChange: (v: T) => void;
+  options: { key: T; label: string; description?: string }[];
+}) {
+  const active = options.find((o) => o.key === value);
+
+  return (
+    <div>
+      <p
+        className="text-[0.72rem] font-extrabold uppercase mb-2"
+        style={{ letterSpacing: "0.12em", color: "var(--ink-soft)" }}
+      >
+        {label}
+      </p>
+      <div className="flex flex-wrap gap-2" role="group" aria-label={label}>
+        {options.map((o) => {
+          const on = o.key === value;
+          return (
+            <button
+              key={o.key}
+              type="button"
+              aria-pressed={on}
+              onClick={() => onChange(o.key)}
+              className="px-3.5 py-2 rounded-full text-[0.84rem] font-semibold cursor-pointer transition-colors min-h-10"
+              style={
+                on
+                  ? { background: "var(--kesar-fill)", color: "#fff" }
+                  : { border: "1.5px solid var(--line)", color: "var(--ink)" }
+              }
+            >
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+      {/* Re-keyed on the active option so panel-in replays on every switch —
+          a visitor tapping through options gets each description as a small
+          settle-in rather than a jump-cut, which is what makes reading them
+          side by side while deciding feel deliberate instead of glitchy. */}
+      {active?.description ? (
+        <p
+          key={active.key}
+          className="panel-in mt-2.5 text-[0.78rem] leading-relaxed whitespace-pre-line"
+          style={{ color: "var(--ink-soft)" }}
+        >
+          {active.description}
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useProfile } from "@/lib/hooks/use-profile";
 import type { GoalKey, DietKey, RegionKey } from "@/lib/poshan-data";
+import { estimateMaintenanceKcal, type Sex, type ActivityLevel } from "@/lib/energy-requirement";
 
 /**
  * The body profile: height, weight, goal, diet, region: with two tiers of
@@ -23,6 +24,14 @@ export type Body = {
   goal: GoalKey;
   diet: DietKey;
   region: RegionKey;
+  /* Optional on purpose, all three: a personalised maintenance-calorie
+     estimate is additive to the BMI tool, which works fully without them.
+     Defaulting sex in particular would mean silently guessing a value that
+     changes the answer by ~450 kcal/day — worse than showing nothing until
+     the person actually says. */
+  age?: number;
+  sex?: Sex;
+  activityLevel?: ActivityLevel;
 };
 
 export const BODY_DEFAULTS: Body = {
@@ -52,6 +61,10 @@ function readLocal(): Body | null {
         ? (p.diet as DietKey) : BODY_DEFAULTS.diet,
       region: (["north", "south", "east", "west"] as const).includes(p.region as RegionKey)
         ? (p.region as RegionKey) : BODY_DEFAULTS.region,
+      age: typeof p.age === "number" && p.age >= 13 && p.age <= 120 ? p.age : undefined,
+      sex: (["male", "female"] as const).includes(p.sex as Sex) ? (p.sex as Sex) : undefined,
+      activityLevel: (["sedentary", "moderate", "heavy"] as const).includes(p.activityLevel as ActivityLevel)
+        ? (p.activityLevel as ActivityLevel) : undefined,
     };
     return b;
   } catch {
@@ -77,6 +90,9 @@ export function useBodySource() {
         goal: (profile.goal as GoalKey) ?? BODY_DEFAULTS.goal,
         diet: (profile.diet as DietKey) ?? BODY_DEFAULTS.diet,
         region: (profile.region as RegionKey) ?? BODY_DEFAULTS.region,
+        age: profile.age ?? undefined,
+        sex: (profile.sex as Sex) ?? undefined,
+        activityLevel: (profile.activity_level as ActivityLevel) ?? undefined,
       };
     }
     return readLocal() ?? BODY_DEFAULTS;
@@ -96,12 +112,20 @@ export function useBodySource() {
         /* Private mode, quota, or storage disabled. Not worth failing over. */
       }
       if (!profile) return;
+      const tdee =
+        b.age && b.sex && b.activityLevel
+          ? estimateMaintenanceKcal(b.weight, b.age, b.sex, b.activityLevel)
+          : null;
       void updateProfile({
         height_cm: Math.round(b.height),
         weight_kg: b.weight,
         goal: b.goal,
         diet: b.diet,
         region: b.region,
+        age: b.age ?? null,
+        sex: b.sex ?? null,
+        activity_level: b.activityLevel ?? null,
+        tdee,
       });
     },
     [profile, updateProfile]

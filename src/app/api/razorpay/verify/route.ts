@@ -1,27 +1,37 @@
 import crypto from "node:crypto";
 import { serviceClient } from "@/lib/supabase";
 import { clientIp, rateLimit, tooMany, readJsonCapped } from "@/lib/rate-limit";
+import { provisionTrialStart } from "@/lib/razorpay-provision";
 
 /**
- * Verifies a completed Razorpay payment.
+ * Verifies the authorization step of a Razorpay Subscription checkout.
  *
  * The client cannot be trusted to report its own success, anyone can POST
- * "payment done". Razorpay signs `order_id|payment_id` with the key secret
- * and only the server can recompute that.
+ * "payment done". For a subscription, Razorpay signs
+ * `payment_id|subscription_id` (the subscription-flow analogue of the
+ * order flow's `order_id|payment_id`) with the key secret, and only the
+ * server can recompute that.
+ *
+ * ⚠ The exact byte order Razorpay signs for subscriptions was not confirmed
+ * against live documentation while writing this (no Razorpay account is
+ * configured yet to test against) — verify this against a real webhook
+ * delivery or the Subscriptions integration guide before going live, and
+ * fix the `update(...)` call below if it differs.
  *
  * Three protections beyond the signature itself:
  *  1. Rate limited, so the signature cannot be brute-forced.
  *  2. Constant-time compare, so it cannot be probed byte by byte.
  *  3. Replay protection: a valid payment id is recorded once and reused
- *     attempts are rejected, otherwise the same successful payment could be
- *     submitted repeatedly to extend a subscription for free.
+ *     attempts are rejected.
  *
- * This route is a convenience for instant UI feedback. The webhook is the
- * source of truth; never grant access on this alone in production.
+ * This route is a convenience for instant UI feedback — it grants the
+ * trial the moment checkout succeeds, before any money has moved. The
+ * webhook's `subscription.charged` event is the source of truth for actual
+ * billing; never treat this route as proof that a charge happened.
  */
 
 type Body = {
-  razorpay_order_id?: string;
+  razorpay_subscription_id?: string;
   razorpay_payment_id?: string;
   razorpay_signature?: string;
 };
@@ -38,14 +48,14 @@ export async function POST(request: Request) {
   const parsed = await readJsonCapped<Body>(request, 4_096);
   if (!parsed.ok) return parsed.response;
 
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = parsed.data;
-  if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+  const { razorpay_subscription_id, razorpay_payment_id, razorpay_signature } = parsed.data;
+  if (!razorpay_subscription_id || !razorpay_payment_id || !razorpay_signature) {
     return Response.json({ verified: false, error: "Missing payment fields." }, { status: 400 });
   }
 
   const expected = crypto
     .createHmac("sha256", keySecret)
-    .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+    .update(`${razorpay_payment_id}|${razorpay_subscription_id}`)
     .digest("hex");
 
   const a = Buffer.from(expected, "utf8");
@@ -58,7 +68,7 @@ export async function POST(request: Request) {
     if (db) {
       await db.from("payment_events").upsert(
         {
-          razorpay_order_id,
+          razorpay_subscription_id,
           razorpay_payment_id,
           signature_valid: false,
           source: "client",
@@ -72,7 +82,7 @@ export async function POST(request: Request) {
 
   if (db) {
     const { error } = await db.from("payment_events").insert({
-      razorpay_order_id,
+      razorpay_subscription_id,
       razorpay_payment_id,
       signature_valid: true,
       source: "client",
@@ -86,5 +96,11 @@ export async function POST(request: Request) {
     }
   }
 
-  return Response.json({ verified: true, paymentId: razorpay_payment_id });
+  /* Fast path: start the trial right away so the customer watching this
+     checkout window sees it active immediately. The webhook's
+     subscription.charged event is what actually moves status to "active"
+     once real billing starts — this only ever grants "trialing". */
+  const activated = await provisionTrialStart(razorpay_subscription_id, razorpay_payment_id);
+
+  return Response.json({ verified: true, paymentId: razorpay_payment_id, activated });
 }

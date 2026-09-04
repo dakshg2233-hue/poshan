@@ -1106,11 +1106,17 @@ section.on-panel,
    nothing below the hero: the sections simply overwrote it again. The dark
    cinematic look is unchanged; it now takes its hue from the active palette,
    so Neel goes inky blue, Jamun plum, Tulsi forest, and so on. */
-main {
+/* Scoped to #top, the SPA shell's own <main>: this cinematic theming is not
+   meant for the plain static pages (/privacy, /terms, /faq), which also
+   render a bare <main>. Unscoped, this rule painted their background dark
+   while their headings — sitting outside any <section> — kept the light-mode
+   --ink, going near-invisible: dark text on a background that was never
+   supposed to apply to them. */
+main#top {
   background: color-mix(in srgb, var(--brand-1) 6%, #0b0a0d);
 }
 
-main section:not(#hero) {
+main#top section:not(#hero) {
   --roti: color-mix(in srgb, var(--brand-1) 8%, #0f0e13);
   --roti-2: color-mix(in srgb, var(--brand-1) 12%, #16151c);
   --wash-1: var(--roti);
@@ -1180,7 +1186,7 @@ main section:not(#hero) {
   backdrop-filter: blur(18px);
 }
 
-main section:not(#hero)::before {
+main#top section:not(#hero)::before {
   content: "";
   position: absolute;
   inset: -25%;
@@ -1220,8 +1226,8 @@ main section:not(#hero)::before {
    ================================================================== */
 
 /* Olive: the mid tone between the dark bands and the cream ones. */
-main section#scan,
-main section#clinics {
+main#top section#scan,
+main#top section#clinics {
   --roti: color-mix(in srgb, var(--brand-2) 10%, #2a2f22);
   --roti-2: color-mix(in srgb, var(--brand-2) 14%, #333927);
   --wash-1: var(--roti);
@@ -1246,7 +1252,7 @@ main section#clinics {
 }
 
 /* Cream: the warmest band, for the sections that talk about food. */
-main section#conditions {
+main#top section#conditions {
   --roti: color-mix(in srgb, var(--brand-2) 9%, #f6f2e6);
   --roti-2: color-mix(in srgb, var(--brand-2) 14%, #ece6d5);
   --wash-1: var(--roti);
@@ -1280,8 +1286,8 @@ main section#conditions {
       color-mix(in srgb, var(--brand-2) 8%, #eef2e7));
 }
 
-main section#plate,
-main section#meals {
+main#top section#plate,
+main#top section#meals {
   /* Both brand colours, not just --brand-2: Jamun and Tulsi happen to share
      the same --haldi, so a ground mixed from that alone came out identical
      in the two. Folding in --brand-1 keeps all nine distinguishable. */
@@ -1328,7 +1334,7 @@ main section#meals {
     );
 }
 
-main section#bios {
+main#top section#bios {
   background-image:
     radial-gradient(circle at 7% 15%, color-mix(in srgb, var(--brand-1) 26%, transparent), transparent 26rem),
     radial-gradient(circle at 90% 90%, color-mix(in srgb, var(--brand-2) 20%, transparent), transparent 28rem),
@@ -1490,13 +1496,42 @@ main section#meals .lift {
   }
 }
 
+/* Steam over the dal and sabzi katoris: the cue that reads "hot, just
+   served" faster than any texture detail can. Two wisps per bowl, offset so
+   they don't rise in lockstep, and the second bowl's pair staggered again
+   against the first so all four never breathe as one unit. */
+@keyframes thali-steam {
+  0% { transform: translateY(0) scaleX(1); opacity: 0; }
+  18% { opacity: 0.4; }
+  82% { opacity: 0.1; }
+  100% { transform: translateY(-15px) scaleX(1.2); opacity: 0; }
+}
+
+.thali-steam {
+  animation: thali-steam 3.8s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.thali-steam-2 {
+  animation-delay: 1.3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Reset the state, not just the animation: steam frozen mid-rise at some
+     arbitrary opacity would read as a smudge above the bowl. */
+  .thali-steam {
+    animation: none;
+    opacity: 0;
+  }
+}
+
 @keyframes hero-echo-drift {
   from { transform: translate3d(-4%, -2%, 0) scale(1); }
   to { transform: translate3d(5%, 4%, 0) scale(1.12); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  main section:not(#hero)::before { animation: none; }
+  main#top section:not(#hero)::before { animation: none; }
   main section:not(#hero) .surface-card,
   main section:not(#hero) .lift { transition: none; }
 }
@@ -1824,6 +1859,47 @@ main section#meals .lift {
 }
 
 /* ------------------------------------------------------------------
+   HEALTH COMPANION MARK
+
+   A sonar-ping ring behind the chat launcher's icon when Health Companion
+   is the active persona — the "hard to not notice" ask. Only on the
+   always-visible floating launcher, not everywhere the mark is used (the
+   persona tab inside the open panel stays still): a ring that never stops
+   pulsing is attention-grabbing exactly once and background noise after.
+   ------------------------------------------------------------------ */
+.health-mark-pulse::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  background: var(--mirch);
+  opacity: 0.55;
+  animation: health-mark-ping 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  z-index: -1;
+}
+
+@keyframes health-mark-ping {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.55;
+  }
+  75%,
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Reset the state, not just the animation: a static ring left at its
+     mid-pulse opacity would read as a smudge behind the icon. */
+  .health-mark-pulse::after {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* ------------------------------------------------------------------
    GHOST LINK UNDERLINE
 
    Reserved for navigational text links (the footer), not inline prose
@@ -1998,12 +2074,19 @@ html {
      attribute says. This rule is later in the file at equal specificity, so
      it wins, and the stow behaviour needs out-of-flow positioning anyway. */
   position: fixed;
-  top: 0;
+  /* --advice-bar-h is set by AdviceBar (src/components/poshan/advice-bar.tsx)
+     to its own measured height while it's on screen, and cleared when it
+     isn't. Without this the nav — fixed at the viewport's top edge — paints
+     directly over the advice bar, which sits in normal flow right above it
+     in the DOM: fixed positioning ignores document order entirely, so being
+     "above it" in markup does nothing on its own. */
+  top: var(--advice-bar-h, 0px);
   left: 0;
   right: 0;
   transition:
     opacity 0.4s var(--ease),
-    transform 0.4s var(--ease);
+    transform 0.4s var(--ease),
+    top 0.4s var(--ease);
 }
 /* The tab strip sits on the dark bar, so it takes the bar's lifted accents
    rather than the page's. Inactive tabs are the bar's soft ink; the active

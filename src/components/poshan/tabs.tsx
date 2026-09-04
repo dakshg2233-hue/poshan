@@ -241,6 +241,80 @@ export function TabLink({
   );
 }
 
+/**
+ * Swipe left/right anywhere in the tab content to move between tabs, the
+ * same order as the tab strip. Touch only — a mouse drag doesn't trigger it,
+ * so nothing changes for desktop pointer users.
+ *
+ * Ignores a touch that starts inside anything marked `data-no-swipe` (the
+ * food scanner's live camera view, so a finger moving across the preview
+ * doesn't fire a tab change) or inside an element that itself scrolls
+ * horizontally (so a swipe meant to scroll a filter row or carousel isn't
+ * stolen for navigation).
+ */
+export function useSwipeNav<T extends HTMLElement>() {
+  const { active, go } = useTabs();
+  const ref = useRef<T>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
+
+    function horizontallyScrollable(node: EventTarget | null): boolean {
+      let n = node instanceof Element ? node : null;
+      while (n && n !== el) {
+        if (n.closest("[data-no-swipe]")) return true;
+        const style = getComputedStyle(n);
+        const scrollsX = style.overflowX === "auto" || style.overflowX === "scroll";
+        if (scrollsX && n.scrollWidth > n.clientWidth) return true;
+        n = n.parentElement;
+      }
+      return false;
+    }
+
+    function onStart(e: TouchEvent) {
+      if (e.touches.length !== 1) return;
+      if (horizontallyScrollable(e.target)) return;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      tracking = true;
+    }
+
+    function onEnd(e: TouchEvent) {
+      if (!tracking) return;
+      tracking = false;
+      const touch = e.changedTouches[0];
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+
+      /* Mostly horizontal, and a real gesture rather than a tap: shorter
+         swipes read as noise, especially on a page that also scrolls
+         vertically. */
+      if (Math.abs(dx) < 64 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+
+      const i = TABS.findIndex((t) => t.key === active);
+      if (i === -1) return;
+      /* Swipe left (negative dx) = next tab, swipe right = previous —
+         matches how a horizontal carousel reads in a left-to-right layout. */
+      const next = dx < 0 ? Math.min(i + 1, TABS.length - 1) : Math.max(i - 1, 0);
+      if (next !== i) go(TABS[next].key);
+    }
+
+    el.addEventListener("touchstart", onStart, { passive: true });
+    el.addEventListener("touchend", onEnd, { passive: true });
+    return () => {
+      el.removeEventListener("touchstart", onStart);
+      el.removeEventListener("touchend", onEnd);
+    };
+  }, [active, go]);
+
+  return ref;
+}
+
 /** Wraps one tab's sections. Only the active panel is in the document. */
 export function TabPanel({
   tab,

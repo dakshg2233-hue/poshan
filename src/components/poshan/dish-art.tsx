@@ -18,7 +18,7 @@ const DISH_PHOTOS: Partial<Record<DishKey, string>> = {
   sabzi: "/dishes/sabzi.jpg",
   dahi: "/dishes/dahi.jpg",
   rice: "/dishes/rice.jpg",
-  /* chutney: no photograph yet: falls through to the vector below. */
+  chutney: "/dishes/chutney.jpg",
 };
 
 const DISH_ALT: Record<DishKey, string> = {
@@ -27,7 +27,7 @@ const DISH_ALT: Record<DishKey, string> = {
   sabzi: "A steel katori of green vegetable sabzi",
   dahi: "A steel katori of plain curd",
   rice: "A steel katori of steamed rice",
-  chutney: "A small katori of red chutney",
+  chutney: "A silver katori of green mint-coriander chutney, garnished with a coriander leaf",
 };
 
 export function DishArt({ dish }: { dish: DishKey }) {

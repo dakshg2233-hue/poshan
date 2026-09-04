@@ -84,7 +84,14 @@ Do not include any dish that is not on the list. Do not add commentary.`;
           {
             role: "user",
             content: [
-              { type: "text", text: prompt },
+              /* The dish menu dwarfs everything else in this prompt (~9K
+                 tokens) and is byte-identical on every request until
+                 MEAL_LIBRARY changes, so it's marked cacheable. Free of cost
+                 either way: a provider that ignores cache_control just drops
+                 the key, and one that honours it (Claude models routed
+                 through OmniRoute) turns every scan after the first into a
+                 cache read instead of a full prompt. */
+              { type: "text", text: prompt, cache_control: { type: "ephemeral" } },
               {
                 type: "image",
                 source: { type: "base64", media_type: mimeType, data: image },
