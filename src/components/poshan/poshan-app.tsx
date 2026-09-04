@@ -14,6 +14,10 @@ import { FoodScanner } from "./food-scanner";
 import { Conditions } from "./conditions";
 import { MotionLayer } from "./motion-layer";
 import { Clinics } from "./clinics";
+import { TodayRecommendation } from "./today-recommendation";
+import { PantryTracker } from "./pantry-tracker";
+import { WeightTracker } from "./weight-tracker";
+import { WeeklyReview } from "./weekly-review";
 /* hero-cinematic.tsx is the previous photographic hero. It is kept, not
    deleted: swapping these two imports and the tag below reverts the hero. */
 import { HeroVideo } from "./hero-video";
@@ -243,6 +247,20 @@ function MainContent({
       </TabPanel>
 
       <TabPanel tab="plate">
+        {/* Signed-in visitors get the real Daily Decision Engine — built
+            from their actual account (goal, conditions, logged history,
+            pantry, today's context), not the generic band-based plan below.
+            Signed-out visitors are untouched: same static Meals plan as
+            always, since there is no account for the engine to read from. */}
+        {signedIn && (
+          <div className="w-[min(1180px,100%-2.5rem)] mx-auto pt-14 md:pt-24 space-y-8">
+            <TodayRecommendation />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <PantryTracker />
+              <WeeklyReview />
+            </div>
+          </div>
+        )}
         <Meals band={band} plan={plan} />
       </TabPanel>
 
@@ -253,6 +271,11 @@ function MainContent({
 
       <TabPanel tab="health">
         <Biomarkers />
+        {signedIn && (
+          <div className="w-[min(1180px,100%-2.5rem)] mx-auto pb-14 md:pb-24">
+            <WeightTracker />
+          </div>
+        )}
         <Conditions />
       </TabPanel>
 
