@@ -11,6 +11,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MacroPersonalizer } from "@/components/poshan/macro-personalizer"
 import type { GoalKey } from "@/lib/poshan-data"
 import { TodayWidget } from "@/components/poshan/today-widget"
+import { TodayRecommendation } from "@/components/poshan/today-recommendation"
+import { PantryTracker } from "@/components/poshan/pantry-tracker"
+import { WeightTracker } from "@/components/poshan/weight-tracker"
+import { WeeklyReview } from "@/components/poshan/weekly-review"
 import { FamilyProfiles } from "@/components/poshan/family-profiles"
 import { PatientCare } from "@/components/poshan/patient-care"
 import { Activity, Heart, Droplet, TrendingUp } from "lucide-react"
@@ -102,6 +106,14 @@ export default function Dashboard() {
             <TodayWidget profile={profile} />
           </div>
 
+          {/* The Daily Decision Engine: what to eat today, built from the
+              same real signals as the clinician's care-plan drafter, plus
+              what this account itself has logged, has at home, and set as
+              today's busy/budget context. */}
+          <div className="mb-8">
+            <TodayRecommendation />
+          </div>
+
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             {statCards.map(({ icon: Icon, label, value }, i) => (
@@ -169,6 +181,13 @@ export default function Dashboard() {
             </Card>
           </div>
 
+          {/* Pantry + weight: the other two Daily Decision Engine inputs
+              that live outside the meal log itself. */}
+          <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <PantryTracker />
+            <WeightTracker />
+          </div>
+
           {/* Family profiles (Premium only — the gate itself is enforced
               server-side in /api/family, this just reflects it). */}
           <div className="mt-8">
@@ -192,6 +211,11 @@ export default function Dashboard() {
               />
             </div>
           )}
+
+          {/* Weekly close of the daily loop. */}
+          <div className="mt-8">
+            <WeeklyReview />
+          </div>
 
           {/* Quick Actions */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
