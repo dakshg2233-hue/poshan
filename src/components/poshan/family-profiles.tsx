@@ -5,7 +5,9 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Plus, Trash2 } from "lucide-react";
 import { useFamilyMembers, type FamilyMember } from "@/lib/hooks/use-family-members";
+import { useFamilyInvites } from "@/lib/hooks/use-family-invites";
 import { bandFor } from "@/lib/poshan-data";
+import { Link2, Copy, X } from "lucide-react";
 
 const MAX_FAMILY_MEMBERS = 5;
 
@@ -31,10 +33,24 @@ const EMPTY_FORM = {
  */
 export function FamilyProfiles({ isPremium }: { isPremium: boolean }) {
   const { members, loading, error, addMember, removeMember } = useFamilyMembers();
+  const { invites, createInvite, revokeInvite } = useFamilyInvites();
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [freshLink, setFreshLink] = useState<string | null>(null);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+
+  async function handleInvite() {
+    setInviteError(null);
+    try {
+      const invite = await createInvite();
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      setFreshLink(`${origin}${invite.url}`);
+    } catch (err) {
+      setInviteError(err instanceof Error ? err.message : "Could not create an invite.");
+    }
+  }
 
   if (!isPremium) {
     return (
@@ -95,16 +111,59 @@ export function FamilyProfiles({ isPremium }: { isPremium: boolean }) {
           Family
         </CardTitle>
         {!adding && !atCap && (
-          <button
-            onClick={() => setAdding(true)}
-            className="flex items-center gap-1 text-sm font-medium cursor-pointer"
-            style={{ color: "var(--kesar)" }}
-          >
-            <Plus className="h-4 w-4" /> Add
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleInvite}
+              className="flex items-center gap-1 text-sm font-medium cursor-pointer"
+              style={{ color: "var(--kesar)" }}
+            >
+              <Link2 className="h-4 w-4" /> Invite
+            </button>
+            <button
+              onClick={() => setAdding(true)}
+              className="flex items-center gap-1 text-sm font-medium cursor-pointer"
+              style={{ color: "var(--kesar)" }}
+            >
+              <Plus className="h-4 w-4" /> Add
+            </button>
+          </div>
         )}
       </CardHeader>
       <CardContent>
+        {freshLink && (
+          <div className="mb-4 flex items-center gap-2 rounded-lg p-3" style={{ background: "var(--roti-2, var(--roti))" }}>
+            <p className="min-w-0 flex-1 truncate text-xs" style={{ color: "var(--ink)" }}>{freshLink}</p>
+            <button
+              onClick={() => navigator.clipboard?.writeText(freshLink)}
+              className="shrink-0 rounded-full p-1.5"
+              style={{ color: "var(--kesar)" }}
+              aria-label="Copy invite link"
+            >
+              <Copy className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setFreshLink(null)}
+              className="shrink-0 rounded-full p-1.5"
+              style={{ color: "var(--ink-soft)" }}
+              aria-label="Dismiss"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+        {inviteError && <p className="mb-3 text-xs text-red-600">{inviteError}</p>}
+        {invites.filter((i) => i.status === "pending").length > 0 && (
+          <div className="mb-4 space-y-2">
+            {invites
+              .filter((i) => i.status === "pending")
+              .map((i) => (
+                <div key={i.id} className="flex items-center justify-between rounded-lg p-2.5 text-xs" style={{ background: "var(--roti-2, var(--roti))" }}>
+                  <span style={{ color: "var(--ink-soft)" }}>Invite pending, expires {new Date(i.expires_at).toLocaleDateString()}</span>
+                  <button onClick={() => revokeInvite(i.id)} style={{ color: "var(--ink-soft)" }}>Revoke</button>
+                </div>
+              ))}
+          </div>
+        )}
         {loading ? (
           <p className="text-sm text-[var(--ink-soft)]">Loading…</p>
         ) : error ? (

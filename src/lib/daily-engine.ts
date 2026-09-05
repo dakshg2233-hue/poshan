@@ -105,6 +105,29 @@ export function isQuickPrep(meal: MealPlanItem): boolean {
   return QUICK_MARKERS.some((m) => text.includes(m));
 }
 
+// -------------------------------------------------------------- vrat mode
+const VRAT_MARKERS = [
+  "sabudana", "sabu dana", "sago", "kuttu", "buckwheat", "singhara", "singhare",
+  "rajgira", "amaranth", "samak", "sama rice", "vrat", "farali", "makhana",
+  "fox nut", "sendha namak",
+];
+
+/**
+ * Whether a dish is recognisably fasting-friendly (Navratri, Ekadashi,
+ * Karva Chauth and similar vrat days) — detected the same way as pantry
+ * staples, by keyword match against the dish's own note text. Coverage is
+ * genuinely thin: MEAL_LIBRARY was built for everyday eating, not vrat
+ * days, so most dishes simply won't match. recommendToday() below falls
+ * back to the normal candidate set when nothing vrat-specific is safe and
+ * eligible, rather than returning nothing.
+ */
+export function isVratFriendly(meal: MealPlanItem): boolean {
+  const text = dishText(meal);
+  return VRAT_MARKERS.some((m) => text.includes(m));
+}
+
+export type DayType = "normal" | "vrat" | "festival";
+
 // --------------------------------------------------------- the engine
 export interface DailyPick {
   id: string;
@@ -151,6 +174,7 @@ const REASON = {
   quick: { en: "Quick to make on a busy day", hi: "व्यस्त दिन के लिए जल्दी बनने वाला" } as Bi,
   budget: { en: "Fits today's budget", hi: "आज के बजट में" } as Bi,
   variety: { en: "Something different from the last two days", hi: "पिछले दो दिनों से अलग" } as Bi,
+  vrat: { en: "Fasting-friendly for today", hi: "आज के व्रत के लिए उपयुक्त" } as Bi,
 } as const;
 
 /**
@@ -171,19 +195,29 @@ export function recommendToday(input: {
   pantryStaples: PantryStapleKey[];
   isBusy: boolean;
   budgetPref: CostTier | null;
+  /** "vrat" tries fasting-friendly dishes first, falling back to the normal
+   *  candidate set when none are safe and eligible for a given meal-time. */
+  dayType?: DayType;
 }): DailyRecommendation {
   const goalDef = GOALS.find((g) => g.key === input.goal);
   const targetKcal = Math.max(1200, (input.maintenanceKcal ?? 2000) + (goalDef?.kcal ?? 0));
   const goalTags = GOAL_TAGS[input.goal] ?? [];
   const perMealBudget = targetKcal / MEAL_TIMES.length;
   const recent = new Set(input.recentDishIds);
+  const dayType = input.dayType ?? "normal";
 
   const picks: DailyPick[] = [];
 
   for (const time of MEAL_TIMES) {
-    const candidates = MEAL_LIBRARY.filter(
+    const baseCandidates = MEAL_LIBRARY.filter(
       (m) => m.time === time && dietMatches(m, input.diet) && regionMatches(m, input.region)
     );
+
+    /* On a vrat day, prefer dishes recognisably fasting-friendly; only fall
+       back to the everyday set if nothing vrat-specific is safe. */
+    const vratCandidates = dayType === "vrat" ? baseCandidates.filter(isVratFriendly) : [];
+    const usingVratSet = vratCandidates.length > 0;
+    const candidates = usingVratSet ? vratCandidates : baseCandidates;
 
     const scored = candidates
       .map((meal) => ({ meal, check: checkMealAll(meal.id, input.conditions) }))
@@ -194,6 +228,11 @@ export function recommendToday(input: {
     const ranked = scored.map(({ meal }) => {
       const reasons: Bi[] = [];
       let score = 0;
+
+      if (usingVratSet) {
+        score += 4;
+        reasons.push(REASON.vrat);
+      }
 
       const goalTagCount = meal.tags.filter((t) => goalTags.includes(t)).length;
       score += goalTagCount * 3;

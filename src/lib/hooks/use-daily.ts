@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { Bi } from "@/lib/poshan-data";
-import type { CostTier } from "@/lib/daily-engine";
+import type { CostTier, DayType } from "@/lib/daily-engine";
 
 export interface DailyPick {
   id: string;
@@ -24,6 +24,8 @@ export interface DailyLog {
 export interface DailyContext {
   is_busy: boolean;
   budget_pref: CostTier | null;
+  day_type: DayType;
+  festival_name: string | null;
 }
 
 export interface DailyData {

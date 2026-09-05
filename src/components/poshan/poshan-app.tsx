@@ -18,6 +18,12 @@ import { TodayRecommendation } from "./today-recommendation";
 import { PantryTracker } from "./pantry-tracker";
 import { WeightTracker } from "./weight-tracker";
 import { WeeklyReview } from "./weekly-review";
+import { GroceryList } from "./grocery-list";
+import { StreakBadges } from "./streak-badges";
+import { EatingOutAdvisor } from "./eating-out-advisor";
+import { SymptomJournal } from "./symptom-journal";
+import { AdherenceOutcome } from "./adherence-outcome";
+import { ReminderOptIn } from "./reminder-optin";
 /* hero-cinematic.tsx is the previous photographic hero. It is kept, not
    deleted: swapping these two imports and the tag below reverts the hero. */
 import { HeroVideo } from "./hero-video";
@@ -254,11 +260,17 @@ function MainContent({
             always, since there is no account for the engine to read from. */}
         {signedIn && (
           <div className="w-[min(1180px,100%-2.5rem)] mx-auto pt-14 md:pt-24 space-y-8">
+            <ReminderOptIn />
             <TodayRecommendation />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <GroceryList />
+              <EatingOutAdvisor />
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <PantryTracker />
               <WeeklyReview />
             </div>
+            <StreakBadges />
           </div>
         )}
         <Meals band={band} plan={plan} />
@@ -272,8 +284,10 @@ function MainContent({
       <TabPanel tab="health">
         <Biomarkers />
         {signedIn && (
-          <div className="w-[min(1180px,100%-2.5rem)] mx-auto pb-14 md:pb-24">
+          <div className="w-[min(1180px,100%-2.5rem)] mx-auto pb-14 md:pb-24 space-y-8">
             <WeightTracker />
+            <SymptomJournal />
+            <AdherenceOutcome />
           </div>
         )}
         <Conditions />

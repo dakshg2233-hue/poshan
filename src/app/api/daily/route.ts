@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthedSupabase } from "@/lib/api-auth";
-import { recommendToday, PANTRY_STAPLES, type PantryStapleKey, type CostTier } from "@/lib/daily-engine";
+import { recommendToday, PANTRY_STAPLES, type PantryStapleKey, type CostTier, type DayType } from "@/lib/daily-engine";
 import { estimateMaintenanceKcal, type ActivityLevel } from "@/lib/energy-requirement";
 import type { GoalKey, DietKey, RegionKey } from "@/lib/poshan-data";
 import type { ConditionKey } from "@/lib/conditions";
@@ -95,6 +95,7 @@ export async function GET(request: NextRequest) {
         pantryStaples,
         isBusy: contextRow?.is_busy ?? false,
         budgetPref: (contextRow?.budget_pref as CostTier | null) ?? null,
+        dayType: (contextRow?.day_type as DayType | undefined) ?? "normal",
       })
     : null;
 
@@ -102,7 +103,7 @@ export async function GET(request: NextRequest) {
     recommendation,
     todayLogs,
     yesterdayLogs,
-    context: contextRow ?? { is_busy: false, budget_pref: null },
+    context: contextRow ?? { is_busy: false, budget_pref: null, day_type: "normal", festival_name: null },
     goalSet: !!target.goal,
   });
 }
@@ -167,10 +168,13 @@ export async function PATCH(request: NextRequest) {
   const { supabase, user } = auth;
 
   const body = await request.json();
-  const { is_busy, budget_pref } = body ?? {};
+  const { is_busy, budget_pref, day_type, festival_name } = body ?? {};
 
   if (budget_pref != null && !["budget", "moderate", "premium"].includes(budget_pref)) {
     return NextResponse.json({ error: "Invalid budget_pref." }, { status: 400 });
+  }
+  if (day_type != null && !["normal", "vrat", "festival"].includes(day_type)) {
+    return NextResponse.json({ error: "Invalid day_type." }, { status: 400 });
   }
 
   const today = new Date().toISOString().slice(0, 10);
@@ -182,6 +186,8 @@ export async function PATCH(request: NextRequest) {
         context_date: today,
         ...(typeof is_busy === "boolean" ? { is_busy } : {}),
         ...(budget_pref !== undefined ? { budget_pref } : {}),
+        ...(day_type !== undefined ? { day_type } : {}),
+        ...(festival_name !== undefined ? { festival_name } : {}),
         updated_at: new Date().toISOString(),
       },
       { onConflict: "user_id,context_date" }

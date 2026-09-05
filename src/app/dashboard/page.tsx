@@ -15,6 +15,12 @@ import { TodayRecommendation } from "@/components/poshan/today-recommendation"
 import { PantryTracker } from "@/components/poshan/pantry-tracker"
 import { WeightTracker } from "@/components/poshan/weight-tracker"
 import { WeeklyReview } from "@/components/poshan/weekly-review"
+import { GroceryList } from "@/components/poshan/grocery-list"
+import { StreakBadges } from "@/components/poshan/streak-badges"
+import { EatingOutAdvisor } from "@/components/poshan/eating-out-advisor"
+import { SymptomJournal } from "@/components/poshan/symptom-journal"
+import { AdherenceOutcome } from "@/components/poshan/adherence-outcome"
+import { ReminderOptIn } from "@/components/poshan/reminder-optin"
 import { FamilyProfiles } from "@/components/poshan/family-profiles"
 import { PatientCare } from "@/components/poshan/patient-care"
 import { Activity, Heart, Droplet, TrendingUp } from "lucide-react"
@@ -114,6 +120,15 @@ export default function Dashboard() {
             <TodayRecommendation />
           </div>
 
+          <div className="mb-8">
+            <ReminderOptIn />
+          </div>
+
+          <div className="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <GroceryList />
+            <EatingOutAdvisor />
+          </div>
+
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             {statCards.map(({ icon: Icon, label, value }, i) => (
@@ -188,6 +203,11 @@ export default function Dashboard() {
             <WeightTracker />
           </div>
 
+          <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <SymptomJournal />
+            <AdherenceOutcome />
+          </div>
+
           {/* Family profiles (Premium only — the gate itself is enforced
               server-side in /api/family, this just reflects it). */}
           <div className="mt-8">
@@ -213,8 +233,9 @@ export default function Dashboard() {
           )}
 
           {/* Weekly close of the daily loop. */}
-          <div className="mt-8">
+          <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
             <WeeklyReview />
+            <StreakBadges />
           </div>
 
           {/* Quick Actions */}
