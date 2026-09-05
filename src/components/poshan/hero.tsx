@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useLang } from "./lang-provider";
 import { Thali } from "./thali";
+import { Thali3D } from "./thali-3d";
 import { TabLink } from "./tabs";
 import { usePrefersReducedMotion } from "@/lib/use-media-query";
-import type { Band, Plan } from "@/lib/poshan-data";
+import type { Band, Plan, GoalKey, DietKey } from "@/lib/poshan-data";
 import {
   estimateMaintenanceKcal,
   ACTIVITY_LEVELS,
@@ -71,6 +72,8 @@ export function Hero({
   bmi,
   band,
   plan,
+  goal,
+  diet,
 }: {
   height: number;
   weight: number;
@@ -85,6 +88,8 @@ export function Hero({
   bmi: number;
   band: Band;
   plan: Plan;
+  goal: GoalKey;
+  diet: DietKey;
 }) {
   const { T } = useLang();
   const shown = useCounter(bmi);
@@ -179,7 +184,11 @@ export function Hero({
         </div>
 
         <div>
-          <Thali bmi={bmi} band={band} plan={plan} />
+          {age !== undefined && sex && activityLevel ? (
+            <Thali3D body={{ height, weight, goal, diet, age, sex, activityLevel }} />
+          ) : (
+            <Thali bmi={bmi} band={band} plan={plan} />
+          )}
 
           <div
             className="mt-6 max-w-[520px] mx-auto grid grid-cols-[auto_1fr] gap-x-5 gap-y-1 items-baseline"

@@ -2265,3 +2265,78 @@ html {
     letter-spacing: -1.3px !important;
   }
 }
+
+/* ------------------------------------------------------------ 3D thali
+   The WebGL thali (thali-3d.tsx wraps public/vendor/thali3d.js) draws its
+   own canvas but positions plain HTML labels over each katori/roti/rice
+   slot in JS — .t3d-label's own inline transform/opacity moves it, this
+   only supplies the look, and [data-state] recolours it to match the
+   engine's own axis verdicts (good/light/heavy/low/high), reusing the
+   same --verdict-* tokens the condition checker uses elsewhere. */
+.t3d-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+.t3d-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.t3d-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: none;
+  background: color-mix(in srgb, #14100c 70%, transparent);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  transition: transform 0.25s var(--ease, ease), background 0.2s ease;
+  white-space: nowrap;
+}
+.t3d-label-name {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--panel-ink, #fff8f4);
+}
+.t3d-label-val {
+  font-size: 0.6rem;
+  color: color-mix(in srgb, var(--panel-ink, #fff8f4) 68%, transparent);
+}
+.t3d-label:hover,
+.t3d-label.is-hovered {
+  background: color-mix(in srgb, var(--kesar) 55%, #14100c);
+}
+.t3d-label.is-selected {
+  background: var(--kesar);
+}
+.t3d-label.is-selected .t3d-label-val {
+  color: color-mix(in srgb, var(--panel-ink, #fff8f4) 88%, transparent);
+}
+.t3d-label[data-state="off"] {
+  opacity: 0.55;
+}
+.t3d-label[data-state="great"] .t3d-label-val,
+.t3d-label[data-state="good"] .t3d-label-val {
+  color: var(--verdict-good, #3d6b4f);
+}
+.t3d-label[data-state="light"] .t3d-label-val,
+.t3d-label[data-state="low"] .t3d-label-val {
+  color: var(--haldi, #eeaa3c);
+}
+.t3d-label[data-state="heavy"] .t3d-label-val,
+.t3d-label[data-state="high"] .t3d-label-val {
+  color: var(--verdict-avoid, #b0453b);
+}
+@media (prefers-reduced-motion: reduce) {
+  .t3d-label {
+    transition: none;
+  }
+}

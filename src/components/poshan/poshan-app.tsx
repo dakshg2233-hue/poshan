@@ -250,6 +250,8 @@ function MainContent({
           bmi={bmi}
           band={band}
           plan={plan}
+          goal={goal}
+          diet={diet}
         />
         <Bands />
       </TabPanel>
