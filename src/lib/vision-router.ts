@@ -1,7 +1,8 @@
 /**
- * Shared model-calling logic for /api/scan and /api/voice-log: both send a
- * menu-constrained prompt (optionally with a photo) and parse back a JSON
- * array of MEAL_LIBRARY ids. Two providers, tried in this order:
+ * Shared model-calling logic for every vision/text-matching feature:
+ * /api/scan (photo → dish ids), /api/voice-log (transcript → dish ids),
+ * and /api/portion-calibration (photo → a portion-size estimate). Two
+ * providers, tried in this order:
  *
  * 1. OpenAI direct (OPENAI_API_KEY) — a real, billable OpenAI key calling
  *    the Chat Completions API directly. Added because OmniRoute (below)
@@ -16,8 +17,8 @@
  * manual entry — this module never invents a match.
  */
 
-export type MenuMatchResult =
-  | { status: "ok"; ids: string[]; model: string }
+export type VisionTextResult =
+  | { status: "ok"; text: string; model: string }
   | { status: "not_configured" }
   | { status: "rate_limited"; retryAfter: number }
   /** Out of credits/quota — a billing problem, not a transient throttle.
@@ -27,8 +28,15 @@ export type MenuMatchResult =
   | { status: "quota_exceeded"; detail: string }
   | { status: "error"; detail: string };
 
+export type MenuMatchResult =
+  | { status: "ok"; ids: string[]; model: string }
+  | { status: "not_configured" }
+  | { status: "rate_limited"; retryAfter: number }
+  | { status: "quota_exceeded"; detail: string }
+  | { status: "error"; detail: string };
+
 /** OpenAI's actual error shape: {"error": {"type": "...", "code": "...", "message": "..."}} */
-function classifyOpenAIError(status: number, bodyText: string): MenuMatchResult {
+function classifyOpenAIError(status: number, bodyText: string): VisionTextResult {
   let parsed: { error?: { type?: string; code?: string; message?: string } } | null = null;
   try {
     parsed = JSON.parse(bodyText);
@@ -47,7 +55,7 @@ function classifyOpenAIError(status: number, bodyText: string): MenuMatchResult 
   return { status: "error", detail: bodyText.slice(0, 300) };
 }
 
-async function callOpenAI(promptText: string, image?: { mimeType: string; data: string }): Promise<MenuMatchResult> {
+async function callOpenAI(promptText: string, image?: { mimeType: string; data: string }): Promise<VisionTextResult> {
   const apiKey = process.env.OPENAI_API_KEY!;
   const model = process.env.OPENAI_VISION_MODEL ?? "gpt-4o-mini";
 
@@ -73,10 +81,10 @@ async function callOpenAI(promptText: string, image?: { mimeType: string; data: 
 
   const data = await res.json();
   const text: string = data?.choices?.[0]?.message?.content ?? "";
-  return { status: "ok", ids: extractIds(text), model };
+  return { status: "ok", text, model };
 }
 
-async function callOmniRoute(promptText: string, image?: { mimeType: string; data: string }): Promise<MenuMatchResult> {
+async function callOmniRoute(promptText: string, image?: { mimeType: string; data: string }): Promise<VisionTextResult> {
   const base = process.env.OMNIROUTE_BASE_URL ?? "http://localhost:20128";
   const model = process.env.OMNIROUTE_VISION_MODEL ?? "oc/mimo-v2.5-free";
   const apiKey = process.env.OMNIROUTE_API_KEY!;
@@ -106,7 +114,22 @@ async function callOmniRoute(promptText: string, image?: { mimeType: string; dat
         .map((b: { text?: string }) => b.text ?? "")
         .join("")
     : "";
-  return { status: "ok", ids: extractIds(text), model };
+  return { status: "ok", text, model };
+}
+
+/** Sends a prompt (optionally with a photo) to whichever provider is
+ *  configured and returns its raw text reply. */
+export async function askVision(
+  promptText: string,
+  image?: { mimeType: string; data: string }
+): Promise<VisionTextResult> {
+  try {
+    if (process.env.OPENAI_API_KEY) return await callOpenAI(promptText, image);
+    if (process.env.OMNIROUTE_API_KEY) return await callOmniRoute(promptText, image);
+    return { status: "not_configured" };
+  } catch (err) {
+    return { status: "error", detail: String(err).slice(0, 200) };
+  }
 }
 
 function extractIds(text: string): string[] {
@@ -120,15 +143,12 @@ function extractIds(text: string): string[] {
   }
 }
 
+/** Same as askVision(), but expects a JSON array of ids back and extracts it. */
 export async function matchAgainstMenu(
   promptText: string,
   image?: { mimeType: string; data: string }
 ): Promise<MenuMatchResult> {
-  try {
-    if (process.env.OPENAI_API_KEY) return await callOpenAI(promptText, image);
-    if (process.env.OMNIROUTE_API_KEY) return await callOmniRoute(promptText, image);
-    return { status: "not_configured" };
-  } catch (err) {
-    return { status: "error", detail: String(err).slice(0, 200) };
-  }
+  const result = await askVision(promptText, image);
+  if (result.status !== "ok") return result;
+  return { status: "ok", ids: extractIds(result.text), model: result.model };
 }

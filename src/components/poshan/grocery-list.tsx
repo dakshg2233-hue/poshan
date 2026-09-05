@@ -2,37 +2,36 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShoppingCart } from "lucide-react";
-import { useDaily } from "@/lib/hooks/use-daily";
+import { useWeekPlan } from "@/lib/hooks/use-week-plan";
 import { usePantry } from "@/lib/hooks/use-pantry";
 import { MEAL_LIBRARY } from "@/lib/poshan-data";
 import { dishStaples } from "@/lib/daily-engine";
 
 /**
- * What today's plate needs that isn't already checked off in the pantry
- * tracker — turns two existing features (the daily recommendation, the
- * pantry checklist) into a third with no new backend: everything here is
- * computed client-side from data both hooks already fetch.
- *
- * Scoped to today's picks, not a full week: recommendations aren't stored
- * ahead of time (recommendToday() runs fresh per request), so "the week's
- * meals" isn't a real list to diff against yet.
+ * What the week's plan needs that isn't already checked off in the
+ * pantry tracker — three existing features (the week-ahead plan, the
+ * pantry checklist, dishStaples' note-text matching) combined with no
+ * new backend of its own: everything here is computed client-side from
+ * data useWeekPlan() and usePantry() already fetch.
  */
 export function GroceryList() {
-  const { data: daily, loading: dailyLoading } = useDaily();
+  const { plan, loading: planLoading } = useWeekPlan();
   const { items: pantry, loading: pantryLoading } = usePantry();
 
-  if (dailyLoading || pantryLoading) return null;
-  if (!daily?.recommendation || daily.recommendation.picks.length === 0) return null;
+  if (planLoading || pantryLoading) return null;
+  if (!plan || plan.length === 0) return null;
 
   const inStock = new Set(pantry.filter((p) => p.in_stock).map((p) => p.key));
   const needed = new Map<string, string>(); // key -> label
-  for (const pick of daily.recommendation.picks) {
-    const meal = MEAL_LIBRARY.find((m) => m.id === pick.id);
-    if (!meal) continue;
-    for (const staple of dishStaples(meal)) {
-      if (!inStock.has(staple)) {
-        const pantryItem = pantry.find((p) => p.key === staple);
-        if (pantryItem) needed.set(staple, pantryItem.label.en);
+  for (const day of plan) {
+    for (const pick of day.recommendation.picks) {
+      const meal = MEAL_LIBRARY.find((m) => m.id === pick.id);
+      if (!meal) continue;
+      for (const staple of dishStaples(meal)) {
+        if (!inStock.has(staple)) {
+          const pantryItem = pantry.find((p) => p.key === staple);
+          if (pantryItem) needed.set(staple, pantryItem.label.en);
+        }
       }
     }
   }
@@ -44,7 +43,7 @@ export function GroceryList() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2" style={{ color: "var(--ink)", fontFamily: "var(--font-display)" }}>
           <ShoppingCart className="h-5 w-5" style={{ color: "var(--kesar)" }} />
-          Pick up today
+          Pick up this week
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -60,7 +59,7 @@ export function GroceryList() {
           ))}
         </ul>
         <p className="mt-3 text-xs text-[var(--ink-soft)]">
-          For today&apos;s recommended plate, not already checked off in your kitchen below.
+          For the week&apos;s planned dishes, not already checked off in your kitchen below.
         </p>
       </CardContent>
     </Card>

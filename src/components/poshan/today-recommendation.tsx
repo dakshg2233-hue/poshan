@@ -3,10 +3,22 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChefHat, Check, Clock3, IndianRupee, Sparkles, HelpCircle, Mic } from "lucide-react";
+import { ChefHat, Check, Clock3, IndianRupee, Sparkles, HelpCircle, Mic, Repeat } from "lucide-react";
 import { useDaily } from "@/lib/hooks/use-daily";
-import { MEAL_LIBRARY, type MealTime } from "@/lib/poshan-data";
-import type { CostTier, DayType } from "@/lib/daily-engine";
+import { useProfile } from "@/lib/hooks/use-profile";
+import { useConditions } from "@/lib/hooks/use-conditions";
+import { usePantry } from "@/lib/hooks/use-pantry";
+import { MEAL_LIBRARY, type MealTime, type DietKey, type RegionKey } from "@/lib/poshan-data";
+import type { ConditionKey } from "@/lib/conditions";
+import {
+  findSubstituteDishes,
+  dishStaples,
+  STAPLE_SUBSTITUTES,
+  PANTRY_STAPLES,
+  type CostTier,
+  type DayType,
+  type PantryStapleKey,
+} from "@/lib/daily-engine";
 import { RecipePanel } from "./recipe-panel";
 import { VoiceLogger } from "./voice-logger";
 
@@ -38,6 +50,7 @@ const DAY_TYPE_LABEL: Record<DayType, string> = {
  */
 export function TodayRecommendation() {
   const { data, loading, error, logMeal, setContext } = useDaily();
+  const { profile } = useProfile();
   const [swapping, setSwapping] = useState<MealTime | null>(null);
   const [swapChoice, setSwapChoice] = useState<string>("");
   const [voiceOpenFor, setVoiceOpenFor] = useState<MealTime | null>(null);
@@ -225,6 +238,8 @@ export function TodayRecommendation() {
 
                       <WhyThisPick dishName={pick.name.en} mealTime={pick.time} reasons={pick.reasons.map((r) => r.en)} />
 
+                      <SubstituteFinder dishId={pick.id} onPick={(id) => logMeal(id, pick.time, "manual")} />
+
                       <RecipePanel mealId={pick.id} />
 
                       <div className="mt-1.5 flex flex-wrap gap-3">
@@ -290,7 +305,11 @@ export function TodayRecommendation() {
             })}
 
             <p className="text-xs text-[var(--ink-soft)]">
-              Target {data.recommendation.targetKcal.toLocaleString("en-IN")} kcal · Plate totals {data.recommendation.totalKcal.toLocaleString("en-IN")} kcal
+              Target {data.recommendation.targetKcal.toLocaleString("en-IN")} kcal · Plate totals{" "}
+              {data.recommendation.totalKcal.toLocaleString("en-IN")} kcal
+              {profile?.portion_scale && profile.portion_scale !== 1 && (
+                <> · ~{Math.round(data.recommendation.totalKcal * profile.portion_scale).toLocaleString("en-IN")} kcal for your bowl size</>
+              )}
             </p>
           </div>
         ) : (
@@ -374,6 +393,103 @@ function WhyThisPick({ dishName, mealTime, reasons }: { dishName: string; mealTi
           {error ?? answer ?? (busy ? "Thinking…" : "")}
           {busy && !answer && !error ? "…" : ""}
         </p>
+      )}
+    </div>
+  );
+}
+
+/**
+ * "Don't have this?" — two layers, both from real data: staple-level
+ * swaps (a small hand-curated role-based map, e.g. paneer → tofu/egg —
+ * see STAPLE_SUBSTITUTES) for the ingredient this dish is actually built
+ * on, and whole-dish alternatives at the same meal-time matched by
+ * protein/calorie closeness (findSubstituteDishes) for when swapping the
+ * ingredient isn't the point. Neither is a nutrition-equivalence claim,
+ * just the closest real data supports.
+ */
+function SubstituteFinder({ dishId, onPick }: { dishId: string; onPick: (dishId: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const { profile } = useProfile();
+  const { conditions } = useConditions();
+  const { items: pantry } = usePantry();
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="mt-1.5 flex items-center gap-1 text-xs underline"
+        style={{ color: "var(--ink-soft)" }}
+      >
+        <Repeat className="h-3 w-3" /> Don&apos;t have this?
+      </button>
+    );
+  }
+
+  const meal = MEAL_LIBRARY.find((m) => m.id === dishId);
+  const diet = (profile?.diet as DietKey) ?? "veg";
+  const region = (profile?.region as RegionKey) ?? null;
+  const conditionKeys = conditions.map((c) => c.condition as ConditionKey);
+
+  const staplesUsed = meal ? dishStaples(meal) : [];
+  const stapleSwaps = new Map<PantryStapleKey, PantryStapleKey[]>();
+  for (const staple of staplesUsed) {
+    const subs = STAPLE_SUBSTITUTES[staple];
+    if (subs && subs.length > 0) stapleSwaps.set(staple, subs);
+  }
+
+  const alternatives = findSubstituteDishes({
+    dishId,
+    diet,
+    region,
+    conditions: conditionKeys,
+    limit: 4,
+  });
+
+  const inStock = new Set(pantry.filter((p) => p.in_stock).map((p) => p.key));
+  const labelFor = (key: PantryStapleKey) => PANTRY_STAPLES.find((s) => s.key === key)?.label.en ?? key;
+
+  return (
+    <div className="mt-1.5 rounded-md p-2" style={{ background: "var(--surface)" }}>
+      {stapleSwaps.size > 0 && (
+        <div className="mb-2">
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--ink-soft)]">Ingredient swaps</p>
+          {Array.from(stapleSwaps.entries()).map(([staple, subs]) => (
+            <p key={staple} className="text-xs" style={{ color: "var(--ink-soft)" }}>
+              No {labelFor(staple).toLowerCase()}? Try {subs.map((s, i) => (
+                <span key={s}>
+                  {i > 0 ? " or " : ""}
+                  <span style={{ color: inStock.has(s) ? "var(--kesar)" : "var(--ink-soft)", fontWeight: inStock.has(s) ? 600 : 400 }}>
+                    {labelFor(s).toLowerCase()}
+                    {inStock.has(s) ? " (in stock)" : ""}
+                  </span>
+                </span>
+              ))}
+              .
+            </p>
+          ))}
+        </div>
+      )}
+
+      {alternatives.length > 0 ? (
+        <div>
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--ink-soft)]">Similar dishes instead</p>
+          <div className="flex flex-wrap gap-2">
+            {alternatives.map((alt) => (
+              <button
+                key={alt.id}
+                onClick={() => onPick(alt.id)}
+                className="rounded-full px-2.5 py-1 text-xs font-medium"
+                style={{ background: "var(--roti-2, var(--roti))", color: "var(--ink)" }}
+              >
+                {alt.name.en} · {alt.kcal} kcal
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        stapleSwaps.size === 0 && (
+          <p className="text-xs text-[var(--ink-soft)]">No close alternative found — try &ldquo;Log something else instead&rdquo; below.</p>
+        )
       )}
     </div>
   );

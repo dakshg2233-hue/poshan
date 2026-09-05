@@ -88,6 +88,7 @@ export async function POST(request: NextRequest) {
     "sex",
     "activity_level",
     "tdee",
+    "portion_scale",
   ] as const;
 
   const updates = Object.fromEntries(

@@ -16,6 +16,8 @@ import { PantryTracker } from "@/components/poshan/pantry-tracker"
 import { WeightTracker } from "@/components/poshan/weight-tracker"
 import { WeeklyReview } from "@/components/poshan/weekly-review"
 import { GroceryList } from "@/components/poshan/grocery-list"
+import { WeeklyPlan } from "@/components/poshan/weekly-plan"
+import { PortionCalibration } from "@/components/poshan/portion-calibration"
 import { StreakBadges } from "@/components/poshan/streak-badges"
 import { EatingOutAdvisor } from "@/components/poshan/eating-out-advisor"
 import { SymptomJournal } from "@/components/poshan/symptom-journal"
@@ -124,6 +126,10 @@ export default function Dashboard() {
             <ReminderOptIn />
           </div>
 
+          <div className="mb-8">
+            <WeeklyPlan />
+          </div>
+
           <div className="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
             <GroceryList />
             <EatingOutAdvisor />
@@ -203,6 +209,10 @@ export default function Dashboard() {
             <WeightTracker />
           </div>
 
+          <div className="mt-8">
+            <PortionCalibration />
+          </div>
+
           <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
             <SymptomJournal />
             <AdherenceOutcome />
@@ -242,13 +252,18 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
             <button
               onClick={() => router.push("/dashboard/meals")}
-              className="p-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">
+              className="p-4 rounded-lg font-medium text-white transition hover:opacity-90"
+              style={{ background: "var(--kesar-fill)" }}>
               🍛 Browse Meals (130+)
             </button>
-            <button className="p-4 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 transition">
+            <button
+              className="p-4 rounded-lg font-medium text-white transition hover:opacity-90"
+              style={{ background: "var(--haldi, var(--kesar-fill))" }}>
               ➕ Add Biomarker
             </button>
-            <button className="p-4 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition">
+            <button
+              className="p-4 rounded-lg font-medium text-white transition hover:opacity-90"
+              style={{ background: "var(--elaichi, var(--kesar-fill))" }}>
               ⚙️ Edit Profile
             </button>
           </div>

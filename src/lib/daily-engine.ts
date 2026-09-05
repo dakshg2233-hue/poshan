@@ -56,9 +56,30 @@ export const PANTRY_STAPLES = [
   { key: "vegetables", label: { en: "Mixed vegetables", hi: "सब्ज़ियाँ" }, keywords: ["spinach", "palak", "gobi", "cauliflower", "peas", "matar", "beans", "vegetable", "bhindi", "okra", "capsicum"] },
   { key: "nuts", label: { en: "Nuts & seeds", hi: "मेवे" }, keywords: ["almond", "cashew", "peanut", "walnut", "seeds", "nuts"] },
   { key: "oats_quinoa", label: { en: "Oats / quinoa / millets", hi: "ओट्स / क्विनोआ / मिलेट" }, keywords: ["oats", "quinoa", "millet", "poha", "daliya", "ragi"] },
+  { key: "soya_tofu", label: { en: "Soya / tofu", hi: "सोया / टोफू" }, keywords: ["soya", "soy", "tofu", "nutrela", "chunks"] },
 ] as const;
 
 export type PantryStapleKey = (typeof PANTRY_STAPLES)[number]["key"];
+
+/**
+ * Rough, role-based swaps — not a nutritional-equivalence table. "Similar
+ * protein source" or "similar carb base", nothing more precise: there's
+ * no per-dish ingredient-quantity data to compute a real substitution
+ * from, so this stays a small, hand-curated map instead of pretending to
+ * be derived.
+ */
+export const STAPLE_SUBSTITUTES: Partial<Record<PantryStapleKey, PantryStapleKey[]>> = {
+  paneer: ["soya_tofu", "egg"],
+  chicken: ["soya_tofu", "fish_seafood", "egg"],
+  mutton: ["chicken", "soya_tofu"],
+  fish_seafood: ["chicken", "soya_tofu", "egg"],
+  egg: ["paneer", "soya_tofu"],
+  soya_tofu: ["paneer", "egg"],
+  rice: ["oats_quinoa", "atta"],
+  atta: ["rice", "oats_quinoa"],
+  milk_curd: ["soya_tofu"],
+  nuts: ["soya_tofu"],
+};
 
 function dishText(meal: MealPlanItem): string {
   return `${meal.name.en} ${meal.note.en}`.toLowerCase();
@@ -290,4 +311,83 @@ export function recommendToday(input: {
     totalKcal: picks.reduce((sum, p) => sum + p.kcal, 0),
     picks,
   };
+}
+
+// ---------------------------------------------------------- weekly plan
+export interface WeeklyDayPlan {
+  /** 0 = today, 1 = tomorrow, ... */
+  offsetDays: number;
+  recommendation: DailyRecommendation;
+}
+
+/**
+ * Runs recommendToday() forward across several days, feeding each day's
+ * picks into the next day's `recentDishIds` — so day 4 avoids repeating
+ * day 1's dishes too, not just the last two real days logged. Busy/
+ * budget/day-type context isn't known for days that haven't happened
+ * yet, so every future day is planned as a plain "normal" day; today's
+ * own card still lets the user override today specifically once it
+ * arrives. This is a suggested plan to shop and cook against, not a
+ * locked schedule — logging something else on any given day is exactly
+ * as free as it already is today.
+ */
+export function recommendWeek(
+  input: Omit<Parameters<typeof recommendToday>[0], "isBusy" | "budgetPref" | "dayType">,
+  days = 7
+): WeeklyDayPlan[] {
+  const plans: WeeklyDayPlan[] = [];
+  let recent = [...input.recentDishIds];
+
+  for (let offset = 0; offset < days; offset++) {
+    const recommendation = recommendToday({
+      ...input,
+      recentDishIds: recent,
+      isBusy: false,
+      budgetPref: null,
+      dayType: "normal",
+    });
+    plans.push({ offsetDays: offset, recommendation });
+    recent = [...recent, ...recommendation.picks.map((p) => p.id)];
+  }
+
+  return plans;
+}
+
+// -------------------------------------------------------- substitutions
+/**
+ * Dishes at the same meal-time, diet and region with the closest protein
+ * and calories to the one being replaced — a macro-similarity match, the
+ * only kind of "similar dish" MEAL_LIBRARY's real data actually supports.
+ * Still passes the same safety filter as the main recommender; nothing
+ * flagged "avoid" for the user's conditions is ever suggested.
+ */
+export function findSubstituteDishes(input: {
+  dishId: string;
+  diet: DietKey;
+  region: RegionKey | null;
+  conditions: ConditionKey[];
+  limit?: number;
+}): MealPlanItem[] {
+  const original = MEAL_LIBRARY.find((m) => m.id === input.dishId);
+  if (!original) return [];
+
+  const candidates = MEAL_LIBRARY.filter(
+    (m) =>
+      m.id !== original.id &&
+      m.time === original.time &&
+      dietMatches(m, input.diet) &&
+      regionMatches(m, input.region)
+  );
+
+  const scored = candidates
+    .filter((m) => checkMealAll(m.id, input.conditions).worst !== "avoid")
+    .map((meal) => {
+      const kcalDiff = Math.abs(meal.kcal - original.kcal) / Math.max(original.kcal, 1);
+      const proteinDiff =
+        Math.abs(meal.macros.protein - original.macros.protein) / Math.max(original.macros.protein, 1);
+      return { meal, closeness: kcalDiff + proteinDiff };
+    });
+
+  scored.sort((a, b) => a.closeness - b.closeness);
+  return scored.slice(0, input.limit ?? 5).map((s) => s.meal);
 }

@@ -19,6 +19,8 @@ import { PantryTracker } from "./pantry-tracker";
 import { WeightTracker } from "./weight-tracker";
 import { WeeklyReview } from "./weekly-review";
 import { GroceryList } from "./grocery-list";
+import { WeeklyPlan } from "./weekly-plan";
+import { PortionCalibration } from "./portion-calibration";
 import { StreakBadges } from "./streak-badges";
 import { EatingOutAdvisor } from "./eating-out-advisor";
 import { SymptomJournal } from "./symptom-journal";
@@ -262,6 +264,7 @@ function MainContent({
           <div className="w-[min(1180px,100%-2.5rem)] mx-auto pt-14 md:pt-24 space-y-8">
             <ReminderOptIn />
             <TodayRecommendation />
+            <WeeklyPlan />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <GroceryList />
               <EatingOutAdvisor />
@@ -286,6 +289,7 @@ function MainContent({
         {signedIn && (
           <div className="w-[min(1180px,100%-2.5rem)] mx-auto pb-14 md:pb-24 space-y-8">
             <WeightTracker />
+            <PortionCalibration />
             <SymptomJournal />
             <AdherenceOutcome />
           </div>

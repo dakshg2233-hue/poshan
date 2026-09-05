@@ -18,6 +18,7 @@ export interface Profile {
   tdee: number | null;
   onboarding_completed: boolean;
   lang: "en" | "hi";
+  portion_scale: number;
   created_at: string;
   updated_at: string;
 }
