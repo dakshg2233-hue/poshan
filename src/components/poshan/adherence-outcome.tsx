@@ -56,9 +56,9 @@ export function AdherenceOutcome() {
           </div>
         )}
 
-        {streak && (
+        {streak?.streak && (
           <p className="mt-4 border-t pt-3 text-xs text-[var(--ink-soft)]" style={{ borderColor: "var(--line)" }}>
-            {streak.totalDaysLogged} day{streak.totalDaysLogged === 1 ? "" : "s"} of meals logged in total, current streak {streak.currentStreak}.
+            {streak.streak.totalDaysLogged} day{streak.streak.totalDaysLogged === 1 ? "" : "s"} of meals logged in total, current streak {streak.streak.currentStreak}.
             The more consistently that number grows, the more this trend actually means.
           </p>
         )}

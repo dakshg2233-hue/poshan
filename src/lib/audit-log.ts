@@ -7,7 +7,8 @@ export type AuditAction =
   | "add_lab"
   | "draft_plan"
   | "approve_plan"
-  | "export_pdf";
+  | "export_pdf"
+  | "read_adherence";
 
 /**
  * "Full audit trail: who read what, who approved what, when" (CLINIC_TIERS,

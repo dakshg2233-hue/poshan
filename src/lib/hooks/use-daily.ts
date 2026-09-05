@@ -94,7 +94,7 @@ export function useDaily(familyMemberId?: string | null) {
     };
   }, [url]);
 
-  const logMeal = async (dish_id: string, meal_time: string, source: "manual" | "recommended" | "scan" = "manual") => {
+  const logMeal = async (dish_id: string, meal_time: string, source: "manual" | "recommended" | "scan" | "voice" = "manual") => {
     const response = await fetch("/api/daily", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

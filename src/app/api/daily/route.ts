@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
       family_member_id: family_member_id ?? null,
       dish_id,
       meal_time,
-      source: ["scan", "manual", "recommended"].includes(source) ? source : "manual",
+      source: ["scan", "manual", "recommended", "voice"].includes(source) ? source : "manual",
     })
     .select()
     .single();

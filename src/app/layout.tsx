@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Anek_Devanagari, Mukta, IBM_Plex_Mono, Instrument_Serif, DM_Sans } from "next/font/google";
+import { Anek_Devanagari, Mukta, IBM_Plex_Mono, Instrument_Serif, DM_Sans, Press_Start_2P } from "next/font/google";
 import "./globals.css";
 import { LangProvider } from "@/components/poshan/lang-provider";
 import { AdviceBar } from "@/components/poshan/advice-bar";
@@ -57,6 +57,18 @@ const mono = IBM_Plex_Mono({
   display: "swap",
 });
 
+/* The gamification layer's Minecraft skin only — scoped to .mc-ui, never
+   the rest of the site's typography. Only ever short strings (badge
+   names, streak counts): Press Start 2P is authentically 8-bit but
+   illegible at body-text length, so it's reserved for headers/labels,
+   never paragraphs, inside that one skin. */
+const pixel = Press_Start_2P({
+  variable: "--font-pixel",
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+});
+
 const DESCRIPTION =
   "Poshan reads your Body Mass Index on Asian-Indian cutoffs, tracks the biomarkers that actually fail in India, and builds the thali you already eat.";
 
@@ -91,7 +103,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${display.variable} ${wordmark.variable} ${uiSans.variable} ${uiSans.variable} ${mono.variable} h-full antialiased`}
+      className={`${display.variable} ${wordmark.variable} ${uiSans.variable} ${uiSans.variable} ${mono.variable} ${pixel.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <LangProvider>

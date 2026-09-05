@@ -266,7 +266,7 @@ export function TodayRecommendation() {
                         <VoiceLogger
                           mealTime={pick.time}
                           onMatched={(dishId) => {
-                            logMeal(dishId, pick.time, "manual");
+                            logMeal(dishId, pick.time, "voice");
                             setVoiceOpenFor(null);
                           }}
                         />

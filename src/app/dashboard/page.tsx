@@ -19,6 +19,9 @@ import { GroceryList } from "@/components/poshan/grocery-list"
 import { WeeklyPlan } from "@/components/poshan/weekly-plan"
 import { PortionCalibration } from "@/components/poshan/portion-calibration"
 import { StreakBadges } from "@/components/poshan/streak-badges"
+import { HouseholdStreaks } from "@/components/poshan/household-streaks"
+import { Leaderboard } from "@/components/poshan/leaderboard"
+import { GamificationSettings } from "@/components/poshan/gamification-settings"
 import { EatingOutAdvisor } from "@/components/poshan/eating-out-advisor"
 import { SymptomJournal } from "@/components/poshan/symptom-journal"
 import { AdherenceOutcome } from "@/components/poshan/adherence-outcome"
@@ -246,6 +249,15 @@ export default function Dashboard() {
           <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
             <WeeklyReview />
             <StreakBadges />
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <HouseholdStreaks />
+            <Leaderboard />
+          </div>
+
+          <div className="mt-8">
+            <GamificationSettings />
           </div>
 
           {/* Quick Actions */}

@@ -19,6 +19,9 @@ export interface Profile {
   onboarding_completed: boolean;
   lang: "en" | "hi";
   portion_scale: number;
+  gamification_enabled: boolean;
+  leaderboard_opt_in: boolean;
+  leaderboard_handle: string | null;
   created_at: string;
   updated_at: string;
 }

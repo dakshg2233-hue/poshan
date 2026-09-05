@@ -2340,3 +2340,207 @@ html {
     transition: none;
   }
 }
+
+/* ============================================================ gamification
+   The gamification layer's visual skin — deliberately Minecraft-inspired
+   and deliberately NOT the rest of Poshan's design language: hard pixel
+   edges, no border-radius, no blur, a beveled-GUI look built from layered
+   box-shadow instead of any shipped texture asset. Everything here lives
+   under .mc-ui, so GAMIFICATION_ENABLED=false (dev-flags.ts) or a
+   per-user opt-out hiding the components that use these classes removes
+   the whole skin with them — nothing here leaks into the rest of the
+   site's typography or color tokens. */
+
+.mc-ui {
+  --mc-bg: #c6c6c6;
+  --mc-bg-dark: #8b8b8b;
+  --mc-light: #ffffff;
+  --mc-shadow: #555555;
+  --mc-shadow-dark: #373737;
+  --mc-ink: #3f3f3f;
+  --mc-green: #5a8f3c;
+  --mc-green-dark: #3d6329;
+  --mc-gold: #fbd93b;
+  --mc-gold-dark: #b8860b;
+  --mc-diamond: #4ce4e8;
+  --mc-red: #b0453b;
+  font-family: var(--font-pixel), monospace;
+  image-rendering: pixelated;
+}
+
+.mc-panel {
+  background: var(--mc-bg);
+  border: 4px solid transparent;
+  box-shadow:
+    inset 2px 2px 0 0 var(--mc-light),
+    inset -2px -2px 0 0 var(--mc-shadow-dark),
+    inset 4px 4px 0 0 var(--mc-bg),
+    inset -4px -4px 0 0 var(--mc-shadow);
+  padding: 16px;
+  color: var(--mc-ink);
+}
+
+.mc-panel-dark {
+  background: #2b2b2b;
+  color: #e8e8e8;
+  border: 4px solid transparent;
+  box-shadow:
+    inset 2px 2px 0 0 #494949,
+    inset -2px -2px 0 0 #141414;
+  padding: 12px;
+}
+
+.mc-title {
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #fff;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+.mc-label {
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.6rem;
+  line-height: 1.7;
+  color: var(--mc-ink);
+}
+
+.mc-button {
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.6rem;
+  color: #fff;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+  background: var(--mc-green);
+  border: none;
+  padding: 10px 14px;
+  cursor: pointer;
+  box-shadow:
+    inset 2px 2px 0 0 rgba(255, 255, 255, 0.35),
+    inset -2px -2px 0 0 rgba(0, 0, 0, 0.35);
+  transition: transform 0.05s;
+}
+.mc-button:hover {
+  filter: brightness(1.08);
+}
+.mc-button:active {
+  transform: translateY(1px);
+  box-shadow:
+    inset -2px -2px 0 0 rgba(255, 255, 255, 0.25),
+    inset 2px 2px 0 0 rgba(0, 0, 0, 0.35);
+}
+.mc-button:disabled {
+  filter: grayscale(0.6) brightness(0.85);
+  cursor: default;
+}
+.mc-button-gray {
+  background: var(--mc-bg-dark);
+}
+
+/* Inventory slot: an inset "hole" pressed into the panel, exactly
+   inverted from .mc-panel's outward bevel. Badge icons sit inside one of
+   these each. */
+.mc-slot {
+  aspect-ratio: 1;
+  background: #8b8b8b;
+  box-shadow:
+    inset 2px 2px 0 0 var(--mc-shadow-dark),
+    inset -2px -2px 0 0 rgba(255, 255, 255, 0.5);
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+.mc-slot[data-locked="true"] {
+  filter: grayscale(1) brightness(0.6);
+}
+
+/* A flat "block" icon built entirely from gradients — no sprite asset —
+   reading as a lit voxel face: lighter top, the base colour flat, a
+   1px dark outline. */
+.mc-block-icon {
+  width: 70%;
+  height: 70%;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--block-color, var(--mc-gold)) 70%, white) 0%, var(--block-color, var(--mc-gold)) 45%, color-mix(in srgb, var(--block-color, var(--mc-gold)) 70%, black) 100%);
+  outline: 2px solid rgba(0, 0, 0, 0.55);
+  outline-offset: -1px;
+}
+
+/* Segmented bar (the streak "hunger bar"): a track of notches with a
+   fill that reads as discrete pips, the same visual grammar as
+   Minecraft's hunger/health rows without drawing individual icons. */
+.mc-bar-track {
+  display: flex;
+  gap: 2px;
+  background: var(--mc-shadow-dark);
+  padding: 3px;
+  box-shadow: inset 1px 1px 0 0 rgba(0, 0, 0, 0.4);
+}
+.mc-bar-pip {
+  flex: 1;
+  height: 14px;
+  background: var(--mc-bg-dark);
+}
+.mc-bar-pip[data-filled="true"] {
+  background: var(--mc-red);
+  box-shadow: inset 0 2px 0 0 rgba(255, 255, 255, 0.4);
+}
+.mc-bar-pip[data-filled="grace"] {
+  background: var(--mc-gold);
+  box-shadow: inset 0 2px 0 0 rgba(255, 255, 255, 0.4);
+}
+
+/* Achievement toast: Minecraft's own pattern almost exactly — a dark
+   translucent banner with an icon slot on the left, sliding in, holding,
+   sliding back out. Fixed position, stacked via the caller. */
+.mc-toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(20, 20, 20, 0.88);
+  border-left: 4px solid var(--mc-gold);
+  padding: 8px 14px 8px 8px;
+  min-width: 260px;
+  animation: mc-toast-in 0.35s steps(6) both, mc-toast-out 0.35s steps(6) 3.2s both;
+}
+.mc-toast-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+.mc-toast-eyebrow {
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.52rem;
+  color: var(--mc-gold);
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
+}
+.mc-toast-name {
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.62rem;
+  color: #fff;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
+  margin-top: 3px;
+}
+@keyframes mc-toast-in {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes mc-toast-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mc-toast {
+    animation: none;
+  }
+}

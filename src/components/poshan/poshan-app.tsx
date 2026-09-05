@@ -22,6 +22,9 @@ import { GroceryList } from "./grocery-list";
 import { WeeklyPlan } from "./weekly-plan";
 import { PortionCalibration } from "./portion-calibration";
 import { StreakBadges } from "./streak-badges";
+import { HouseholdStreaks } from "./household-streaks";
+import { Leaderboard } from "./leaderboard";
+import { GamificationSettings } from "./gamification-settings";
 import { EatingOutAdvisor } from "./eating-out-advisor";
 import { SymptomJournal } from "./symptom-journal";
 import { AdherenceOutcome } from "./adherence-outcome";
@@ -276,6 +279,11 @@ function MainContent({
               <WeeklyReview />
             </div>
             <StreakBadges />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <HouseholdStreaks />
+              <Leaderboard />
+            </div>
+            <GamificationSettings />
           </div>
         )}
         <Meals band={band} plan={plan} />
