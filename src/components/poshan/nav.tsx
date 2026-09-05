@@ -3,9 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useLang } from "./lang-provider";
-import { LangHint } from "./lang-hint";
-import { TabBar } from "./tabs";
-import { SiteSearch } from "./site-search";
+import { TabBar, TabLink } from "./tabs";
 
 /**
  * Whether the page has scrolled far enough for the bar to read as
@@ -36,10 +34,16 @@ function useCompactNav() {
 
 /* The four anchor links that used to live here are gone. They pointed into a
    single continuous scroll; navigation is the tab strip now, and TABS in
-   tabs.tsx is the one place the sections are named. */
+   tabs.tsx is the one place the sections are named.
 
-export function Nav({ signedIn = false }: { signedIn?: boolean }) {
-  const { lang, setLang, T } = useLang();
+   Search, the language toggle and the account icon used to live here too,
+   crowding the tab strip down to a sliver on a phone — "Check your BMI"
+   truncated mid-word under the advice bar. They now live in <BottomBar>,
+   fixed to the bottom in every view, so this bar only ever has to fit a
+   logo and the tabs. */
+
+export function Nav() {
+  const { T } = useLang();
   const compact = useCompactNav();
 
   /* The bar used to stow itself while the video hero held the top of the
@@ -74,8 +78,11 @@ export function Nav({ signedIn = false }: { signedIn?: boolean }) {
       >
         {T({ en: "Skip to content", hi: "सामग्री पर जाएँ" })}
       </a>
-      <div className="w-[min(1180px,100%-2.5rem)] mx-auto flex items-center gap-4 h-[66px]">
-        <a href="#top" className="flex items-center gap-2.5 no-underline shrink-0" aria-label="Poshan home">
+      <div className="w-[min(1180px,100%-2.5rem)] mx-auto flex items-center gap-4 h-[52px]">
+        {/* The one persistent Poshan mark — everywhere else on the site that
+            used to draw its own logo (the old cinematic hero's header, its
+            mobile menu) drew a second one instead. This is the only one now. */}
+        <TabLink to="dashboard" className="flex items-center gap-2.5 no-underline shrink-0" aria-label="Poshan home">
           {/* transform, not width/height: the mark scales down rather than
               the header shrinking, which would force a layout pass on every
               scroll frame. data-compact carries the state; the transition
@@ -88,80 +95,25 @@ export function Nav({ signedIn = false }: { signedIn?: boolean }) {
             height={390}
             priority
             data-compact={compact}
-            className="nav-logo-mark w-[26px] h-auto shrink-0"
+            className="nav-logo-mark w-[24px] h-auto shrink-0"
           />
-          {/* The wordmark goes below xl. Five tabs, a search and a language
-              toggle do not fit beside it, and the tab strip is the thing that
-              has to survive: the mark alone still identifies the site and
-              still links home. */}
           <span
-            className="hidden xl:inline text-[1.45rem] leading-none"
+            className="hidden sm:inline text-[1.28rem] leading-none"
             style={{ fontFamily: "var(--font-display)" }}
           >
             पोषण <span style={{ color: "var(--kesar)" }}>Poshan</span>
           </span>
-        </a>
+        </TabLink>
 
-        {/* Scrolls sideways rather than hiding below lg. The links this
-            replaced were desktop-only, which left small screens with no
-            navigation at all once the sections stopped being one scroll. */}
+        {/* Scrolls sideways rather than hiding below lg. The whole bar is
+            now just this: with search, language and account gone, the tab
+            strip gets the full remaining width instead of a leftover sliver. */}
         <nav
           className="flex-1 min-w-0 overflow-x-auto no-scrollbar"
           aria-label="Main"
         >
           <TabBar className="nav-tabs w-max" />
         </nav>
-
-        <SiteSearch />
-
-        {/* Hint sits immediately left of the toggle it is pointing at. */}
-        <div className="lg:ml-0 ml-auto flex items-center gap-2 shrink-0 relative">
-          <div className="hidden xl:block"><LangHint /></div>
-          <div
-            className="flex rounded-full overflow-hidden"
-            style={{ border: "1px solid rgb(255 255 255 / .28)" }}
-            role="group"
-            aria-label="Language / भाषा"
-          >
-          {(["en", "hi"] as const).map((l) => (
-            <button
-              key={l}
-              type="button"
-              aria-pressed={lang === l}
-              onClick={() => setLang(l)}
-              className="px-3 py-1.5 text-[0.82rem] font-extrabold tracking-wider transition-colors cursor-pointer"
-              style={
-                lang === l
-                      ? { background: "#fff", color: "#111" }
-                      : { color: "#fff" }
-              }
-            >
-              {l === "en" ? "EN" : "हिं"}
-              </button>
-            ))}
-          </div>
-          {/* Account, on the main site's own nav: signed in goes straight to
-              the profile, signed out to sign-in. Before this the only path
-              to /profile ran through the dashboard's own bar, so a visitor
-              browsing the marketing site had no way to reach their account
-              at all. Icon-only — the bar already scrolls sideways under
-              five tabs, search and the language toggle. */}
-          <a
-            href={signedIn ? "/profile" : "/login"}
-            aria-label={
-              signedIn
-                ? T({ en: "Your account", hi: "आपका खाता" })
-                : T({ en: "Sign in", hi: "साइन इन करें" })
-            }
-            className="flex h-9 w-9 items-center justify-center rounded-full shrink-0 no-underline"
-            style={{ color: "#fff", border: "1px solid rgb(255 255 255 / .28)" }}
-          >
-            <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21a8 8 0 0 0-16 0" />
-              <circle cx="12" cy="8" r="4.5" />
-            </svg>
-          </a>
-        </div>
       </div>
     </header>
   );

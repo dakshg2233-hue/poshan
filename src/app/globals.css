@@ -2060,7 +2060,7 @@ nav button:not(:disabled):not(.lift):not(.surface-card):active {
    whether the bar is fixed or stuck, so this was wrong before the hero too.
    80px, not 66: landing a heading flush against the bar reads as clipped. */
 html {
-  scroll-padding-top: 80px;
+  scroll-padding-top: calc(var(--nav-h, 52px) + 14px);
 }
 
 /* Nav stows itself while the video hero owns the top of the frame.
@@ -2071,22 +2071,19 @@ html {
   /* Declared here rather than as a Tailwind `fixed` utility because
      .liquid-glass-chrome sets position:relative for its ::before hairline,
      is unlayered, and so beats any layered utility no matter what the class
-     attribute says. This rule is later in the file at equal specificity, so
-     it wins, and the stow behaviour needs out-of-flow positioning anyway. */
+     attribute says.
+     Always the true top of the viewport — this used to make room for
+     AdviceBar above it (top: var(--advice-bar-h)), which is what let the
+     two bars overlap on a slow measurement or a line-wrap. AdviceBar is
+     normal-flow content inside <Dashboard> now, below this bar, not
+     fixed chrome competing with it for the same edge. */
   position: fixed;
-  /* --advice-bar-h is set by AdviceBar (src/components/poshan/advice-bar.tsx)
-     to its own measured height while it's on screen, and cleared when it
-     isn't. Without this the nav — fixed at the viewport's top edge — paints
-     directly over the advice bar, which sits in normal flow right above it
-     in the DOM: fixed positioning ignores document order entirely, so being
-     "above it" in markup does nothing on its own. */
-  top: var(--advice-bar-h, 0px);
+  top: 0;
   left: 0;
   right: 0;
   transition:
     opacity 0.4s var(--ease),
-    transform 0.4s var(--ease),
-    top 0.4s var(--ease);
+    transform 0.4s var(--ease);
 }
 /* The tab strip sits on the dark bar, so it takes the bar's lifted accents
    rather than the page's. Inactive tabs are the bar's soft ink; the active
@@ -2122,6 +2119,71 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .nav-logo-mark {
     transition: none;
+  }
+}
+
+/* Fixed height for the bottom utility bar (search, language, account).
+   Unlike --advice-bar-h this is never measured — the bar's content never
+   wraps or changes shape — so it is just a constant every other fixed-bottom
+   element (sticky CTA, chat bubble, cookie banner) offsets above via
+   calc(var(--bottom-bar-h) + …), the same way they already clear each other. */
+:root {
+  --bottom-bar-h: 52px;
+  --nav-h: 52px;
+}
+.bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--bottom-bar-h);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+/* Keeps the last section (footer included) from sitting under the fixed bar,
+   and the first section of every tab from sitting under the now-always-fixed
+   nav (it used to be pushed down by AdviceBar instead of content making
+   room for it). */
+body {
+  padding-top: var(--nav-h);
+  padding-bottom: calc(var(--bottom-bar-h) + env(safe-area-inset-bottom));
+}
+/* The hero is meant to run edge-to-edge under the nav's glass, not start
+   below it like every other section. */
+#hero {
+  margin-top: calc(-1 * var(--nav-h));
+}
+
+/* Advice-of-the-day ticker: two identical copies of the text placed side by
+   side (see advice-bar.tsx), the whole track animated to translateX(-50%).
+   That's exactly one copy's width, so the instant the first copy has fully
+   scrolled off, the second is sitting exactly where the first began — no
+   jump, no gap. animation-play-state is set here rather than removing the
+   animation on hover, so a visitor can actually finish reading a long line
+   by hovering it. */
+.ticker-item {
+  padding-right: 3.5rem;
+  line-height: 1.5;
+}
+.ticker-track {
+  animation: ticker-scroll 20s linear infinite;
+}
+.ticker-viewport:hover .ticker-track {
+  animation-play-state: paused;
+}
+@keyframes ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track {
+    animation: none;
+  }
+  .ticker-track > [aria-hidden="true"] {
+    display: none;
   }
 }
 

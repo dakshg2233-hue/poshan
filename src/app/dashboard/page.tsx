@@ -42,7 +42,7 @@ export default function Dashboard() {
           .from("subscriptions")
           .select("*")
           .eq("user_id", userId)
-          .eq("product", "home")
+          .in("product", ["home", "college"])
           .in("status", ["trialing", "active"])
           .single()
 

@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Stethoscope, X } from "lucide-react";
 import { useLang } from "./lang-provider";
 import { getTodaysAdvice, type DailyAdvice } from "@/lib/doctor-advice";
@@ -13,13 +12,14 @@ function todayKey(d = new Date()) {
 }
 
 /**
- * Scoped to the hero page only (pathname === "/"), not every route this
- * layout wraps. Was previously a blacklist ("show everywhere except
- * /dashboard"), which meant it also showed on /login, /faq, /contact and
- * every /clinician page — anywhere but the one page it was actually meant
- * for. Narrowed to an allowlist instead: TodayWidget already surfaces the
- * same advice inside its own card on /dashboard, and none of the other
- * pages it was leaking onto were ever the intended surface either.
+ * Today's advice, rendered in normal document flow inside <Dashboard> —
+ * the one place it's mounted, so there is nothing left to scope by tab or
+ * pathname. It used to be fixed chrome pinned above the top nav (pushing the
+ * nav down by its own measured height, via a ResizeObserver and a CSS var),
+ * which is what let it paint over the nav on a tall line-wrap and, worse,
+ * leak onto every tab once the tab system replaced routing — a pathname
+ * check against a single-page app is always true. Now the nav stays fixed at
+ * the true top of the viewport always, and this is just a card below it.
  *
  * Computed client-side only: today's advice is a pure function of the date,
  * but the server and a visitor's browser can disagree on what "today" is
@@ -28,11 +28,8 @@ function todayKey(d = new Date()) {
  */
 export function AdviceBar() {
   const { T } = useLang();
-  const pathname = usePathname();
   const [advice, setAdvice] = useState<DailyAdvice | null>(null);
   const [dismissed, setDismissed] = useState(true);
-  const barRef = useRef<HTMLDivElement>(null);
-  const isHeroPage = pathname === "/";
 
   useEffect(() => {
     let cancelled = false;
@@ -49,38 +46,22 @@ export function AdviceBar() {
     };
   }, []);
 
-  /* The main site's nav is `position: fixed; top: var(--advice-bar-h, 0px)`
-     (src/app/globals.css, .nav-slide) so it shifts down instead of painting
-     over this bar — fixed elements ignore document order entirely, so
-     merely rendering above the nav in JSX does nothing on its own. Measured
-     rather than hardcoded because the text wraps to a second line below
-     ~480px wide, changing the bar's real height. Cleared on dismiss/unmount
-     so the nav snaps back to top:0 the moment the bar is gone. */
-  useEffect(() => {
-    const root = document.documentElement;
-    if (!advice || dismissed || !isHeroPage) {
-      root.style.removeProperty("--advice-bar-h");
-      return;
-    }
-    const el = barRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver(([entry]) => {
-      root.style.setProperty("--advice-bar-h", `${entry.contentRect.height}px`);
-    });
-    observer.observe(el);
-    return () => {
-      observer.disconnect();
-      root.style.removeProperty("--advice-bar-h");
-    };
-  }, [advice, dismissed, isHeroPage]);
+  if (!advice || dismissed) return null;
 
-  if (!advice || dismissed || !isHeroPage) return null;
+  /* Just the advice + source — the "Advice of the day" label is not part of
+     this any more, it's a fixed prefix outside the scrolling track. */
+  const scrolling = (
+    <span className="ticker-item" style={{ color: "var(--ink)" }}>
+      {T({ en: advice.en, hi: advice.hi })}
+      {"  "}
+      <span style={{ color: "var(--ink-soft)" }}>— {advice.source}</span>
+    </span>
+  );
 
   return (
     <div
-      ref={barRef}
-      className="panel-in flex items-center gap-3 px-4 py-2.5 text-sm"
-      style={{ background: "var(--surface)", borderBottom: "1px solid var(--line)" }}
+      className="panel-in flex items-center gap-3 px-4 py-3 mb-8 rounded-2xl text-sm"
+      style={{ background: "var(--surface)", border: "1px solid var(--line)" }}
       role="note"
       aria-label={T({ en: "Doctor's advice of the day", hi: "आज की डॉक्टर की सलाह" })}
     >
@@ -89,21 +70,30 @@ export function AdviceBar() {
         style={{ color: "var(--kesar)" }}
         aria-hidden="true"
       />
-      {/* A bar means one line: the full advice + source can run past 200
-          characters, which wraps to three lines at typical widths and stops
-          being a bar. Truncated with an ellipsis and the full text on
-          hover/long-press via title, same trade a stock ticker makes. */}
-      <p
-        className="min-w-0 flex-1 truncate"
-        style={{ color: "var(--ink)" }}
-        title={`${T({ en: advice.en, hi: advice.hi })} — ${advice.source}`}
+      {/* Fixed, not part of the scroll: this label stays put while only the
+          advice text moves past it. */}
+      <span className="font-semibold shrink-0 whitespace-nowrap" style={{ color: "var(--ink)" }}>
+        {T({ en: "Advice of the day:", hi: "आज की सलाह:" })}
+      </span>
+      {/* One line, always — the old wrap-and-ellipsis version cropped the
+          text against this bar's fixed height instead of showing it in
+          full. A ticker scrolls it through, seamlessly: two identical
+          copies in a row, animated to exactly -50% of the track, so the
+          moment the first copy exits, the second is sitting where the
+          first began. Height and line-height are both pinned to the same
+          value here — an auto-height row inside overflow:hidden can end up
+          a pixel short of a font's actual line box, which is what was
+          shaving the top off every line. */}
+      <div
+        className="ticker-viewport min-w-0 flex-1 overflow-x-hidden"
+        style={{ height: "1.35rem", lineHeight: "1.35rem" }}
       >
-        <span className="font-semibold">
-          {T({ en: "Advice of the day: ", hi: "आज की सलाह: " })}
-        </span>
-        {T({ en: advice.en, hi: advice.hi })}{" "}
-        <span style={{ color: "var(--ink-soft)" }}>— {advice.source}</span>
-      </p>
+        <div className="ticker-track inline-flex whitespace-nowrap">
+          {scrolling}
+          {/* Decorative repeat for the seamless loop, not a second message. */}
+          <span aria-hidden="true">{scrolling}</span>
+        </div>
+      </div>
       <button
         type="button"
         onClick={() => {

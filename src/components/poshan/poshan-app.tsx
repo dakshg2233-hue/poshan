@@ -7,26 +7,23 @@ import {
   type Body,
 } from "@/lib/use-body-profile";
 import { Nav } from "./nav";
+import { BottomBar } from "./bottom-bar";
+import { Dashboard } from "./dashboard";
 import { Hero } from "./hero";
 import { Premium } from "./premium";
 import { MealLibrary } from "./meal-library";
-import { FoodScanner } from "./food-scanner";
+import { ScannerPage } from "./scanner-page";
 import { Conditions } from "./conditions";
 import { MotionLayer } from "./motion-layer";
 import { Clinics } from "./clinics";
-/* hero-cinematic.tsx is the previous photographic hero. It is kept, not
-   deleted: swapping these two imports and the tag below reverts the hero. */
-import { HeroVideo } from "./hero-video";
-import { CursorPicker } from "./cursor-picker";
-import { PaletteControl } from "./palette-control";
 import { PointerLight } from "./pointer-light";
 import { StickyCta } from "./sticky-cta";
 import { Consent } from "./consent";
-import { ChatWidget } from "./chat-widget";
+import { ChatWidget, ChatProvider } from "./chat-widget";
 import { GlassFilter } from "@/components/ui/glass-filter";
 import { MagneticCursor } from "@/components/ui/magnetic-cursor";
 import { TabProvider, TabPanel, useSwipeNav } from "./tabs";
-import { Bands, Meals, Biomarkers, Testimonials, ClosingCta, Footer } from "./sections";
+import { Bands, Biomarkers, Testimonials, ClosingCta, Footer } from "./sections";
 import {
   bandFor,
   PLANS,
@@ -115,7 +112,10 @@ function PoshanAppInner({
       {/* Wraps Nav as well as main, because the tab strip and the site search
           both live in the bar and both drive the same active tab. */}
       <TabProvider>
-      <Nav signedIn={signedIn} />
+      {/* Shared open/kind state for the chat panel: the floating bubble and
+          <BottomBar>'s small chat icon both toggle the same conversation. */}
+      <ChatProvider>
+      <Nav />
       <MainContent
         height={height}
         weight={weight}
@@ -142,24 +142,17 @@ function PoshanAppInner({
       <Footer />
       {/* Chrome, not content, so it sits outside <main>. Still inside the
           provider, because the sticky CTA points at the BMI tool and has to
-          switch tab to reach it from anywhere else. */}
-      {/* Bottom-left. These were taken off the page because the cursor chip
-          sat directly under the logo; it lives in the opposite bottom corner
-          now, so it is reachable without landing on the composition. */}
-      <CursorPicker />
-      {/* Fixed chrome, not nav furniture: the header stows over the hero,
-          which used to take the only palette control off screen with it.
-          Dev-only: this was always meant to be removed once a palette was
-          chosen (sindoor, the bare :root, already is that choice) — a raw
-          theme-tester floating on every page reads as unfinished to a real
-          visitor, not premium. Kept for the team, gone from production. */}
-      {process.env.NODE_ENV === "development" && <PaletteControl />}
+          switch tab to reach it from anywhere else.
+          Cursor picker and (dev-only) palette control now live inside
+          <BottomBar> as small icons, rather than floating independently. */}
       {/* The hero's pointer spotlight, carried down the whole page. */}
       <PointerLight />
       <StickyCta />
       <ChatWidget signedIn={signedIn} />
+      <BottomBar signedIn={signedIn} />
       {/* Nothing is loaded and no id is set until this is accepted. */}
       <Consent />
+      </ChatProvider>
       </TabProvider>
     </MagneticCursor>
   );
@@ -220,10 +213,11 @@ function MainContent({
     <main id="top" className="flex-1" ref={swipeRef}>
       {/* One tab mounts at a time. The sections themselves are unchanged;
           only which of them is in the document at once has moved. */}
+      <TabPanel tab="dashboard">
+        <Dashboard />
+      </TabPanel>
+
       <TabPanel tab="home">
-        {/* Photographic opener. The BMI tool below is untouched: it is the
-            core interaction and does not belong buried under a hero. */}
-        <HeroVideo />
         <Hero
           height={height}
           weight={weight}
@@ -242,24 +236,12 @@ function MainContent({
         <Bands />
       </TabPanel>
 
-      <TabPanel tab="plate">
-        <Meals band={band} plan={plan} />
+      <TabPanel tab="yourmeals">
+        <MealLibrary goal={goal} plan={plan} bandName={band.name} />
       </TabPanel>
 
-      <TabPanel tab="meals">
-        <MealLibrary goal={goal} />
-        <FoodScanner />
-      </TabPanel>
-
-      <TabPanel tab="health">
-        <Biomarkers />
-        <Conditions />
-      </TabPanel>
-
-      <TabPanel tab="premium">
-        {/* diet and region now live here too, so all five values persist
-            together rather than the customiser holding two of them privately. */}
-        <Premium
+      <TabPanel tab="scanner">
+        <ScannerPage
           baseKcal={plan.kcal}
           goal={goal}
           setGoal={setGoal}
@@ -268,7 +250,17 @@ function MainContent({
           region={region}
           setRegion={setRegion}
           signedIn={signedIn}
+          isPremium={false}
         />
+      </TabPanel>
+
+      <TabPanel tab="health">
+        <Biomarkers />
+        <Conditions />
+      </TabPanel>
+
+      <TabPanel tab="premium">
+        <Premium signedIn={signedIn} />
         <Clinics />
         <Testimonials />
         <ClosingCta />

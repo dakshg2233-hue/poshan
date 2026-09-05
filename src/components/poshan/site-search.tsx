@@ -16,6 +16,12 @@ import { CONDITIONS } from "@/lib/conditions";
  * to the owning tab and scrolls to the section, so a result is a destination
  * rather than a hint about where to look.
  *
+ * Lives in <BottomBar> as a small always-visible input rather than an icon
+ * that opens one — it used to be icon-only in the top nav, which meant a
+ * whole extra tap before anyone could type. The results panel still opens as
+ * a floating portal, just anchored above the bottom bar instead of below the
+ * top one.
+ *
  * The index is built once from the same constants the sections render, so
  * there is nothing to keep in sync. Both languages are always searched,
  * whichever is on screen, because people type Indian dish names in either
@@ -37,7 +43,7 @@ function buildIndex(): Hit[] {
     title: m.name,
     detail: m.note,
     kind: { en: "Meal", hi: "भोजन" },
-    tab: "meals",
+    tab: "yourmeals",
     target: "meals",
   }));
 
@@ -70,14 +76,11 @@ function haystack(h: Hit) {
 export function SiteSearch() {
   const { T } = useLang();
   const { go } = useTabs();
-  const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  /* Built once. The datasets are module constants, so there is nothing for
-     this to depend on and nothing that can invalidate it. */
   const prepared = useMemo(
     () => buildIndex().map((h) => ({ hit: h, hay: haystack(h) })),
     []
@@ -86,8 +89,6 @@ export function SiteSearch() {
   const results = useMemo(() => {
     const term = q.trim().toLowerCase();
     if (term.length < 2) return [];
-    /* Title matches first: someone typing "dal" wants the dal, not every
-       plan whose note happens to mention it. */
     const scored = prepared
       .filter((p) => p.hay.includes(term))
       .map((p) => {
@@ -100,24 +101,21 @@ export function SiteSearch() {
     return scored.slice(0, 8).map((s) => s.hit);
   }, [q, prepared]);
 
-  /* Escape closes and returns focus to the field; a click outside closes
-     without stealing it. */
+  const panelOpen = q.trim().length >= 2;
+
   useEffect(() => {
-    if (!open) return;
+    if (!panelOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setOpen(false);
         setQ("");
+        inputRef.current?.blur();
       }
     };
-    /* Both subtrees count as inside. The panel is portalled to <body>, so it
-       is not a descendant of rootRef: testing rootRef alone would read a
-       click on a result as a click outside and close before it lands. */
     const onClick = (e: MouseEvent) => {
       const target = e.target as Node;
       const inToggle = rootRef.current?.contains(target);
       const inPanel = panelRef.current?.contains(target);
-      if (!inToggle && !inPanel) setOpen(false);
+      if (!inToggle && !inPanel) setQ("");
     };
     addEventListener("keydown", onKey);
     addEventListener("mousedown", onClick);
@@ -125,86 +123,64 @@ export function SiteSearch() {
       removeEventListener("keydown", onKey);
       removeEventListener("mousedown", onClick);
     };
-  }, [open]);
+  }, [panelOpen]);
 
   function pick(h: Hit) {
     go(h.tab, h.target);
-    setOpen(false);
     setQ("");
   }
 
   return (
-    <div ref={rootRef} className="relative shrink-0">
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-label={T({ en: "Search the site", hi: "साइट खोजें" })}
-        onClick={() => {
-          setOpen((o) => !o);
-          /* Focus after the field exists, not in the same tick. */
-          requestAnimationFrame(() => inputRef.current?.focus());
-        }}
-        className="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer transition-colors hover:bg-white/10"
-        style={{ color: "#ffffffcc" }}
-      >
-        <svg viewBox="0 0 20 20" aria-hidden className="w-[18px] h-[18px]">
+    <div ref={rootRef} className="relative flex-1 min-w-0">
+      <div className="relative flex items-center">
+        <svg
+          viewBox="0 0 20 20"
+          aria-hidden
+          className="absolute left-3 w-[15px] h-[15px] pointer-events-none"
+          style={{ color: "#ffffffaa" }}
+        >
           <circle cx={9} cy={9} r={6} fill="none" stroke="currentColor" strokeWidth={2} />
           <path d="M13.5 13.5 17.5 17.5" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
         </svg>
-      </button>
+        <input
+          ref={inputRef}
+          type="search"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && results.length) pick(results[0]);
+          }}
+          placeholder={T({ en: "Search meals, conditions…", hi: "भोजन, स्थितियाँ खोजें…" })}
+          aria-label={T({ en: "Search the site", hi: "साइट खोजें" })}
+          className="w-full pl-8 pr-3 min-h-9 rounded-full text-[0.84rem] outline-none"
+          style={{
+            background: "rgb(255 255 255 / .1)",
+            border: "1px solid rgb(255 255 255 / .28)",
+            color: "#fff",
+          }}
+        />
+      </div>
 
-      {/* Portalled to <body>, and it has to be.
-        *
-        * The bar is .liquid-glass-chrome: overflow:hidden for its hairline,
-        * which clips an absolutely positioned panel to the bar's 67px, and
-        * backdrop-filter for the glass, which makes the bar a containing
-        * block for fixed descendants. That second one is the killer. Inside
-        * the header, position:fixed resolves against the header rather than
-        * the viewport, so the panel computed top:68.8px and still painted at
-        * 6px, over the tabs. No positioning fixes that from within; the panel
-        * has to leave the subtree.
-        *
-        * The document check is not decoration. This component is prerendered
-        * on the server, where there is no document at all, and React throws
-        * "Target container is not a DOM element" the moment createPortal is
-        * reached with anything that is not an element. Guarding on `open`
-        * alone is not enough to keep the server off this branch. */}
-      {open &&
+      {/* Portalled to <body>: the bottom bar is .liquid-glass-chrome with
+          overflow:hidden for its hairline and a backdrop-filter that makes it
+          a containing block for fixed descendants, so a panel positioned
+          from inside it never resolves against the viewport. Anchored above
+          the bar (bottom, not top) since the trigger now lives at the very
+          bottom of the screen. */}
+      {panelOpen &&
         typeof document !== "undefined" &&
         createPortal(
-        <div
-          ref={panelRef}
-          className="liquid-glass-chrome refract popover-in w-[min(23rem,calc(100vw-2rem))] rounded-2xl p-2.5 shadow-2xl"
-          style={{
-            position: "fixed",
-            top: "4.3rem",
-            right: "max(1.25rem, calc((100vw - 1180px) / 2))",
-            zIndex: 130,
-          }}
-        >
-          <input
-            ref={inputRef}
-            type="search"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && results.length) pick(results[0]);
-            }}
-            placeholder={T({
-              en: "Search meals, conditions, biomarkers",
-              hi: "भोजन, स्थितियाँ, बायोमार्कर खोजें",
-            })}
-            aria-label={T({ en: "Search", hi: "खोजें" })}
-            className="w-full px-3.5 min-h-10 rounded-xl text-[0.88rem] outline-none"
+          <div
+            ref={panelRef}
+            className="liquid-glass-chrome refract popover-in w-[min(23rem,calc(100vw-2rem))] rounded-2xl p-2.5 shadow-2xl"
             style={{
-              background: "var(--surface)",
-              border: "1px solid var(--line)",
-              color: "var(--ink)",
+              position: "fixed",
+              bottom: "calc(var(--bottom-bar-h, 64px) + 0.6rem)",
+              left: "max(1rem, calc((100vw - 1180px) / 2 + 1rem))",
+              zIndex: 130,
             }}
-          />
-
-          {q.trim().length >= 2 && (
-            <ul className="mt-2 grid gap-0.5 list-none max-h-[19rem] overflow-y-auto">
+          >
+            <ul className="grid gap-0.5 list-none max-h-[19rem] overflow-y-auto m-0 p-0">
               {results.length === 0 && (
                 <li
                   className="px-3 py-3 text-[0.84rem]"
@@ -236,10 +212,9 @@ export function SiteSearch() {
                 </li>
               ))}
             </ul>
-          )}
-        </div>,
-        document.body
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

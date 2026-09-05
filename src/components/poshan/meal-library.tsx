@@ -1,31 +1,78 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useLang, useReveal } from "./lang-provider";
-import { FoodScanner } from "./food-scanner";
 import { RecipePanel } from "./recipe-panel";
+import { usePickedConditions } from "@/lib/use-conditions";
+import { checkMealAll, VERDICT_COLOUR, VERDICT_LABEL, type Verdict } from "@/lib/conditions";
 import {
   MEAL_LIBRARY,
   CATEGORY_LABEL,
   TAG_LABEL,
+  COLLECTION_LABEL,
   MEAL_TIME_LABEL,
   NUTRIENT,
   REGIONS,
   GOALS,
   GOAL_TAGS,
-  COLLECTIONS,
   filterMeals,
   countByCategory,
-  countByCollection,
+  countByTag,
   type FoodCategory,
+  type DietTag,
   type MealTime,
   type RegionKey,
   type GoalKey,
   type CollectionKey,
+  type Plan,
+  type Bi,
+  type MealPlanItem,
 } from "@/lib/poshan-data";
 
-/** Cards added per "show more" press. */
-const PAGE = 60;
+/**
+ * Each meal of the day gets its own budget, not one pooled daily total —
+ * general clinical guidance splits calories unevenly across the day rather
+ * than in even thirds (a heavier lunch, a lighter dinner), so breakfast and
+ * dinner shouldn't share a limit. Brunch stands in for breakfast+lunch when
+ * used, so it carries a similar share to lunch. Shares are approximate by
+ * design — the four main slots sum to 1.0; brunch is an alternate, not an
+ * addition to them.
+ */
+const MEAL_TIME_SHARE: Record<MealTime, number> = {
+  breakfast: 0.25,
+  brunch: 0.3,
+  lunch: 0.35,
+  dinner: 0.3,
+  snack: 0.1,
+};
+
+type Totals = { kcal: number; protein: number; carbohydrate: number; fat: number; fibre: number };
+
+/**
+ * Per-meal-time nutrient budget derived from the BMI-band calorie target the
+ * "Check your BMI" tool already computes (plan.kcal), split by that meal's
+ * share of the day. Not yet personalised against a signed-in user's own lab
+ * values or logged conditions — that needs a server round trip this
+ * client-only cart doesn't make yet. Macro split within each slot follows
+ * the same general range used for the daily figure: protein ~20% of kcal,
+ * carbohydrate ~50%, fat ~25%, fibre scaled with the same share off a flat
+ * 30 g/day.
+ */
+function budgetForTime(plan: Plan, time: MealTime): Totals {
+  const share = MEAL_TIME_SHARE[time] ?? 0.25;
+  const kcal = Math.round(plan.kcal * share);
+  return {
+    kcal,
+    protein: Math.round((kcal * 0.2) / 4),
+    carbohydrate: Math.round((kcal * 0.5) / 4),
+    fat: Math.round((kcal * 0.25) / 9),
+    fibre: Math.round(30 * share),
+  };
+}
+
+/** Cards shown before "show more" — 18 fits a comfortable scroll on first
+ * load; the rest of the library (1,600+) comes in per-press batches. */
+const PAGE = 18;
 
 /**
  * The FSSAI food mark, as printed on every packaged food sold in India:
@@ -56,26 +103,127 @@ export function FoodMark({
   );
 }
 
-const TIMES: MealTime[] = ["breakfast", "lunch", "dinner", "snack"];
+/**
+ * A bolt for the Gen-Z high-protein shelf — the one shelf here that isn't
+ * a diet at all, so it gets its own mark instead of borrowing the FSSAI
+ * veg/non-veg shapes.
+ */
+function GenZMark({ active }: { active?: boolean }) {
+  return (
+    <svg viewBox="0 0 16 16" aria-hidden className="w-4 h-4 shrink-0">
+      <path
+        d="M9.1 1 3.6 9.2h3.1L6 15l6.4-8.6H9.3Z"
+        fill={active ? "#fff" : "var(--kesar)"}
+      />
+    </svg>
+  );
+}
 
-export function MealLibrary({ goal }: { goal: GoalKey }) {
+const TIMES: MealTime[] = ["breakfast", "brunch", "lunch", "dinner", "snack"];
+
+/** All plans, veg, non-veg, plus the two Jain/vegan sub-diets and the
+ * Gen-Z high-protein shelf — one single-select row instead of a primary
+ * axis plus a buried "Shelf" filter. */
+type PrimaryFilter = "all" | "veg" | "nonveg" | "vegan" | "jain" | "genz";
+
+export function MealLibrary({ goal, plan, bandName }: { goal: GoalKey; plan: Plan; bandName: Bi }) {
   const { T, lang } = useLang();
   const reveal = useReveal<HTMLDivElement>();
 
-  const [category, setCategory] = useState<FoodCategory | null>(null);
+  const [primary, setPrimary] = useState<PrimaryFilter>("all");
   const [region, setRegion] = useState<RegionKey | null>(null);
   const [time, setTime] = useState<MealTime | null>(null);
-  const [collection, setCollection] = useState<CollectionKey | null>(null);
   const [byGoal, setByGoal] = useState(false);
   const [query, setQuery] = useState("");
   /* The library runs to four figures. Mounting every card at once costs a
      visible pause on a mid-range phone, so the grid grows on request. */
   const [shown, setShown] = useState(PAGE);
+  /* The cart: how many of each meal the visitor has added, and — separately
+     from the dish's own tag — which meal-of-the-day slot it counts toward.
+     Defaults to the dish's own `time`, but a breakfast dish eaten at dinner
+     is a real thing, so it's reassignable per cart entry, not locked to the
+     library's own classification. Client-only, like the rest of this tab's
+     state — nothing here persists to an account yet. */
+  const [cart, setCart] = useState<Record<string, { qty: number; time: MealTime }>>({});
+  const addToCart = (m: MealPlanItem, delta: number) =>
+    setCart((c) => {
+      const prev = c[m.id];
+      const qty = Math.max(0, (prev?.qty ?? 0) + delta);
+      if (qty === 0) {
+        const rest = { ...c };
+        delete rest[m.id];
+        return rest;
+      }
+      return { ...c, [m.id]: { qty, time: prev?.time ?? m.time } };
+    });
+  const reassignTime = (id: string, time: MealTime) =>
+    setCart((c) => (c[id] ? { ...c, [id]: { ...c[id], time } } : c));
+
+  /* One thali per meal-time that actually has something in it — totals and
+     budget both scoped to that slot (the ASSIGNED one, not the dish's own
+     tag), not pooled into one daily number. */
+  const totalsByTime = useMemo(() => {
+    const acc = {} as Partial<Record<MealTime, Totals>>;
+    for (const [id, entry] of Object.entries(cart)) {
+      if (entry.qty <= 0) continue;
+      const m = MEAL_LIBRARY.find((x) => x.id === id);
+      if (!m) continue;
+      const t = acc[entry.time] ?? { kcal: 0, protein: 0, carbohydrate: 0, fat: 0, fibre: 0 };
+      t.kcal += m.kcal * entry.qty;
+      t.protein += m.macros.protein * entry.qty;
+      t.carbohydrate += m.macros.carbohydrate * entry.qty;
+      t.fat += m.macros.fat * entry.qty;
+      t.fibre += m.macros.fibre * entry.qty;
+      acc[entry.time] = t;
+    }
+    return acc;
+  }, [cart]);
+  const activeTimes = TIMES.filter((t) => totalsByTime[t]);
+  const cartCount = Object.values(cart).reduce((a, b) => a + (b.qty > 0 ? b.qty : 0), 0);
+
+  /* Conditions picked in the Biomarkers tab — shared via localStorage, see
+     use-conditions.ts. Drives both the per-card verdict dot and the toast
+     that fires when adding something flagged for one of them. */
+  const { picked } = usePickedConditions();
+  const [toast, setToast] = useState<{ mealName: string; verdict: Verdict; why?: Bi } | null>(null);
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 5000);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  function verdictFor(mealId: string) {
+    if (!picked.length) return null;
+    const { worst, results } = checkMealAll(mealId, picked);
+    const withReasons = results.flatMap((r) => r.reasons.map((rs) => ({ ...rs, condition: r.condition })));
+    /* MEAL_ATTRS only covers the original library, not every dish added
+       since — an unflagged dish with zero matching rules still falls back
+       to "caution" inside checkMeal, which would paint most of the library
+       amber for no real reason. Only surface a verdict backed by an actual
+       matched rule. */
+    if (withReasons.length === 0) return null;
+    return { worst, why: withReasons.find((r) => r.verdict === worst)?.why };
+  }
+
+  function handleAdd(m: MealPlanItem) {
+    addToCart(m, 1);
+    if (!picked.length) return;
+    const v = verdictFor(m.id);
+    if (v && v.worst !== "good") {
+      setToast({ mealName: T(m.name), verdict: v.worst, why: v.why });
+    }
+  }
 
   const goalLabel = GOALS.find((g) => g.key === goal)!.label;
 
+  const category: FoodCategory | null =
+    primary === "veg" ? "veg" : primary === "nonveg" ? "nonveg" : null;
+  const tag: DietTag | null =
+    primary === "vegan" ? "vegan" : primary === "jain" ? "jain" : null;
+  const collection: CollectionKey | null = primary === "genz" ? "genz" : null;
+
   const meals = useMemo(() => {
-    const filtered = filterMeals({ category, region, time, collection, goal: byGoal ? goal : null });
+    const filtered = filterMeals({ category, region, time, tag, collection, goal: byGoal ? goal : null });
     /* Name and note, both languages regardless of which is on screen: Indian
        dish names get typed in either script, and someone reading the English
        copy still searches "पनीर". Applied after the filters so the count the
@@ -98,13 +246,13 @@ export function MealLibrary({ goal }: { goal: GoalKey }) {
           a.tags.filter((t) => wanted.includes(t)).length ||
         b.macros.protein - a.macros.protein
     );
-  }, [category, region, time, collection, byGoal, goal, query]);
+  }, [category, region, time, tag, collection, byGoal, goal, query]);
 
   /* Any change to the filters puts the grid back to the first page, so the
      count above the grid and the cards below it never disagree. Adjusted
      during render rather than in an effect: React re-runs this pass before
      anything paints, so the short grid never flashes at the old length. */
-  const filterSig = `${category}|${region}|${time}|${collection}|${byGoal}|${goal}|${query}`;
+  const filterSig = `${primary}|${region}|${time}|${byGoal}|${goal}|${query}`;
   const [prevSig, setPrevSig] = useState(filterSig);
   if (filterSig !== prevSig) {
     setPrevSig(filterSig);
@@ -112,32 +260,33 @@ export function MealLibrary({ goal }: { goal: GoalKey }) {
   }
 
   const counts = countByCategory();
-  const collectionCounts = useMemo(() => countByCollection(), []);
+  const veganCount = useMemo(() => countByTag("vegan"), []);
+  const jainCount = useMemo(() => countByTag("jain"), []);
+  const genzCount = useMemo(() => filterMeals({ collection: "genz" }).length, []);
   const visible = meals.slice(0, shown);
+  /* Browsing "All plans" is a wall of 1,600+ dishes with nothing narrowing
+     what they'd actually be eating — adding only switches on once a real
+     choice (veg/non-veg/vegan/Jain/Gen-Z) has been made. */
+  const canAdd = primary !== "all";
 
   return (
     <section id="meals" className="py-14 md:py-24">
       <div className="w-[min(1180px,100%-2.5rem)] mx-auto">
         <div ref={reveal} className="rise">
-          <div className="max-w-[56ch] mb-9">
-            <div className="shiro w-[72px] mb-5" />
+          <div className="max-w-[56ch] mb-6">
+            <div className="shiro w-[72px] mb-4" />
             <h2
-              className="text-[clamp(1.9rem,4.4vw,2.85rem)] leading-tight"
+              className="text-[clamp(1.7rem,3.8vw,2.5rem)] leading-tight"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              {T({ en: "Every plan, sorted the way you already sort food", hi: "हर प्लान, उसी तरह छँटा जैसे आप पहले से छाँटते हैं" })}
+              {T({ en: "Your Meals", hi: "आपके भोजन" })}
             </h2>
-            <p className="mt-4 text-[1.02rem]" style={{ color: "var(--ink-soft)" }}>
+            <p className="mt-3 text-[0.95rem]" style={{ color: "var(--ink-soft)" }}>
               {T({
-                en: `${MEAL_LIBRARY.length} plans: ${counts.veg} vegetarian, ${counts.nonveg} non-vegetarian. Marked with the same green circle and brown triangle you read on every packet in an Indian shop.`,
-                hi: `${MEAL_LIBRARY.length} प्लान: ${counts.veg} शाकाहारी, ${counts.nonveg} मांसाहारी। वही हरा गोला और भूरा त्रिकोण जो आप भारतीय दुकान के हर पैकेट पर पढ़ते हैं।`,
+                en: `Search or filter ${MEAL_LIBRARY.length} plans, then add what you're eating — Poshan tracks it against today's budget as you go.`,
+                hi: `${MEAL_LIBRARY.length} प्लान खोजें या छाँटें, फिर जो खा रहे हैं उसे जोड़ें — पोषण उसे आज के बजट के सामने ट्रैक करता है।`,
               })}
             </p>
-          </div>
-
-          {/* ---------- food scanner (free feature) ---------- */}
-          <div className="mb-8">
-            <FoodScanner isPremium={false} />
           </div>
 
           {/* ---------- search ---------- */}
@@ -191,61 +340,88 @@ export function MealLibrary({ goal }: { goal: GoalKey }) {
             )}
           </div>
 
-          {/* ---------- primary axis: veg / non-veg ---------- */}
+          {/* ---------- primary axis: diet + shelf, one row ---------- */}
           <div
-            className="flex flex-wrap gap-2 p-2 rounded-2xl mb-4"
+            className="flex flex-nowrap items-center gap-2 p-2 rounded-2xl mb-6 overflow-x-auto no-scrollbar"
             style={{ background: "var(--surface)", border: "1px solid var(--line)" }}
             role="group"
-            aria-label={T({ en: "Filter by food category", hi: "खाद्य श्रेणी से छाँटें" })}
+            aria-label={T({ en: "Filter by diet and food category", hi: "आहार और खाद्य श्रेणी से छाँटें" })}
           >
             <CategoryTab
-              active={category === null}
-              onClick={() => setCategory(null)}
+              active={primary === "all"}
+              onClick={() => setPrimary("all")}
               label={T({ en: "All plans", hi: "सभी प्लान" })}
               count={MEAL_LIBRARY.length}
             />
             <CategoryTab
-              active={category === "veg"}
-              onClick={() => setCategory("veg")}
+              active={primary === "veg"}
+              onClick={() => setPrimary("veg")}
               label={T(CATEGORY_LABEL.veg)}
               count={counts.veg}
               mark="veg"
             />
             <CategoryTab
-              active={category === "nonveg"}
-              onClick={() => setCategory("nonveg")}
+              active={primary === "nonveg"}
+              onClick={() => setPrimary("nonveg")}
               label={T(CATEGORY_LABEL.nonveg)}
               count={counts.nonveg}
               mark="nonveg"
             />
-          </div>
+            <CategoryTab
+              active={primary === "vegan"}
+              onClick={() => setPrimary("vegan")}
+              label={T(TAG_LABEL.vegan)}
+              count={veganCount}
+              mark="veg"
+            />
+            <CategoryTab
+              active={primary === "jain"}
+              onClick={() => setPrimary("jain")}
+              label={T(TAG_LABEL.jain)}
+              count={jainCount}
+              mark="veg"
+            />
+            <CategoryTab
+              active={primary === "genz"}
+              onClick={() => setPrimary("genz")}
+              label={T(COLLECTION_LABEL.genz)}
+              count={genzCount}
+              icon={<GenZMark active={primary === "genz"} />}
+            />
 
-          {/* ---------- the goal-driven category ---------- */}
-          <button
-            type="button"
-            aria-pressed={byGoal}
-            onClick={() => setByGoal((v) => !v)}
-            className="flex items-center gap-2.5 px-4 min-h-11 rounded-xl mb-6 text-[0.88rem] font-extrabold cursor-pointer transition-colors"
-            style={
-              byGoal
-                ? { background: "var(--kesar-fill)", color: "#fff" }
-                : { border: "1px solid var(--line)", color: "var(--ink)", background: "var(--surface)" }
-            }
-          >
-            <svg viewBox="0 0 16 16" aria-hidden className="w-4 h-4 shrink-0">
-              <path
-                d="M8 1.5 9.9 5.6l4.4.5-3.3 3 .9 4.4L8 11.4 4.1 13.5l.9-4.4-3.3-3 4.4-.5Z"
-                fill={byGoal ? "#fff" : "var(--haldi)"}
-              />
-            </svg>
-            {T({
-              en: `For your goal, ${goalLabel.en.toLowerCase()}`,
-              hi: `आपके लक्ष्य के लिए, ${goalLabel.hi}`,
-            })}
-            <span className="text-[0.74rem] font-medium tabular-nums" style={{ fontFamily: "var(--font-data)", opacity: 0.75 }}>
-              {filterMeals({ goal }).length}
-            </span>
-          </button>
+            <span
+              className="shrink-0 w-px self-stretch my-1 mx-0.5"
+              style={{ background: "var(--line)" }}
+              aria-hidden
+            />
+
+            {/* ---------- the goal-driven category, same row ---------- */}
+            <button
+              type="button"
+              aria-pressed={byGoal}
+              onClick={() => setByGoal((v) => !v)}
+              className="flex items-center gap-2.5 px-4 min-h-11 rounded-xl text-[0.88rem] font-extrabold cursor-pointer transition-colors shrink-0 whitespace-nowrap"
+              style={
+                byGoal
+                  ? { background: "var(--kesar-fill)", color: "#fff" }
+                  : { border: "1px solid var(--line)", color: "var(--ink)", background: "transparent" }
+              }
+            >
+              <svg viewBox="0 0 16 16" aria-hidden className="w-4 h-4 shrink-0">
+                <path
+                  d="M8 1.5 9.9 5.6l4.4.5-3.3 3 .9 4.4L8 11.4 4.1 13.5l.9-4.4-3.3-3 4.4-.5Z"
+                  fill={byGoal ? "#fff" : "var(--haldi)"}
+                />
+              </svg>
+              {T({
+                en: `For your goal, ${goalLabel.en.toLowerCase()}`,
+                hi: `आपके लक्ष्य के लिए, ${goalLabel.hi}`,
+              })}
+              <span className="text-[0.74rem] font-medium tabular-nums" style={{ fontFamily: "var(--font-data)", opacity: 0.75 }}>
+                {filterMeals({ goal }).length}
+              </span>
+            </button>
+          </div>
 
           {/* ---------- secondary filters ---------- */}
           <div className="flex flex-wrap gap-x-6 gap-y-3 mb-8">
@@ -267,24 +443,43 @@ export function MealLibrary({ goal }: { goal: GoalKey }) {
               value={time}
               onChange={(k) => setTime(k as MealTime | null)}
             />
-            <FilterRow
-              label={T({ en: "Shelf", hi: "श्रेणी" })}
-              options={[
-                { key: null, label: T({ en: "All", hi: "सभी" }) },
-                ...COLLECTIONS.map((c) => ({
-                  key: c.key as string | null,
-                  label: `${T(c.label)} (${collectionCounts[c.key]})`,
-                })),
-              ]}
-              value={collection}
-              onChange={(k) => setCollection(k as CollectionKey | null)}
-            />
           </div>
 
-          {collection && (
+          {primary === "genz" && (
             <p className="text-[0.85rem] mb-6 max-w-[52ch]" style={{ color: "var(--ink-soft)" }}>
-              {T(COLLECTIONS.find((c) => c.key === collection)!.blurb)}
+              {T({
+                en: "Bowls, wraps and salads built to hit a protein target.",
+                hi: "प्रोटीन लक्ष्य के लिए बने बाउल, रैप और सलाद।",
+              })}
             </p>
+          )}
+
+          {cartCount > 0 && (
+            <div className="mb-6">
+              <p
+                className="flex items-center gap-1.5 text-[0.72rem] font-semibold mb-3"
+                style={{ color: "var(--ink-soft)" }}
+              >
+                <svg viewBox="0 0 16 16" aria-hidden className="w-3.5 h-3.5 shrink-0">
+                  <path
+                    d="M8 1.3 13.5 3.6v4c0 3.6-2.3 6.4-5.5 7.1-3.2-.7-5.5-3.5-5.5-7.1v-4Z"
+                    fill="none"
+                    stroke="var(--elaichi)"
+                    strokeWidth={1.4}
+                  />
+                  <path d="M5.6 8.1 7.3 9.8l3.1-3.6" fill="none" stroke="var(--elaichi)" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                {T({
+                  en: `These limits follow your BMI band (${T(bandName)}). Sign in and log biomarkers or conditions to sharpen them further.`,
+                  hi: `ये सीमाएँ आपके BMI बैंड (${T(bandName)}) के अनुसार हैं। और सटीक बनाने के लिए साइन इन कर बायोमार्कर या स्थितियाँ दर्ज करें।`,
+                })}
+              </p>
+              <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
+                {activeTimes.map((t) => (
+                  <MealTimeThali key={t} time={t} totals={totalsByTime[t]!} budget={budgetForTime(plan, t)} T={T} />
+                ))}
+              </div>
+            </div>
           )}
 
           {/* ---------- results ---------- */}
@@ -343,12 +538,30 @@ export function MealLibrary({ goal }: { goal: GoalKey }) {
                         </p>
                       </div>
                     </div>
-                    <span
-                      className="text-[1.05rem] tabular-nums whitespace-nowrap"
-                      style={{ fontFamily: "var(--font-data)", color: "var(--ink-soft)" }}
-                    >
-                      {m.kcal}
-                      <span className="text-[0.68rem]"> kcal</span>
+                    <span className="flex flex-col items-end gap-1 shrink-0">
+                      <span
+                        className="text-[1.05rem] tabular-nums whitespace-nowrap"
+                        style={{ fontFamily: "var(--font-data)", color: "var(--ink-soft)" }}
+                      >
+                        {m.kcal}
+                        <span className="text-[0.68rem]"> kcal</span>
+                      </span>
+                      {/* Only rendered when a rule actually matched one of
+                          the visitor's picked conditions — see verdictFor,
+                          which treats "no data" as no badge rather than a
+                          false amber. */}
+                      {(() => {
+                        const v = verdictFor(m.id);
+                        if (!v || v.worst === "good") return null;
+                        return (
+                          <span
+                            className="text-[0.64rem] font-extrabold uppercase px-1.5 py-0.5 rounded-full whitespace-nowrap"
+                            style={{ background: VERDICT_COLOUR[v.worst], color: "#fff" }}
+                          >
+                            {T(VERDICT_LABEL[v.worst])}
+                          </span>
+                        );
+                      })()}
                     </span>
                   </div>
 
@@ -386,7 +599,41 @@ export function MealLibrary({ goal }: { goal: GoalKey }) {
                     ))}
                   </dl>
 
-                  <RecipePanel mealId={m.id} />
+                  <div className="flex items-center justify-between gap-2 mt-3 pt-3 flex-wrap" style={{ borderTop: "1px solid var(--line)" }}>
+                    <RecipePanel mealId={m.id} />
+                    {canAdd ? (
+                      <div className="flex items-center gap-2">
+                        {/* A breakfast dish eaten at dinner is a real thing:
+                            once it's in the cart, which thali it counts
+                            toward is editable, not locked to the library's
+                            own tag. */}
+                        {(cart[m.id]?.qty ?? 0) > 0 && (
+                          <select
+                            value={cart[m.id]!.time}
+                            onChange={(e) => reassignTime(m.id, e.target.value as MealTime)}
+                            aria-label={T({ en: "Count toward which meal", hi: "किस भोजन में गिनें" })}
+                            className="text-[0.74rem] font-semibold rounded-full px-2.5 py-1.5 cursor-pointer"
+                            style={{ border: "1px solid var(--line)", color: "var(--ink-soft)", background: "var(--surface)" }}
+                          >
+                            {TIMES.map((t) => (
+                              <option key={t} value={t}>
+                                {T(MEAL_TIME_LABEL[t])}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                        <AddStepper
+                          qty={cart[m.id]?.qty ?? 0}
+                          onChange={(d) => (d > 0 ? handleAdd(m) : addToCart(m, d))}
+                          T={T}
+                        />
+                      </div>
+                    ) : (
+                      <span className="text-[0.72rem]" style={{ color: "var(--ink-soft)" }}>
+                        {T({ en: "Pick veg, non-veg or a diet to add", hi: "जोड़ने के लिए शाकाहारी/मांसाहारी/आहार चुनें" })}
+                      </span>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
@@ -409,7 +656,190 @@ export function MealLibrary({ goal }: { goal: GoalKey }) {
           )}
         </div>
       </div>
+
+      {/* ---------- condition warning toast ---------- */}
+      {toast && (
+        <div
+          role="status"
+          className="card-in fixed z-[115] left-1/2 -translate-x-1/2 w-[min(28rem,calc(100vw-2rem))] rounded-2xl p-4 shadow-2xl flex gap-3 items-start"
+          style={{
+            bottom: "calc(var(--bottom-bar-h, 64px) + 1rem)",
+            background: "var(--surface)",
+            border: `1px solid ${VERDICT_COLOUR[toast.verdict]}`,
+          }}
+        >
+          <span
+            className="shrink-0 mt-0.5 w-2.5 h-2.5 rounded-full"
+            style={{ background: VERDICT_COLOUR[toast.verdict] }}
+            aria-hidden
+          />
+          <div className="min-w-0 flex-1">
+            <p className="text-[0.84rem] font-extrabold" style={{ color: "var(--ink)" }}>
+              {T(VERDICT_LABEL[toast.verdict])}: {toast.mealName}
+            </p>
+            {toast.why && (
+              <p className="text-[0.8rem] mt-1" style={{ color: "var(--ink-soft)" }}>
+                {T(toast.why)}
+              </p>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            aria-label={T({ en: "Dismiss", hi: "बंद करें" })}
+            className="shrink-0 rounded-full p-1 transition-colors hover:opacity-70"
+            style={{ color: "var(--ink-soft)" }}
+          >
+            <svg viewBox="0 0 16 16" aria-hidden className="w-3.5 h-3.5">
+              <path d="M3 3 13 13M13 3 3 13" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
+      )}
     </section>
+  );
+}
+
+/** Add/remove one meal from today's plate, right on its card. */
+function AddStepper({
+  qty,
+  onChange,
+  T,
+}: {
+  qty: number;
+  onChange: (delta: number) => void;
+  T: (b: { en: string; hi: string }) => string;
+}) {
+  if (qty === 0) {
+    return (
+      <button
+        type="button"
+        onClick={() => onChange(1)}
+        className="px-3.5 min-h-9 rounded-full text-[0.78rem] font-extrabold cursor-pointer shrink-0"
+        style={{ background: "var(--kesar-fill)", color: "#fff" }}
+      >
+        {T({ en: "+ Add", hi: "+ जोड़ें" })}
+      </button>
+    );
+  }
+  return (
+    <div className="flex items-center gap-1 shrink-0" role="group" aria-label={T({ en: "Quantity", hi: "मात्रा" })}>
+      <button
+        type="button"
+        onClick={() => onChange(-1)}
+        aria-label={T({ en: "Remove one", hi: "एक हटाएँ" })}
+        className="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer font-extrabold"
+        style={{ border: "1px solid var(--line)", color: "var(--ink)" }}
+      >
+        −
+      </button>
+      <span className="w-5 text-center text-[0.85rem] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-data)" }}>
+        {qty}
+      </span>
+      <button
+        type="button"
+        onClick={() => onChange(1)}
+        aria-label={T({ en: "Add one more", hi: "एक और जोड़ें" })}
+        className="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer font-extrabold"
+        style={{ background: "var(--kesar-fill)", color: "#fff" }}
+      >
+        +
+      </button>
+    </div>
+  );
+}
+
+/**
+ * One meal-time's thali, running: the same steel-katori language as the 3D
+ * thali (var(--steel) rims) collapsed into a card. Calories get the one big
+ * bar at the top — the number that actually gates a meal — with the four
+ * macros as smaller katoris underneath, 2×2. Green while a nutrient sits
+ * under its budget, red the moment it clears it — the same colour the app
+ * already uses for "past the healthy cutoff" everywhere else (BANDS, the
+ * biomarker cards).
+ */
+function MealTimeThali({
+  time,
+  totals,
+  budget,
+  T,
+}: {
+  time: MealTime;
+  totals: Totals;
+  budget: Totals;
+  T: (b: { en: string; hi: string }) => string;
+}) {
+  const calOver = totals.kcal > budget.kcal;
+  const calColor = calOver ? "var(--mirch)" : "var(--elaichi)";
+  const calPct = budget.kcal > 0 ? Math.min(1, totals.kcal / budget.kcal) : 0;
+
+  const macroRows: { key: keyof Totals; label: { en: string; hi: string }; unit: string }[] = [
+    { key: "protein", label: { en: "Protein", hi: "प्रोटीन" }, unit: "g" },
+    { key: "carbohydrate", label: { en: "Carbs", hi: "कार्ब्स" }, unit: "g" },
+    { key: "fat", label: { en: "Fat", hi: "वसा" }, unit: "g" },
+    { key: "fibre", label: { en: "Fibre", hi: "रेशा" }, unit: "g" },
+  ];
+
+  return (
+    <div
+      className="rounded-2xl p-5"
+      style={{ background: "var(--surface)", border: "1px solid var(--steel-lo, var(--line))" }}
+    >
+      <p className="text-[0.68rem] font-extrabold uppercase mb-3.5" style={{ letterSpacing: "0.12em", color: "var(--ink-soft)" }}>
+        {T(MEAL_TIME_LABEL[time])}
+      </p>
+
+      {/* ---------- the big bar: calories ---------- */}
+      <div className="mb-4">
+        <div className="flex justify-between items-baseline text-[0.8rem] mb-1.5">
+          <span style={{ color: "var(--ink-soft)" }}>{T({ en: "Calories", hi: "कैलोरी" })}</span>
+          <span className="font-extrabold tabular-nums" style={{ fontFamily: "var(--font-data)", color: calColor }}>
+            {Math.round(totals.kcal)}
+            <span style={{ color: "var(--ink-soft)", fontWeight: 500 }}> / {budget.kcal} kcal</span>
+          </span>
+        </div>
+        <div
+          className="h-3.5 rounded-full overflow-hidden"
+          style={{ background: "color-mix(in srgb, var(--steel, var(--line)) 22%, transparent)" }}
+        >
+          <div
+            className="h-full rounded-full transition-[width]"
+            style={{ width: `${Math.min(100, calPct * 100)}%`, background: calColor }}
+          />
+        </div>
+      </div>
+
+      {/* ---------- four smaller katoris, 2×2 ---------- */}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+        {macroRows.map((r) => {
+          const value = totals[r.key];
+          const target = budget[r.key];
+          const over = value > target;
+          const color = over ? "var(--mirch)" : "var(--elaichi)";
+          const pct = target > 0 ? Math.min(1, value / target) : 0;
+          return (
+            <div key={r.key}>
+              <div className="flex justify-between items-baseline text-[0.7rem] mb-1">
+                <span style={{ color: "var(--ink-soft)" }}>{T(r.label)}</span>
+                <span className="font-extrabold tabular-nums" style={{ fontFamily: "var(--font-data)", color }}>
+                  {Math.round(value)}
+                  <span style={{ color: "var(--ink-soft)", fontWeight: 500 }}> /{target}{r.unit}</span>
+                </span>
+              </div>
+              <div
+                className="h-1.5 rounded-full overflow-hidden"
+                style={{ background: "color-mix(in srgb, var(--steel, var(--line)) 22%, transparent)" }}
+              >
+                <div
+                  className="h-full rounded-full transition-[width]"
+                  style={{ width: `${Math.min(100, pct * 100)}%`, background: color }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -419,19 +849,21 @@ function CategoryTab({
   label,
   count,
   mark,
+  icon,
 }: {
   active: boolean;
   onClick: () => void;
   label: string;
   count: number;
   mark?: FoodCategory;
+  icon?: React.ReactNode;
 }) {
   return (
     <button
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className="flex items-center gap-2 px-4 min-h-11 rounded-xl text-[0.92rem] font-extrabold cursor-pointer transition-colors"
+      className="flex items-center gap-2 px-4 min-h-11 rounded-xl text-[0.92rem] font-extrabold cursor-pointer transition-colors shrink-0 whitespace-nowrap"
       style={
         active
           ? { background: "var(--ink)", color: "var(--roti)" }
@@ -439,6 +871,7 @@ function CategoryTab({
       }
     >
       {mark && <FoodMark category={mark} size={16} />}
+      {icon}
       <span>{label}</span>
       <span
         className="text-[0.74rem] tabular-nums font-medium"

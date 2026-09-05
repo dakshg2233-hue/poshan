@@ -60,18 +60,30 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "Sign in to subscribe." }, { status: 401 });
   }
 
-  const parsed = await readJsonCapped<{ plan?: "monthly" | "yearly" }>(request, 1_024);
+  const parsed = await readJsonCapped<{ plan?: "monthly" | "yearly"; product?: "home" | "college" }>(
+    request,
+    1_024
+  );
   if (!parsed.ok) return parsed.response;
 
-  const plan = parsed.data.plan === "yearly" ? "yearly" : "monthly";
+  const product = parsed.data.product === "college" ? "college" : "home";
+  /* Poshan Plus (college) is a single yearly SKU — no monthly option, one
+     price for one profile — so its billing cycle is fixed regardless of
+     what the client sends. */
+  const plan = product === "college" ? "yearly" : parsed.data.plan === "yearly" ? "yearly" : "monthly";
   const planId =
-    plan === "yearly" ? process.env.RAZORPAY_PLAN_ID_YEARLY : process.env.RAZORPAY_PLAN_ID_MONTHLY;
+    product === "college"
+      ? process.env.RAZORPAY_PLAN_ID_COLLEGE
+      : plan === "yearly"
+        ? process.env.RAZORPAY_PLAN_ID_YEARLY
+        : process.env.RAZORPAY_PLAN_ID_MONTHLY;
 
   if (!planId) {
+    const missingVar = product === "college" ? "RAZORPAY_PLAN_ID_COLLEGE" : `RAZORPAY_PLAN_ID_${plan.toUpperCase()}`;
     return Response.json(
       {
         configured: false,
-        reason: `RAZORPAY_PLAN_ID_${plan.toUpperCase()} is not set: create the ${plan} Plan in the Razorpay dashboard first, then add its id here.`,
+        reason: `${missingVar} is not set: create the matching Plan in the Razorpay dashboard first, then add its id here.`,
       },
       { status: 503 }
     );
@@ -99,7 +111,7 @@ export async function POST(request: NextRequest) {
         /* The only durable link between this subscription and an account:
            neither /verify nor the webhook is ever handed a user id by
            Razorpay itself, so provisioning reads it back from here. */
-        notes: { plan, product: "home", user_id: user.id },
+        notes: { plan, product, user_id: user.id },
       }),
     });
 

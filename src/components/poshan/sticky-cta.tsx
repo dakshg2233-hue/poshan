@@ -49,7 +49,7 @@ export function StickyCta() {
       aria-hidden={!show}
       className="fixed inset-x-0 bottom-0 z-[110] p-3 md:hidden print:hidden sticky-cta"
       data-show={show ? "true" : "false"}
-      style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
+      style={{ paddingBottom: "calc(var(--bottom-bar-h, 64px) + 0.75rem)" }}>
       {/* Visible on every tab, so it has to switch to the one holding the
           BMI tool rather than jump to a section that may not be mounted. */}
       <TabLink to="home" target="check"

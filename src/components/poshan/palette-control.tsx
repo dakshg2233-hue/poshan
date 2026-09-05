@@ -123,7 +123,7 @@ export function PaletteControl() {
   const current = PALETTES.find((p) => p.key === active) ?? PALETTES[0];
 
   return (
-    <div ref={rootRef} className="fixed bottom-4 right-4 z-[100] print:hidden">
+    <div ref={rootRef} className="relative print:hidden">
       {/* Announces the change; visually hidden, never removed from the DOM so
           screen readers reliably pick up the update. */}
       <span aria-live="polite" className="sr-only">
@@ -136,7 +136,7 @@ export function PaletteControl() {
           role="radiogroup"
           aria-label={T({ en: "Colour palette", hi: "रंग पट्टिका" })}
           onKeyDown={onListKeyDown}
-          className="popover-in popover-br mb-2 w-[268px] max-h-[68vh] overflow-y-auto rounded-2xl p-2 shadow-2xl border"
+          className="popover-in popover-br mb-2 absolute bottom-full right-0 w-[268px] max-h-[68vh] overflow-y-auto rounded-2xl p-2 shadow-2xl border"
           style={{
             background: "color-mix(in srgb, var(--roti) 94%, transparent)",
             borderColor: "var(--line)",
@@ -196,19 +196,14 @@ export function PaletteControl() {
           en: `Change colour palette. Current: ${current.name}`,
           hi: `रंग बदलें। अभी: ${current.name}`,
         })}
-        className="flex items-center gap-2 min-h-11 px-4 rounded-full font-extrabold text-[0.82rem] cursor-pointer shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2"
-        style={{
-          background: "var(--ink)",
-          color: "var(--roti)",
-          outlineColor: "var(--kesar)",
-        }}
+        className="flex items-center justify-center h-9 w-9 rounded-full cursor-pointer shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2"
+        style={{ color: "#fff", border: "1px solid rgb(255 255 255 / .28)", outlineColor: "var(--kesar)" }}
       >
         <span className="flex rounded-full overflow-hidden" aria-hidden>
           {current.swatch.map((c) => (
-            <span key={c} className="block w-2.5 h-4" style={{ background: c }} />
+            <span key={c} className="block w-[5px] h-4" style={{ background: c }} />
           ))}
         </span>
-        {T({ en: "Colours", hi: "रंग" })}
       </button>
     </div>
   );

@@ -69,31 +69,31 @@ export function CursorPicker() {
   const current = FOOD_CURSORS.find((f) => f.key === active) ?? FOOD_CURSORS[0];
 
   return (
-    /* Bottom-left: floating chrome, but out of the composition. Top-left put
-       the chip directly under the logo, which is why this was taken off the
-       page rather than moved. Down here it mirrors the palette control in the
-       opposite corner, and the mobile sticky CTA that also lives at the bottom
-       is no conflict: this never renders on touch. */
-    /* flex-col-reverse so the list opens upward. Anchored at the bottom, a
-       normally-ordered list would unroll straight off the viewport. */
-    <div className="fixed bottom-4 left-4 z-[95] flex flex-col-reverse items-start print:hidden">
+    /* Lives in <BottomBar> now, inline with the other icon controls, instead
+       of floating independently over bottom-4 left-4. flex-col-reverse so the
+       list still opens upward — anchored at the bottom of the viewport, a
+       normally-ordered list would unroll straight off the bottom edge.
+       hidden below lg: a food cursor is a mouse-pointer novelty, and on
+       phone/tablet widths it was showing up as a dead icon anyway — the
+       hover:none check above already catches touch-only devices, but a
+       touch-capable laptop or a mouse-equipped tablet still has a hover
+       pointer, so width is the more reliable "is this actually a desktop"
+       signal here. */
+    <div className="relative hidden lg:flex items-center print:hidden">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="liquid-glass-chrome refract flex items-center gap-2 min-h-9 pl-2 pr-3.5 rounded-full text-[0.76rem] font-extrabold cursor-pointer shadow-lg"
-        /* No opaque background here, .liquid-glass-chrome supplies a
-           translucent one, and an opaque inline fill would leave nothing
-           for the blur to show through. */
-        style={{ color: "var(--ink)" }}
+        aria-label={T({ en: "Cursor", hi: "कर्सर" }) + `: ${T(current.name)}`}
+        className="flex items-center justify-center h-9 w-9 rounded-full cursor-pointer shrink-0"
+        style={{ color: "#fff", border: "1px solid rgb(255 255 255 / .28)" }}
       >
-        <span aria-hidden data-swatch={current.key} className="food-swatch block w-5 h-5 shrink-0" />
-        {T({ en: "Cursor", hi: "कर्सर" })}
+        <span aria-hidden data-swatch={current.key} className="food-swatch block w-[18px] h-[18px] shrink-0" />
       </button>
 
       {open && (
         <ul
-          className="liquid-glass-chrome refract popover-in popover-bl mb-2 w-[178px] rounded-2xl p-2 shadow-2xl grid gap-0.5 list-none"
+          className="liquid-glass-chrome refract popover-in popover-bl absolute bottom-full left-0 mb-2 w-[178px] rounded-2xl p-2 shadow-2xl grid gap-0.5 list-none"
           role="radiogroup"
           aria-label={T({ en: "Choose a cursor", hi: "कर्सर चुनें" })}
         >

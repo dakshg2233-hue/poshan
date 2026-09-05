@@ -5,6 +5,7 @@ import { useLang, useReveal } from "./lang-provider";
 import { FoodMark } from "./meal-library";
 import { FoodScanner } from "./food-scanner";
 import { MEAL_LIBRARY, PREMIUM } from "@/lib/poshan-data";
+import { usePickedConditions } from "@/lib/use-conditions";
 import {
   CONDITIONS,
   CONFLICTS,
@@ -16,14 +17,22 @@ import {
   type ConditionKey,
 } from "@/lib/conditions";
 
+/** Cards shown before "show more" — mounting all ~1,600 at once (each with
+ * its own card-in animation and a flatMap/filter over its reasons) is what
+ * made this tab read as stuck rather than loaded. */
+const PAGE = 18;
+
 export function Conditions() {
   const { T, lang } = useLang();
   const reveal = useReveal<HTMLDivElement>();
-  const [picked, setPicked] = useState<ConditionKey[]>(["diabetes"]);
+  const { picked, setPicked } = usePickedConditions();
   const [scannedId, setScannedId] = useState<string | null>(null);
+  const [shown, setShown] = useState(PAGE);
 
-  const toggle = (k: ConditionKey) =>
+  const toggle = (k: ConditionKey) => {
     setPicked((p) => (p.includes(k) ? p.filter((x) => x !== k) : [...p, k]));
+    setShown(PAGE);
+  };
 
   const active = picked.map(conditionByKey);
 
@@ -246,7 +255,7 @@ export function Conditions() {
               </div>
 
               <ul className="grid gap-2.5 list-none p-0 m-0 [grid-template-columns:repeat(auto-fit,minmax(300px,1fr))]">
-                {checked.map(({ meal, worst, results }, i) => {
+                {checked.slice(0, shown).map(({ meal, worst, results }, i) => {
                   const reasons = results.flatMap((r) => r.reasons).filter((r) => r.verdict === worst);
                   return (
                     <li
@@ -303,6 +312,22 @@ export function Conditions() {
                   );
                 })}
               </ul>
+
+              {checked.length > shown && (
+                <div className="mt-8 text-center">
+                  <button
+                    type="button"
+                    onClick={() => setShown((n) => n + PAGE)}
+                    className="px-6 py-3 rounded-full text-[0.9rem]"
+                    style={{ background: "var(--surface)", border: "1px solid var(--line)", color: "var(--ink)" }}
+                  >
+                    {T({
+                      en: `Show ${Math.min(PAGE, checked.length - shown)} more of ${checked.length}`,
+                      hi: `${checked.length} में से ${Math.min(PAGE, checked.length - shown)} और दिखाएँ`,
+                    })}
+                  </button>
+                </div>
+              )}
             </>
           )}
 

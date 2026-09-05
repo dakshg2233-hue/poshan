@@ -33,7 +33,16 @@ function loadCheckout(): Promise<boolean> {
   });
 }
 
-export function CheckoutButton({ yearly, signedIn }: { yearly: boolean; signedIn: boolean }) {
+export function CheckoutButton({
+  yearly,
+  signedIn,
+  product = "home",
+}: {
+  yearly: boolean;
+  signedIn: boolean;
+  /** Which SKU to buy — "home" is Poshan Home, "college" is the single-profile student plan. */
+  product?: "home" | "college";
+}) {
   const { T } = useLang();
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -45,7 +54,7 @@ export function CheckoutButton({ yearly, signedIn }: { yearly: boolean; signedIn
       const res = await fetch("/api/razorpay/subscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: yearly ? "yearly" : "monthly" }),
+        body: JSON.stringify({ plan: yearly ? "yearly" : "monthly", product }),
       });
       const data = await res.json();
 
@@ -78,13 +87,15 @@ export function CheckoutButton({ yearly, signedIn }: { yearly: boolean; signedIn
         return;
       }
 
+      const planName = product === "college" ? "Poshan Plus" : "Poshan Home";
+      const planNameHi = product === "college" ? "पोषण प्लस" : "पोषण घर";
       const rzp = new window.Razorpay({
         key: data.keyId,
         subscription_id: data.subscriptionId,
         name: "Poshan",
         description: T({
-          en: `Poshan Home, ${yearly ? "yearly" : "monthly"} — ${PREMIUM.trialDays} days free, then billed automatically`,
-          hi: `पोषण घर, ${yearly ? "वार्षिक" : "मासिक"} — ${PREMIUM.trialDays} दिन मुफ़्त, फिर अपने-आप बिल`,
+          en: `${planName}, ${yearly ? "yearly" : "monthly"} — ${PREMIUM.trialDays} days free, then billed automatically`,
+          hi: `${planNameHi}, ${yearly ? "वार्षिक" : "मासिक"} — ${PREMIUM.trialDays} दिन मुफ़्त, फिर अपने-आप बिल`,
         }),
         theme: { color: "#A8500A" },
         /* Razorpay collects card, UPI and netbanking details inside their own
@@ -99,8 +110,8 @@ export function CheckoutButton({ yearly, signedIn }: { yearly: boolean; signedIn
           setStatus(
             vd.verified
               ? T({
-                  en: `Poshan Home is active. Nothing charged today — day ${PREMIUM.trialDays} you'll be billed automatically, unless you cancel first.`,
-                  hi: `पोषण घर सक्रिय है। आज कुछ शुल्क नहीं लिया गया — दिन ${PREMIUM.trialDays} पर अपने-आप बिल लिया जाएगा, जब तक आप पहले रद्द न करें।`,
+                  en: `${planName} is active. Nothing charged today — day ${PREMIUM.trialDays} you'll be billed automatically, unless you cancel first.`,
+                  hi: `${planNameHi} सक्रिय है। आज कुछ शुल्क नहीं लिया गया — दिन ${PREMIUM.trialDays} पर अपने-आप बिल लिया जाएगा, जब तक आप पहले रद्द न करें।`,
                 })
               : T({ en: "We could not verify that. Nothing has been charged, contact support.", hi: "हम उसकी पुष्टि नहीं कर सके। कोई शुल्क नहीं लिया गया: सहायता से संपर्क करें।" })
           );
@@ -116,7 +127,7 @@ export function CheckoutButton({ yearly, signedIn }: { yearly: boolean; signedIn
     } finally {
       setBusy(false);
     }
-  }, [yearly, T]);
+  }, [yearly, product, T]);
 
   if (!signedIn) {
     return (
@@ -130,8 +141,8 @@ export function CheckoutButton({ yearly, signedIn }: { yearly: boolean; signedIn
           <span>{T({ en: "Sign in to subscribe", hi: "सदस्यता के लिए साइन इन करें" })}</span>
           <span className="text-[0.72rem] font-semibold opacity-90">
             {T({
-              en: "Poshan Home needs an account to attach to",
-              hi: "पोषण घर के लिए एक खाता ज़रूरी है",
+              en: `${product === "college" ? "Poshan Plus" : "Poshan Home"} needs an account to attach to`,
+              hi: `${product === "college" ? "पोषण प्लस" : "पोषण घर"} के लिए एक खाता ज़रूरी है`,
             })}
           </span>
         </Link>

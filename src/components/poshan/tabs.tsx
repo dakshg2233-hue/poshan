@@ -33,30 +33,34 @@ import type { Bi } from "@/lib/poshan-data";
  * each tab claims the section ids it contains.
  */
 
-export type TabKey = "home" | "plate" | "meals" | "health" | "premium";
+export type TabKey = "dashboard" | "home" | "yourmeals" | "scanner" | "health" | "premium";
 
 export type Tab = {
   key: TabKey;
   label: Bi;
   /** Section ids this tab owns, so old deep links still land somewhere. */
   owns: string[];
+  /** Reachable by hash/key but not rendered as a pill in <TabBar> — the
+   * dashboard is a click-the-logo destination, not one of the utility tabs. */
+  hidden?: boolean;
 };
 
 export const TABS: Tab[] = [
   {
+    key: "dashboard",
+    label: { en: "Home", hi: "होम" },
+    owns: ["dashboard", "hero"],
+    hidden: true,
+  },
+  {
     key: "home",
     label: { en: "Check your BMI", hi: "बीएमआई जाँचें" },
-    owns: ["top", "hero", "check", "ht", "wt"],
+    owns: ["top", "check", "ht", "wt"],
   },
   {
-    key: "plate",
-    label: { en: "Your plate", hi: "आपकी थाली" },
-    owns: ["plate", "thali-d", "thali-t", "thali-plate-fill"],
-  },
-  {
-    key: "meals",
-    label: { en: "Meals", hi: "भोजन" },
-    owns: ["meals", "scan", "dish-search"],
+    key: "scanner",
+    label: { en: "Food Scanner", hi: "भोजन स्कैनर" },
+    owns: ["scan", "build-your-plan"],
   },
   {
     key: "health",
@@ -64,13 +68,18 @@ export const TABS: Tab[] = [
     owns: ["bios", "conditions"],
   },
   {
+    key: "yourmeals",
+    label: { en: "Your Meals", hi: "आपके भोजन" },
+    owns: ["plate", "meals", "thali-d", "thali-t", "thali-plate-fill", "dish-search"],
+  },
+  {
     key: "premium",
-    label: { en: "Poshan Home", hi: "पोषण घर" },
+    label: { en: "Poshan+", hi: "पोषण+" },
     owns: ["premium", "clinics", "cancel-details"],
   },
 ];
 
-const DEFAULT_TAB: TabKey = "home";
+const DEFAULT_TAB: TabKey = "dashboard";
 
 /** Resolve a raw hash to a tab. Accepts both tab keys and owned section ids. */
 export function tabFromHash(hash: string): TabKey | null {
@@ -149,13 +158,15 @@ export function TabProvider({ children }: { children: React.ReactNode }) {
  * enters and leaves the strip in one press rather than stepping through all
  * five. This is the same keyboard contract the palette control already uses.
  */
+const VISIBLE_TABS = TABS.filter((t) => !t.hidden);
+
 export function TabBar({ className = "" }: { className?: string }) {
   const { T } = useLang();
   const { active, go } = useTabs();
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
 
   function onKeyDown(e: React.KeyboardEvent, i: number) {
-    const last = TABS.length - 1;
+    const last = VISIBLE_TABS.length - 1;
     let next: number | null = null;
     if (e.key === "ArrowRight" || e.key === "ArrowDown") next = i === last ? 0 : i + 1;
     else if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = i === 0 ? last : i - 1;
@@ -163,7 +174,7 @@ export function TabBar({ className = "" }: { className?: string }) {
     else if (e.key === "End") next = last;
     if (next === null) return;
     e.preventDefault();
-    go(TABS[next].key);
+    go(VISIBLE_TABS[next].key);
     refs.current[next]?.focus();
   }
 
@@ -173,7 +184,7 @@ export function TabBar({ className = "" }: { className?: string }) {
       aria-label={T({ en: "Sections", hi: "अनुभाग" })}
       className={`flex gap-1 ${className}`}
     >
-      {TABS.map((t, i) => {
+      {VISIBLE_TABS.map((t, i) => {
         const on = active === t.key;
         return (
           <button
@@ -296,12 +307,12 @@ export function useSwipeNav<T extends HTMLElement>() {
          vertically. */
       if (Math.abs(dx) < 64 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
 
-      const i = TABS.findIndex((t) => t.key === active);
+      const i = VISIBLE_TABS.findIndex((t) => t.key === active);
       if (i === -1) return;
       /* Swipe left (negative dx) = next tab, swipe right = previous —
          matches how a horizontal carousel reads in a left-to-right layout. */
-      const next = dx < 0 ? Math.min(i + 1, TABS.length - 1) : Math.max(i - 1, 0);
-      if (next !== i) go(TABS[next].key);
+      const next = dx < 0 ? Math.min(i + 1, VISIBLE_TABS.length - 1) : Math.max(i - 1, 0);
+      if (next !== i) go(VISIBLE_TABS[next].key);
     }
 
     el.addEventListener("touchstart", onStart, { passive: true });

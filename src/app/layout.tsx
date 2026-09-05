@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Anek_Devanagari, Mukta, IBM_Plex_Mono, Instrument_Serif, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { LangProvider } from "@/components/poshan/lang-provider";
-import { AdviceBar } from "@/components/poshan/advice-bar";
 
 /* One face covering Latin and Devanagari, so the two scripts share a single
    design intent instead of being bolted together.
@@ -94,10 +93,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${display.variable} ${wordmark.variable} ${uiSans.variable} ${uiSans.variable} ${mono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <LangProvider>
-          <AdviceBar />
-          {children}
-        </LangProvider>
+        <LangProvider>{children}</LangProvider>
       </body>
     </html>
   );

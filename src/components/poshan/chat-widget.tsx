@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useContext, useMemo, createContext } from "react";
 import Link from "next/link";
 import { useLang } from "./lang-provider";
 import { HealthCompanionMark } from "./health-companion-mark";
@@ -12,6 +12,58 @@ const LABEL: Record<ChatKind, Record<"en" | "hi", string>> = {
   nutrition: { en: "Ask Poshan", hi: "पोषण से पूछें" },
   health: { en: "Health Companion", hi: "स्वास्थ्य साथी" },
 };
+
+/**
+ * open/kind are lifted out of <ChatWidget> so <BottomBar>'s small chat icon
+ * can toggle the same panel the floating bubble opens — two triggers, one
+ * conversation, rather than a second chat state that would silently drift
+ * from the first.
+ */
+type ChatCtx = {
+  open: boolean;
+  setOpen: (v: boolean | ((o: boolean) => boolean)) => void;
+  kind: ChatKind;
+  setKind: (k: ChatKind) => void;
+};
+const Ctx = createContext<ChatCtx | null>(null);
+
+export function ChatProvider({ children }: { children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const [kind, setKind] = useState<ChatKind>("nutrition");
+  const value = useMemo(() => ({ open, setOpen, kind, setKind }), [open, kind]);
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+}
+
+function useChat() {
+  const ctx = useContext(Ctx);
+  if (!ctx) throw new Error("useChat must be used inside <ChatProvider>");
+  return ctx;
+}
+
+/** Small icon-only trigger for <BottomBar>. Same open/kind state as the
+ * floating bubble — whichever one you tap, the other reflects it. */
+export function ChatBottomBarButton() {
+  const { T } = useLang();
+  const { open, setOpen, kind } = useChat();
+  return (
+    <button
+      type="button"
+      onClick={() => setOpen((o) => !o)}
+      aria-expanded={open}
+      aria-label={
+        kind === "health"
+          ? T({ en: "Chat with Health Companion", hi: "स्वास्थ्य साथी से बात करें" })
+          : T({ en: "Chat with Poshan", hi: "पोषण से बात करें" })
+      }
+      className="flex items-center justify-center h-9 w-9 rounded-full shrink-0"
+      style={{ color: "#fff", border: "1px solid rgb(255 255 255 / .28)" }}
+    >
+      <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden fill="none" stroke="currentColor" strokeWidth={2}>
+        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+      </svg>
+    </button>
+  );
+}
 
 /**
  * Two chatbots, one floating widget: "Ask Poshan" (food/nutrition — dishes,
@@ -26,8 +78,7 @@ const LABEL: Record<ChatKind, Record<"en" | "hi", string>> = {
  */
 export function ChatWidget({ signedIn }: { signedIn: boolean }) {
   const { T, lang } = useLang();
-  const [open, setOpen] = useState(false);
-  const [kind, setKind] = useState<ChatKind>("nutrition");
+  const { open, setOpen, kind, setKind } = useChat();
   const [messages, setMessages] = useState<Record<ChatKind, Msg[]>>({ nutrition: [], health: [] });
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -110,38 +161,14 @@ export function ChatWidget({ signedIn }: { signedIn: boolean }) {
 
   const activeMessages = messages[kind];
 
+  /* No floating bubble any more — <ChatBottomBarButton> in <BottomBar> is
+     the only trigger, so the panel here is purely open-state-driven. */
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-label={
-          kind === "health"
-            ? T({ en: "Chat with Health Companion", hi: "स्वास्थ्य साथी से बात करें" })
-            : T({ en: "Chat with Poshan", hi: "पोषण से बात करें" })
-        }
-        className="fixed bottom-20 right-4 md:bottom-4 z-[100] flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform hover:-translate-y-0.5 print:hidden"
-        style={{ background: "var(--kesar-fill)", color: "#fff" }}
-      >
-        {open ? (
-          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
-            <path d="M6 6l12 12M18 6L6 18" />
-          </svg>
-        ) : kind === "health" ? (
-          /* Health Companion's own mark, pulsing — the one spot on the page
-             this widget is supposed to be genuinely hard to miss. */
-          <HealthCompanionMark size={34} pulse />
-        ) : (
-          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden fill="none" stroke="currentColor" strokeWidth={2}>
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-          </svg>
-        )}
-      </button>
-
       {open && (
         <div
-          className="card-in fixed bottom-36 right-4 md:bottom-20 z-[100] flex w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl shadow-2xl print:hidden"
-          style={{ background: "var(--panel)", color: "var(--panel-ink)", border: "1px solid var(--line)", maxHeight: "70vh" }}
+          className="card-in fixed right-4 z-[100] flex w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl shadow-2xl print:hidden"
+          style={{ background: "var(--panel)", color: "var(--panel-ink)", border: "1px solid var(--line)", maxHeight: "70vh", bottom: "calc(var(--bottom-bar-h, 64px) + 8.5rem)" }}
         >
           <div className="flex gap-1 p-2" style={{ borderBottom: "1px solid var(--line)" }}>
             {(["nutrition", "health"] as ChatKind[]).map((k) => (

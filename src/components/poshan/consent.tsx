@@ -56,8 +56,8 @@ export function Consent() {
 
   return (
     <div role="dialog" aria-label="Cookies"
-      className="consent-in fixed inset-x-3 bottom-3 z-[120] mx-auto w-[min(46rem,100%-1.5rem)] rounded-2xl p-4 shadow-2xl sm:p-5"
-      style={{ background: "var(--surface)", border: "1px solid var(--line)", color: "var(--ink)" }}>
+      className="consent-in fixed inset-x-3 z-[120] mx-auto w-[min(46rem,100%-1.5rem)] rounded-2xl p-4 shadow-2xl sm:p-5"
+      style={{ background: "var(--surface)", border: "1px solid var(--line)", color: "var(--ink)", bottom: "calc(var(--bottom-bar-h, 64px) + 0.75rem)" }}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <p className="text-[0.88rem] leading-relaxed">
           We&apos;d like to measure how the site is used. Nothing loads until you say yes,

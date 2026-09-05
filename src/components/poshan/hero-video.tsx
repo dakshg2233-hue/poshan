@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUpRight, Menu, X } from "lucide-react";
 import { useLang } from "./lang-provider";
 
 /**
@@ -30,50 +29,14 @@ const MOTION = "/thali-hero.jpg";
 /** Poshan Leaf: the only action and status colour in this design. */
 const LEAF = "#8FBF72";
 
-/* Conventional section names rather than brand-speak. "Ritual", "Our blends",
-   "The science" and "Journal" described a supplements company and told a
-   first-time visitor nothing about what is on the page. Every href is an
-   anchor that exists: verified, because this nav has shipped dead links
-   twice before. */
-const NAV = [
-  { href: "#meals", en: "Meal plans", hi: "मील प्लान" },
-  { href: "#bios", en: "Biomarkers", hi: "बायोमार्कर" },
-  { href: "#premium", en: "Pricing", hi: "मूल्य" },
-  { href: "#clinics", en: "For clinics", hi: "क्लिनिक" },
-];
-
-/**
- * The four-part botanical kernel: an abstract seed of interlocking leaves that
- * also reads as a plate seen from above. Text-free and white, as specified.
- */
-function Kernel({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
-      <g fill="currentColor">
-        {[0, 90, 180, 270].map((deg) => (
-          <path
-            key={deg}
-            transform={`rotate(${deg} 16 16)`}
-            /* One leaf, rotated four times about the centre so the tips meet. */
-            d="M16 15.1c0-3.6 1.2-7.2 3.6-10.1 2.9 2.4 4.5 5.6 4.5 8.8 0 3.1-1.6 5.6-4.2 6.9-1.6.8-3 .9-3.9.9z"
-          />
-        ))}
-        <circle cx="16" cy="16" r="1.7" opacity="0.55" />
-      </g>
-    </svg>
-  );
-}
-
 export function HeroVideo() {
   const { T } = useLang();
   const heroRef = useRef<HTMLElement>(null);
   const revealRef = useRef<HTMLDivElement>(null);
-  const gridRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const target = useRef({ x: -800, y: -800 });
   const smooth = useRef({ x: -800, y: -800 });
 
-  const [menuOpen, setMenuOpen] = useState(false);
   /* True by default so nothing animates before the preference is known. */
   const [calm, setCalm] = useState(true);
 
@@ -84,13 +47,6 @@ export function HeroVideo() {
     q.addEventListener("change", apply);
     return () => q.removeEventListener("change", apply);
   }, []);
-
-  useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [menuOpen]);
 
   /* Spotlight and grid parallax. The mask is drawn into a hidden canvas and
      handed to the reveal layer as a data URL, per the spec. */
@@ -132,12 +88,6 @@ export function HeroVideo() {
         const url = `url(${canvas.toDataURL()})`;
         revealRef.current.style.webkitMaskImage = url;
         revealRef.current.style.maskImage = url;
-      }
-      if (gridRef.current) {
-        /* ~16px of travel, eased. */
-        const dx = ((x - rect.width / 2) / rect.width) * 16;
-        const dy = ((y - rect.height / 2) / rect.height) * 16;
-        gridRef.current.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
       }
       frame = requestAnimationFrame(draw);
     };
@@ -205,19 +155,6 @@ export function HeroVideo() {
         aria-hidden="true"
       />
 
-      {/* 3: 48px technical grid, parallaxed */}
-      <div
-        ref={gridRef}
-        className="absolute inset-[-40px] z-[2] will-change-transform"
-        style={{
-          opacity: 0.09,
-          backgroundSize: "48px 48px",
-          backgroundImage:
-            "linear-gradient(to right, #cfd8cd 1px, transparent 1px)," +
-            "linear-gradient(to bottom, #cfd8cd 1px, transparent 1px)",
-        }}
-        aria-hidden="true"
-      />
 
       {/* 5: masked reveal, across the whole frame.
              The spec clipped this to inset(40% 0 0 0) so the spotlight only
@@ -233,71 +170,14 @@ export function HeroVideo() {
         />
       )}
 
-      {/* ----------------------------------------------------------- nav */}
-      {/* Three tracks: brand | pill | CTA: rather than a flex row with the
-          pill absolutely centred over it. Absolute positioning reserved no
-          space, so at 1100px the pill ran from 599 to 1031 and the CTA began
-          at 898: a 133px overlap, with the pill sitting on top of "Find your
-          blend". A grid gives the centre track its own room and lets it
-          shrink before it ever reaches the CTA. The pill now sits in that
-          right-hand group beside the CTA rather than centred, so all the
-          navigation reads as one block at the extreme right. */}
-      <header className="absolute inset-x-0 top-0 z-50 flex items-start justify-between gap-4 p-5 sm:p-7">
-        <a href="#top" className="flex w-fit items-center gap-2.5 no-underline" aria-label="Poshan">
-          <Kernel className="h-7 w-7 text-white" />
-          <span
-            className="text-[1.35rem] italic leading-none text-white"
-            style={{ fontFamily: "var(--font-wordmark), Georgia, serif" }}
-          >
-            Poshan
-          </span>
-        </a>
-
-        <div className="flex items-center gap-3">
-          <nav
-          /* justify-self-center keeps it optically centred in its own track
-             instead of over the whole header, and min-w-0 lets it give way
-             rather than push the CTA off the edge. */
-          className="liquid-glass hidden min-w-0 items-center whitespace-nowrap gap-0.5 rounded-full p-1.5 lg:flex"
-          style={{ backdropFilter: "blur(7px)", WebkitBackdropFilter: "blur(7px)" }}
-          aria-label="Main"
-        >
-          {NAV.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className="rounded-full px-3.5 py-2 text-[0.82rem] no-underline transition-colors hover:text-white active:scale-[.97]"
-              style={{ color: "rgb(255 255 255 / .72)", fontFamily: "var(--font-ui), sans-serif" }}
-            >
-              {T(l)}
-            </a>
-          ))}
-          </nav>
-
-        <a
-          href="#check"
-          /* Smaller than the spec's default pill. Only the header one shrinks:
-             the mobile-menu CTA stays large, since that is the touch target. */
-          className="hidden w-fit items-center gap-1.5 rounded-full px-3.5 py-2 text-[0.74rem] font-medium no-underline transition-transform active:scale-[.97] md:flex"
-          style={{ background: LEAF, color: "#0a0b0a", fontFamily: "var(--font-ui), sans-serif" }}
-        >
-          <span className="h-1 w-1 rounded-full bg-[#0a0b0a]" aria-hidden="true" />
-          {T({ en: "Find your blend", hi: "अपनी थाली पाएँ" })}
-          <ArrowUpRight className="h-3.5 w-3.5" />
-        </a>
-
-        <button
-          type="button"
-          onClick={() => setMenuOpen(true)}
-          className="liquid-glass grid h-11 w-11 place-items-center rounded-full active:scale-[.97] md:hidden"
-          style={{ backdropFilter: "blur(7px)", WebkitBackdropFilter: "blur(7px)" }}
-          aria-label={T({ en: "Open menu", hi: "मेन्यू खोलें" })}
-          aria-expanded={menuOpen}
-        >
-            <Menu className="h-5 w-5" />
-          </button>
-        </div>
-      </header>
+      {/* The header this section used to carry — its own logo, its own nav
+          links, its own "Find your blend" pill — is gone. It duplicated the
+          real <Nav> (a second Poshan mark, a second set of links pointing at
+          anchors the tab system no longer scrolls to) and, being
+          position:absolute inside this section rather than fixed to the
+          viewport, painted directly under the real header: two bars reading
+          as one overlapping mess. This is decoration now, not chrome; "Find
+          your blend" lives on the dashboard as a real utility link instead. */}
 
       {/* --------------------------------------------------------- centre */}
       <div className="pointer-events-none absolute inset-x-0 top-1/2 z-10 -translate-y-1/2 px-5 text-center">
@@ -336,7 +216,9 @@ export function HeroVideo() {
         </p>
       </div>
 
-      {/* --------------------------------------------------------- footer */}
+      {/* Footer used to end in a "01 / 01" page-number tick — a leftover from
+          a slide-deck-style spec this was adapted from. There is only ever
+          one hero; a page count that never changes isn't information. */}
       <div
         className="absolute inset-x-0 bottom-0 z-10 flex items-center gap-4 px-5 pb-5 text-[0.68rem] sm:px-7 sm:pb-7"
         style={{ color: "rgb(255 255 255 / .62)", fontFamily: "var(--font-ui), sans-serif" }}
@@ -345,69 +227,7 @@ export function HeroVideo() {
           {T({ en: "Thoughtfully made for the everyday.", hi: "रोज़मर्रा के लिए, सोच के साथ बना।" })}
         </span>
         <span className="h-px flex-1" style={{ background: "rgb(255 255 255 / .18)" }} aria-hidden="true" />
-        <span className="shrink-0 tabular-nums">
-          01 <span style={{ color: LEAF }}>/</span> 01
-        </span>
       </div>
-
-      {/* ---------------------------------------------------- mobile menu */}
-      {menuOpen && (
-        <div
-          className="fixed inset-0 z-[70] flex flex-col p-5 md:hidden"
-          style={{ background: "#0a0b0a", minHeight: "100dvh" }}
-        >
-          <div className="flex items-start justify-between">
-            <a href="#top" className="flex items-center gap-2.5 no-underline" aria-label="Poshan">
-              <Kernel className="h-7 w-7 text-white" />
-              <span
-                className="text-[1.35rem] italic leading-none text-white"
-                style={{ fontFamily: "var(--font-wordmark), Georgia, serif" }}
-              >
-                Poshan
-              </span>
-            </a>
-            <button
-              type="button"
-              onClick={() => setMenuOpen(false)}
-              className="liquid-glass grid h-11 w-11 place-items-center rounded-full active:scale-[.97]"
-              style={{ backdropFilter: "blur(7px)", WebkitBackdropFilter: "blur(7px)" }}
-              aria-label={T({ en: "Close menu", hi: "मेन्यू बंद करें" })}
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-
-          <nav className="my-auto grid gap-6" aria-label="Mobile menu">
-            {NAV.map((l, i) => (
-              <a
-                key={l.href}
-                href={l.href}
-                onClick={() => setMenuOpen(false)}
-                className="text-4xl text-white/90 no-underline"
-                style={{
-                  fontFamily: "var(--font-wordmark), Georgia, serif",
-                  animation: calm
-                    ? undefined
-                    : `poshan-menu-in .5s cubic-bezier(.77,0,.18,1) ${100 + i * 60}ms both`,
-                }}
-              >
-                {T(l)}
-              </a>
-            ))}
-          </nav>
-
-          <a
-            href="#check"
-            onClick={() => setMenuOpen(false)}
-            className="flex items-center justify-center gap-2 rounded-full px-6 py-4 text-sm font-medium no-underline active:scale-[.97]"
-            style={{ background: LEAF, color: "#0a0b0a", fontFamily: "var(--font-ui), sans-serif" }}
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-[#0a0b0a]" aria-hidden="true" />
-            {T({ en: "Find your blend", hi: "अपनी थाली पाएँ" })}
-            <ArrowUpRight className="h-4 w-4" />
-          </a>
-        </div>
-      )}
     </section>
   );
 }

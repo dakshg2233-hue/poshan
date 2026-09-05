@@ -42,6 +42,63 @@ export function Bands() {
             </p>
           </div>
 
+          {/* The quote in one picture: same body, same BMI, two different
+             answers — because the threshold, not the person, moved. */}
+          <div className="grid gap-4 sm:grid-cols-2 mb-11">
+            <div
+              className="rounded-2xl p-6"
+              style={{
+                background: "color-mix(in srgb, var(--mirch) 8%, var(--surface))",
+                border: "1px solid color-mix(in srgb, var(--mirch) 28%, transparent)",
+              }}
+            >
+              <p
+                className="text-[0.72rem] font-extrabold uppercase mb-3"
+                style={{ letterSpacing: "0.12em", color: "var(--mirch)" }}
+              >
+                {T({ en: "Every other app says", hi: "हर दूसरा ऐप कहता है" })}
+              </p>
+              <p
+                className="text-[1.3rem] mb-2"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                {T({ en: '"Overweight" starts at 25.0', hi: '"अधिक वज़न" 25.0 से शुरू होता है' })}
+              </p>
+              <p className="text-[0.9rem]" style={{ color: "var(--ink-soft)" }}>
+                {T({
+                  en: 'A man at BMI 24.2 is told he\'s "Normal." He walks away with no warning — already at real risk.',
+                  hi: "24.2 बीएमआई वाले व्यक्ति को \"सामान्य\" बताया जाता है। वह बिना किसी चेतावनी के लौट जाता है — जबकि असल जोखिम पहले से मौजूद है।",
+                })}
+              </p>
+            </div>
+            <div
+              className="rounded-2xl p-6"
+              style={{
+                background: "color-mix(in srgb, var(--elaichi) 10%, var(--surface))",
+                border: "1px solid color-mix(in srgb, var(--elaichi) 32%, transparent)",
+              }}
+            >
+              <p
+                className="text-[0.72rem] font-extrabold uppercase mb-3"
+                style={{ letterSpacing: "0.12em", color: "var(--elaichi)" }}
+              >
+                {T({ en: "Poshan says", hi: "पोषण कहता है" })}
+              </p>
+              <p
+                className="text-[1.3rem] mb-2"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                {T({ en: '"Overweight" starts at 23.0', hi: '"अधिक वज़न" 23.0 से शुरू होता है' })}
+              </p>
+              <p className="text-[0.9rem]" style={{ color: "var(--ink-soft)" }}>
+                {T({
+                  en: "The same man is told the truth, at the exact point where changing his plate still makes the biggest difference.",
+                  hi: "उसी व्यक्ति को सच बताया जाता है, ठीक उसी बिंदु पर जहाँ थाली बदलना सबसे बड़ा फ़र्क़ ला सकता है।",
+                })}
+              </p>
+            </div>
+          </div>
+
           <div className="surface-card rounded-2xl p-6">
             {/* 2 columns on mobile so all four bands — Overweight included —
                are visible without a swipe; a forced 4-col min-width here
@@ -450,7 +507,7 @@ export function Footer() {
         <nav className="flex flex-wrap gap-6 text-[0.84rem]" aria-label="Footer">
           {[
             { to: "home" as const, target: "check", en: "BMI", hi: "बीएमआई" },
-            { to: "plate" as const, target: "plate", en: "Meal plans", hi: "मील प्लान" },
+            { to: "yourmeals" as const, target: "meals", en: "Meal plans", hi: "मील प्लान" },
             { to: "health" as const, target: "bios", en: "Biomarkers", hi: "बायोमार्कर" },
             { to: "premium" as const, target: "premium", en: "Pricing", hi: "मूल्य" },
             { to: "premium" as const, target: "clinics", en: "For clinics", hi: "क्लिनिकों के लिए" },

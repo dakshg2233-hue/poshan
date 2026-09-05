@@ -63,7 +63,7 @@ export function LangHint() {
         <div
           role="dialog"
           aria-label="Language help · भाषा सहायता"
-          className="absolute right-0 top-10 z-50 w-[236px] rounded-2xl p-3.5 shadow-2xl text-left"
+          className="absolute right-0 bottom-10 z-50 w-[236px] rounded-2xl p-3.5 shadow-2xl text-left"
           style={{ background: "var(--surface)", border: "1px solid var(--line)" }}
         >
           <p className="text-[0.82rem] leading-snug m-0" style={{ color: "var(--ink)" }}>

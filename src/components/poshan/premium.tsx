@@ -6,8 +6,10 @@ import { CheckoutButton } from "./checkout-button";
 import { Spotlight } from "@/components/ui/spotlight";
 import {
   PREMIUM,
+  COLLEGE_PLAN,
   FREE_FEATURES,
   PREMIUM_FEATURES,
+  COLLEGE_FEATURES,
   GOALS,
   DIETS,
   REGIONS,
@@ -17,35 +19,12 @@ import {
   type RegionKey,
 } from "@/lib/poshan-data";
 
-export function Premium({
-  baseKcal,
-  goal,
-  setGoal,
-  diet,
-  setDiet,
-  region,
-  setRegion,
-  signedIn,
-}: {
-  baseKcal: number;
-  /* All three now live in PoshanApp, which owns persistence. They used to be
-     local state here, which is precisely why the customiser reset on every
-     refresh while the rest of the page looked like it remembered you. */
-  goal: GoalKey;
-  setGoal: (g: GoalKey) => void;
-  diet: DietKey;
-  setDiet: (d: DietKey) => void;
-  region: RegionKey;
-  setRegion: (r: RegionKey) => void;
-  signedIn: boolean;
-}) {
+export function Premium({ signedIn }: { signedIn: boolean }) {
   const { T } = useLang();
   const reveal = useReveal<HTMLDivElement>();
   const revealCards = useReveal<HTMLDivElement>();
 
   const [yearly, setYearly] = useState(true);
-
-  const plan = buildPlan(region, diet, goal, baseKcal);
   const price = yearly ? PREMIUM.yearly : PREMIUM.monthly;
 
   return (
@@ -57,124 +36,21 @@ export function Premium({
             className="text-[clamp(1.9rem,4.4vw,2.85rem)] leading-tight"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            {T({ en: "Poshan Home", hi: "पोषण घर" })}{" "}
+            {T({ en: "Poshan+", hi: "पोषण+" })}{" "}
             <em style={{ color: "var(--kesar)", fontStyle: "italic" }}>
-              {T({ en: "the plan that knows your kitchen", hi: "वह प्लान जो आपकी रसोई जानता है" })}
+              {T({ en: "every subscription, side by side", hi: "हर सदस्यता, साथ-साथ" })}
             </em>
           </h2>
           <p className="mt-4 text-[1.02rem]" style={{ color: "var(--ink-soft)" }}>
             {T({
-              en: "The free plan reads your body. Poshan Home cooks for it: a plan rebuilt around your goal, your diet and the food your region actually makes.",
-              hi: "मुफ़्त प्लान आपका शरीर पढ़ता है। पोषण घर उसके लिए पकाता है: आपके लक्ष्य, आपके आहार और आपके क्षेत्र के असली खाने के हिसाब से बना प्लान।",
+              en: "Free reads your body. Poshan Plus and Poshan Home cook for it — pick the one that matches your household. Build your actual plan from the Food Scanner tab.",
+              hi: "मुफ़्त आपका शरीर पढ़ता है। पोषण प्लस और पोषण घर उसके लिए पकाते हैं — जो आपके घर के लिए सही हो वह चुनें। अपना प्लान भोजन स्कैनर टैब से बनाएँ।",
             })}
           </p>
         </div>
 
-        {/* ------------------------------------------------ the customiser */}
-        <div
-          className="on-panel liquid-glass-strong refract backdrop-blur-xl rounded-3xl p-6 md:p-9 mb-10 relative"
-          style={{ background: "var(--panel)", color: "var(--panel-ink)" }}
-        >
-          {/* Cursor-tracked light. Dark surfaces are where this reads as
-              expensive rather than busy: it does nothing on the warm ground. */}
-          <Spotlight className="from-amber-100 via-amber-200 to-transparent" size={320} />
-          <p
-            className="text-[0.72rem] font-extrabold uppercase mb-6 relative"
-            style={{ letterSpacing: "0.16em", color: "var(--haldi)" }}
-          >
-            {T({ en: "Build your plan", hi: "अपना प्लान बनाएँ" })}
-          </p>
-
-          {/* Says where the choices are being kept. Signed out they still
-              survive a refresh, via localStorage: worth saying so, because
-              "you must make an account to keep this" is the assumption most
-              people arrive with. */}
-          <p
-            className="text-[0.74rem] -mt-4 mb-6 relative"
-            style={{ color: "color-mix(in srgb, var(--panel-ink) 62%, var(--panel))" }}
-          >
-            {signedIn
-              ? T({
-                  en: "Saved to your account.",
-                  hi: "आपके खाते में सहेजा गया।",
-                })
-              : T({
-                  en: "Kept on this device: sign in to carry it across devices.",
-                  hi: "इसी डिवाइस पर सुरक्षित: दूसरे डिवाइस पर ले जाने के लिए साइन इन करें।",
-                })}
-          </p>
-
-          <div className="grid gap-6 md:grid-cols-3">
-            <Choice
-              label={T({ en: "Your goal", hi: "आपका लक्ष्य" })}
-              options={GOALS.map((g) => ({ key: g.key, label: T(g.label) }))}
-              value={goal}
-              onChange={(k) => setGoal(k as GoalKey)}
-            />
-            <Choice
-              label={T({ en: "Your diet", hi: "आपका आहार" })}
-              options={DIETS.map((d) => ({ key: d.key, label: T(d.label) }))}
-              value={diet}
-              onChange={(k) => setDiet(k as DietKey)}
-            />
-            <Choice
-              label={T({ en: "Your region", hi: "आपका क्षेत्र" })}
-              options={REGIONS.map((r) => ({ key: r.key, label: T(r.label) }))}
-              value={region}
-              onChange={(k) => setRegion(k as RegionKey)}
-            />
-          </div>
-
-          {/* result */}
-          <div
-            className="mt-8 pt-7 grid gap-5 md:grid-cols-[1fr_auto]"
-            style={{ borderTop: "1px solid color-mix(in srgb, var(--roti) 18%, transparent)" }}
-            aria-live="polite"
-          >
-            <div className="grid gap-3">
-              {(
-                [
-                  ["breakfast", { en: "Breakfast", hi: "नाश्ता" }],
-                  ["lunch", { en: "Lunch", hi: "दोपहर का खाना" }],
-                  ["dinner", { en: "Dinner", hi: "रात का खाना" }],
-                ] as const
-              ).map(([key, label]) => (
-                <div key={key} className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                  <span
-                    className="text-[0.68rem] font-extrabold uppercase w-[86px] shrink-0"
-                    style={{ letterSpacing: "0.14em", color: "var(--haldi)" }}
-                  >
-                    {T(label)}
-                  </span>
-                  <span className="text-[1.16rem]" style={{ fontFamily: "var(--font-display)" }}>
-                    {T(plan.meals[key])}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div className="md:text-right">
-              <div
-                className="text-[2.4rem] leading-none tabular-nums"
-                style={{ fontFamily: "var(--font-data)", fontWeight: 500 }}
-              >
-                {plan.kcal.toLocaleString("en-IN")}
-              </div>
-              <div
-                className="text-[0.75rem] uppercase mt-1"
-                style={{ letterSpacing: "0.12em", color: "color-mix(in srgb, var(--roti) 60%, transparent)" }}
-              >
-                {T({ en: "kilocalories a day", hi: "किलोकैलोरी प्रतिदिन" })}
-              </div>
-              <div className="mt-3 text-[0.85rem]" style={{ color: "var(--haldi)" }}>
-                {T({ en: "Focus:", hi: "ध्यान:" })} {T(plan.focus)}
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* ----------------------------------------------------- the tiers */}
-        <div ref={revealCards} className="rise grid gap-5 md:grid-cols-2 items-start">
+        <div ref={revealCards} className="rise grid gap-5 md:grid-cols-3 items-start">
           {/* Free */}
           <div
             className="surface-card rounded-2xl p-7 h-full"
@@ -196,6 +72,58 @@ export function Premium({
                 </li>
               ))}
             </ul>
+          </div>
+
+          {/* Poshan Plus — college & hostellers, single profile */}
+          <div className="surface-card rounded-2xl p-7 h-full relative">
+            <span
+              className="absolute top-5 right-5 text-[0.66rem] font-extrabold uppercase px-2.5 py-1 rounded-full"
+              style={{ letterSpacing: "0.12em", background: "var(--elaichi-fill, var(--elaichi))", color: "#fff" }}
+            >
+              {T({ en: "Students", hi: "छात्र" })}
+            </span>
+            <h3 className="text-[1.5rem]" style={{ fontFamily: "var(--font-display)" }}>
+              {T({ en: "Poshan Plus", hi: "पोषण प्लस" })}
+            </h3>
+            <p className="mt-1 text-[0.88rem]" style={{ color: "var(--ink-soft)" }}>
+              {T({
+                en: "College & hostellers — one profile, no family, same plan.",
+                hi: "कॉलेज व हॉस्टलर्स — एक प्रोफ़ाइल, कोई परिवार नहीं, वही प्लान।",
+              })}
+            </p>
+
+            <div className="flex items-end gap-2.5 flex-wrap my-6">
+              <span
+                className="text-[2.4rem] leading-none tabular-nums"
+                style={{ fontFamily: "var(--font-data)", fontWeight: 500 }}
+              >
+                ₹{COLLEGE_PLAN.yearly.toLocaleString("en-IN")}
+              </span>
+              <span className="text-[0.9rem] pb-1" style={{ color: "var(--ink-soft)" }}>
+                {T({ en: "/ year", hi: "/ वर्ष" })}
+              </span>
+            </div>
+            <p className="text-[0.82rem] -mt-4 mb-6" style={{ color: "var(--ink-soft)" }}>
+              {T({
+                en: `Works out to ₹${Math.round(COLLEGE_PLAN.yearly / 12)} a month — ${COLLEGE_PLAN.trialDays} days free first.`,
+                hi: `यानी ₹${Math.round(COLLEGE_PLAN.yearly / 12)} प्रति माह — पहले ${COLLEGE_PLAN.trialDays} दिन मुफ़्त।`,
+              })}
+            </p>
+
+            <ul className="grid gap-2.5 list-none p-0 mb-7">
+              {COLLEGE_FEATURES.map((f, i) => (
+                <li key={i} className="flex gap-2.5 text-[0.9rem]" style={{ color: "var(--ink-soft)" }}>
+                  <Tick color="var(--elaichi)" />
+                  <span>{T(f)}</span>
+                </li>
+              ))}
+            </ul>
+
+            <CheckoutButton yearly product="college" signedIn={signedIn} />
+
+            <p className="text-center text-[0.76rem] mt-3" style={{ color: "var(--ink-soft)" }}>
+              {T({ en: "Prices include GST.", hi: "कीमतों में जीएसटी शामिल है।" })}
+            </p>
           </div>
 
           {/* Poshan Home */}
@@ -363,6 +291,130 @@ export function Premium({
         </div>
       </div>
     </section>
+  );
+}
+
+/**
+ * The plan customiser — goal, diet, region in, a day's breakfast/lunch/dinner
+ * and kilocalorie target out. Used to live inside the Poshan+ tab, ahead of
+ * the pricing cards it had nothing to do with; it lives on the Food Scanner
+ * tab now, next to the other "figure out what to actually eat" tool.
+ */
+export function BuildYourPlan({
+  baseKcal,
+  goal,
+  setGoal,
+  diet,
+  setDiet,
+  region,
+  setRegion,
+  signedIn,
+}: {
+  baseKcal: number;
+  goal: GoalKey;
+  setGoal: (g: GoalKey) => void;
+  diet: DietKey;
+  setDiet: (d: DietKey) => void;
+  region: RegionKey;
+  setRegion: (r: RegionKey) => void;
+  signedIn: boolean;
+}) {
+  const { T } = useLang();
+  const plan = buildPlan(region, diet, goal, baseKcal);
+
+  return (
+    <div
+      id="build-your-plan"
+      className="on-panel liquid-glass-strong refract backdrop-blur-xl rounded-3xl p-6 md:p-9 relative"
+      style={{ background: "var(--panel)", color: "var(--panel-ink)" }}
+    >
+      <Spotlight className="from-amber-100 via-amber-200 to-transparent" size={320} />
+      <p
+        className="text-[0.72rem] font-extrabold uppercase mb-6 relative"
+        style={{ letterSpacing: "0.16em", color: "var(--haldi)" }}
+      >
+        {T({ en: "Build your plan", hi: "अपना प्लान बनाएँ" })}
+      </p>
+
+      <p
+        className="text-[0.74rem] -mt-4 mb-6 relative"
+        style={{ color: "color-mix(in srgb, var(--panel-ink) 62%, var(--panel))" }}
+      >
+        {signedIn
+          ? T({ en: "Saved to your account.", hi: "आपके खाते में सहेजा गया।" })
+          : T({
+              en: "Kept on this device: sign in to carry it across devices.",
+              hi: "इसी डिवाइस पर सुरक्षित: दूसरे डिवाइस पर ले जाने के लिए साइन इन करें।",
+            })}
+      </p>
+
+      <div className="grid gap-6 md:grid-cols-3">
+        <Choice
+          label={T({ en: "Your goal", hi: "आपका लक्ष्य" })}
+          options={GOALS.map((g) => ({ key: g.key, label: T(g.label) }))}
+          value={goal}
+          onChange={(k) => setGoal(k as GoalKey)}
+        />
+        <Choice
+          label={T({ en: "Your diet", hi: "आपका आहार" })}
+          options={DIETS.map((d) => ({ key: d.key, label: T(d.label) }))}
+          value={diet}
+          onChange={(k) => setDiet(k as DietKey)}
+        />
+        <Choice
+          label={T({ en: "Your region", hi: "आपका क्षेत्र" })}
+          options={REGIONS.map((r) => ({ key: r.key, label: T(r.label) }))}
+          value={region}
+          onChange={(k) => setRegion(k as RegionKey)}
+        />
+      </div>
+
+      <div
+        className="mt-8 pt-7 grid gap-5 md:grid-cols-[1fr_auto]"
+        style={{ borderTop: "1px solid color-mix(in srgb, var(--roti) 18%, transparent)" }}
+        aria-live="polite"
+      >
+        <div className="grid gap-3">
+          {(
+            [
+              ["breakfast", { en: "Breakfast", hi: "नाश्ता" }],
+              ["lunch", { en: "Lunch", hi: "दोपहर का खाना" }],
+              ["dinner", { en: "Dinner", hi: "रात का खाना" }],
+            ] as const
+          ).map(([key, label]) => (
+            <div key={key} className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+              <span
+                className="text-[0.68rem] font-extrabold uppercase w-[86px] shrink-0"
+                style={{ letterSpacing: "0.14em", color: "var(--haldi)" }}
+              >
+                {T(label)}
+              </span>
+              <span className="text-[1.16rem]" style={{ fontFamily: "var(--font-display)" }}>
+                {T(plan.meals[key])}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="md:text-right">
+          <div
+            className="text-[2.4rem] leading-none tabular-nums"
+            style={{ fontFamily: "var(--font-data)", fontWeight: 500 }}
+          >
+            {plan.kcal.toLocaleString("en-IN")}
+          </div>
+          <div
+            className="text-[0.75rem] uppercase mt-1"
+            style={{ letterSpacing: "0.12em", color: "color-mix(in srgb, var(--roti) 60%, transparent)" }}
+          >
+            {T({ en: "kilocalories a day", hi: "किलोकैलोरी प्रतिदिन" })}
+          </div>
+          <div className="mt-3 text-[0.85rem]" style={{ color: "var(--haldi)" }}>
+            {T({ en: "Focus:", hi: "ध्यान:" })} {T(plan.focus)}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

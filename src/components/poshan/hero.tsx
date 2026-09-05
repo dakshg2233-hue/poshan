@@ -159,7 +159,7 @@ export function Hero({
                 the cursor already supplies the feedback, and both at once
                 reads as jitter. */}
             <TabLink
-              to="plate"
+              to="yourmeals"
               data-magnetic
               data-magnetic-color="var(--kesar-fill)"
               className="inline-flex items-center min-h-12 px-6 rounded-full font-extrabold text-[0.94rem] no-underline"
@@ -173,7 +173,7 @@ export function Hero({
               className="inline-flex items-center min-h-12 px-6 rounded-full font-extrabold text-[0.94rem] no-underline"
               style={{ border: "1.5px solid var(--ink)", color: "var(--ink)" }}
             >
-              {T({ en: "Poshan Home, ₹299", hi: "पोषण घर, ₹299" })}
+              {T({ en: "See Poshan+ plans", hi: "पोषण+ प्लान देखें" })}
             </TabLink>
           </div>
         </div>

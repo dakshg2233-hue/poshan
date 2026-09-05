@@ -45,6 +45,7 @@ export async function provisionTrialStart(
 
   const notes = subscription.notes as Record<string, string> | undefined;
   const userId = notes?.user_id;
+  const product = notes?.product === "college" ? "college" : "home";
   const plan = notes?.plan === "yearly" ? "yearly" : "monthly";
   const startAt = subscription.start_at as number | undefined;
   if (!userId || !startAt) return false;
@@ -55,7 +56,7 @@ export async function provisionTrialStart(
   const { error } = await db.from("subscriptions").upsert(
     {
       user_id: userId,
-      product: "home",
+      product,
       plan,
       status: "trialing",
       razorpay_subscription_id: subscriptionId,
@@ -86,6 +87,7 @@ export async function provisionRecurringCharge(
 
   const notes = subscription.notes as Record<string, string> | undefined;
   const userId = notes?.user_id;
+  const product = notes?.product === "college" ? "college" : "home";
   const plan = notes?.plan === "yearly" ? "yearly" : "monthly";
   /* `current_end` is Razorpay's own record of when the cycle just paid for
      runs out — authoritative, not computed here. */
@@ -98,7 +100,7 @@ export async function provisionRecurringCharge(
   const { error } = await db.from("subscriptions").upsert(
     {
       user_id: userId,
-      product: "home",
+      product,
       plan,
       status: "active",
       razorpay_subscription_id: subscriptionId,
