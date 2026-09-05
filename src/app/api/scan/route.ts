@@ -1,39 +1,29 @@
 import { MEAL_LIBRARY } from "@/lib/poshan-data";
 import { clientIp, rateLimit, tooMany, readJsonCapped } from "@/lib/rate-limit";
+import { matchAgainstMenu } from "@/lib/vision-router";
 
 /**
  * Meal recognition from a photograph.
  *
- * Routed through OmniRoute rather than calling a provider directly, so the
- * model can be swapped in one env var without touching this file. OmniRoute
- * speaks the Anthropic Messages API at /v1/messages.
- *
- * Only `oc/mimo-v2.5-free` is both vision-capable and has live credentials on
- * the current OmniRoute instance: the anthropic and openai providers have no
- * credentials configured, and the `aug/*` models need the Auggie CLI.
- *
- * If OmniRoute is unreachable or unconfigured this returns 503 and the client
- * falls back to tapping dishes by hand, which still produces an exact calorie
- * count from real macro data. It never invents results: a wrong calorie number
- * is worse than no number.
+ * Tries OpenAI direct first (OPENAI_API_KEY), then OmniRoute
+ * (OMNIROUTE_API_KEY) — see src/lib/vision-router.ts for why there are two
+ * paths. Neither configured, or the model unreachable: this returns 503
+ * and the client falls back to tapping dishes by hand, which still
+ * produces an exact calorie count from real macro data. It never invents
+ * results: a wrong calorie number is worse than no number.
  */
-
-const BASE = process.env.OMNIROUTE_BASE_URL ?? "http://localhost:20128";
-const MODEL = process.env.OMNIROUTE_VISION_MODEL ?? "oc/mimo-v2.5-free";
-
 export async function POST(request: Request) {
   /* Each scan costs a model call, so this is the endpoint most worth
      protecting: an unthrottled loop bills you, not the attacker. */
   const gate = rateLimit(`scan:${clientIp(request)}`, { limit: 12, windowMs: 60_000 });
   if (!gate.ok) return tooMany(gate.retryAfter);
 
-  const token = process.env.OMNIROUTE_API_KEY;
-  if (!token) {
+  if (!process.env.OPENAI_API_KEY && !process.env.OMNIROUTE_API_KEY) {
     return Response.json(
       {
         configured: false,
         reason:
-          "OMNIROUTE_API_KEY is not set on the server, so automatic recognition is off. Identify the dishes by hand: the calorie count is exact either way.",
+          "No vision model is configured on the server, so automatic recognition is off. Identify the dishes by hand: the calorie count is exact either way.",
       },
       { status: 503 }
     );
@@ -69,92 +59,45 @@ Reply with ONLY a JSON array of matching ids, most confident first, e.g.
 ["poha","dahi"]. If nothing on the list is visible, reply with [].
 Do not include any dish that is not on the list. Do not add commentary.`;
 
-  try {
-    const res = await fetch(`${BASE}/v1/messages`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": token,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 256,
-        messages: [
-          {
-            role: "user",
-            content: [
-              /* The dish menu dwarfs everything else in this prompt (~9K
-                 tokens) and is byte-identical on every request until
-                 MEAL_LIBRARY changes, so it's marked cacheable. Free of cost
-                 either way: a provider that ignores cache_control just drops
-                 the key, and one that honours it (Claude models routed
-                 through OmniRoute) turns every scan after the first into a
-                 cache read instead of a full prompt. */
-              { type: "text", text: prompt, cache_control: { type: "ephemeral" } },
-              {
-                type: "image",
-                source: { type: "base64", media_type: mimeType, data: image },
-              },
-            ],
-          },
-        ],
-      }),
-      signal: AbortSignal.timeout(45_000),
-    });
+  const result = await matchAgainstMenu(prompt, { mimeType, data: image });
 
-    if (!res.ok) {
-      const detail = await res.text();
-      /* Free models rate-limit hard and it is transient, so say so plainly
-         rather than reporting it as a rejection the user can't act on. */
-      if (res.status === 429 || detail.includes("rate_limit")) {
-        return Response.json(
-          {
-            configured: true,
-            retryable: true,
-            reason:
-              "The vision model is rate limited right now. Wait a moment and take the photo again, or just tap the dishes: the calorie count is exact either way.",
-          },
-          { status: 429, headers: { "Retry-After": "30" } }
-        );
-      }
+  switch (result.status) {
+    case "not_configured":
       return Response.json(
-        { error: "The vision model rejected the request.", detail: detail.slice(0, 300) },
+        { configured: false, reason: "The vision model isn't configured. Identify the dishes by hand instead." },
+        { status: 503 }
+      );
+    case "rate_limited":
+      return Response.json(
+        {
+          configured: true,
+          retryable: true,
+          reason:
+            "The vision model is rate limited right now. Wait a moment and take the photo again, or just tap the dishes: the calorie count is exact either way.",
+        },
+        { status: 429, headers: { "Retry-After": String(result.retryAfter) } }
+      );
+    case "quota_exceeded":
+      return Response.json(
+        {
+          configured: true,
+          retryable: false,
+          reason: "The vision model's account is out of credits, so automatic recognition is off for now. Identify the dishes by hand: the calorie count is exact either way.",
+        },
+        { status: 503 }
+      );
+    case "error":
+      return Response.json(
+        { error: "The vision model rejected the request.", detail: result.detail },
         { status: 502 }
       );
+    case "ok": {
+      const known = new Set(MEAL_LIBRARY.map((m) => m.id));
+      return Response.json({
+        configured: true,
+        model: result.model,
+        ids: result.ids.filter((id) => known.has(id)),
+      });
     }
-
-    const data = await res.json();
-    /* Anthropic returns content blocks; thinking models emit a `thinking`
-       block first, so join only the text blocks. */
-    const text: string = Array.isArray(data?.content)
-      ? data.content
-          .filter((b: { type?: string }) => b?.type === "text")
-          .map((b: { text?: string }) => b.text ?? "")
-          .join("")
-      : "";
-
-    const match = text.match(/\[[\s\S]*?\]/);
-    let ids: string[] = [];
-    if (match) {
-      try {
-        const list = JSON.parse(match[0]);
-        if (Array.isArray(list)) ids = list.filter((x): x is string => typeof x === "string");
-      } catch {
-        /* fall through to an empty result rather than guessing */
-      }
-    }
-
-    const known = new Set(MEAL_LIBRARY.map((m) => m.id));
-    return Response.json({
-      configured: true,
-      model: MODEL,
-      ids: ids.filter((id) => known.has(id)),
-    });
-  } catch (err) {
-    return Response.json(
-      { error: "Could not reach the vision model.", detail: String(err).slice(0, 200) },
-      { status: 502 }
-    );
   }
 }
