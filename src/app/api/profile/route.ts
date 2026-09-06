@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { generateLeaderboardHandle } from "@/lib/gamification";
 
 export async function GET(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -88,19 +89,33 @@ export async function POST(request: NextRequest) {
     "sex",
     "activity_level",
     "tdee",
+    "portion_scale",
+    "gamification_enabled",
+    "leaderboard_opt_in",
   ] as const;
 
   const updates = Object.fromEntries(
     Object.entries(body).filter(([k]) =>
       (WRITABLE as readonly string[]).includes(k)
     )
-  );
+  ) as Record<string, unknown>;
 
   if (Object.keys(updates).length === 0) {
     return NextResponse.json(
       { error: "No writable fields supplied" },
       { status: 400 }
     );
+  }
+
+  /* leaderboard_handle is never client-writable (see WRITABLE above) — a
+     user picking their own public display name is an impersonation/
+     moderation problem this app doesn't need. Generated once, the first
+     time opt-in flips true, and left alone after that. */
+  if (updates.leaderboard_opt_in === true) {
+    const { data: existing } = await supabase.from("profiles").select("leaderboard_handle").eq("id", user.id).single();
+    if (!existing?.leaderboard_handle) {
+      updates.leaderboard_handle = generateLeaderboardHandle(user.id);
+    }
   }
 
   const { data, error } = await supabase

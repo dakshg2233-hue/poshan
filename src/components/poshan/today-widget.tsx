@@ -9,10 +9,12 @@ import type { Profile } from "@/lib/hooks/use-profile";
 
 /**
  * The dashboard's glanceable summary: BMI, today's maintenance-calorie
- * target, and the doctor's-advice-of-the-day line, in one card. Every number
- * here is derived from real stored profile data — no invented streak or
- * "calories logged today" figure, because this app doesn't track a daily
- * food log anywhere yet. If that ever gets built, it belongs here too.
+ * target, and the doctor's-advice-of-the-day line, in one card. Every
+ * number here is derived from real stored profile data — no invented
+ * streak or "calories logged today" figure. The real daily food log now
+ * lives in its own card (TodayRecommendation, src/lib/daily-engine.ts)
+ * rather than folded in here, so this stays the profile-derived summary
+ * it always was.
  */
 export function TodayWidget({ profile }: { profile: Profile | null }) {
   const advice = getTodaysAdvice();

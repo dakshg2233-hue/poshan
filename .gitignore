@@ -50,4 +50,6 @@ Gemini_Generated_Image_*.png
 supabase/.temp/
 
 # Pitch deck — kept out of this public repo deliberately, not an oversight.
-Poshan-Pre-Seed-Deck.pdf
+# Globbed (not an exact filename) so local backup copies made before an edit
+# (e.g. Poshan-Pre-Seed-Deck.backup-*.pdf) are excluded the same way.
+Poshan-Pre-Seed-Deck*.pdf

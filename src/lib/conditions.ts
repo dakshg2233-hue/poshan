@@ -580,6 +580,26 @@ export const VERDICT_COLOUR: Record<Verdict, string> = {
   avoid: "var(--verdict-avoid)",
 };
 
+/**
+ * Advice for a meal Poshan has no menu for — a restaurant, a wedding, a
+ * friend's house. There's no dish library to rank here, so this reuses
+ * each condition's own already-written favour/limit lists (the same ones
+ * shown on the condition detail screen) rather than inventing new
+ * restaurant-specific copy — general, not restaurant-specific, but honest
+ * about that rather than pretending to know a menu it's never seen.
+ */
+export function eatingOutAdvice(conditions: ConditionKey[]): { favour: Bi[]; limit: Bi[] } {
+  const favour: Bi[] = [];
+  const limit: Bi[] = [];
+  for (const key of conditions) {
+    const c = CONDITIONS.find((x) => x.key === key);
+    if (!c) continue;
+    favour.push(...c.favour);
+    limit.push(...c.limit);
+  }
+  return { favour, limit };
+}
+
 export const MEDICAL_DISCLAIMER: Bi = {
   en: "Poshan is educational, not a diagnosis. These plans follow ICMR-NIN and WHO guidance, but medication, blood results and the stage of your condition change what is safe for you. Confirm with your doctor or a registered dietitian before making changes: especially for kidney disease, or if you take thyroid medication or blood thinners.",
   hi: "पोषण शैक्षिक है, निदान नहीं। ये प्लान आईसीएमआर-एनआईएन और डब्ल्यूएचओ मार्गदर्शन पर आधारित हैं, पर दवाएँ, रक्त जाँच और आपकी स्थिति का चरण बदल देते हैं कि आपके लिए क्या सुरक्षित है। बदलाव से पहले अपने डॉक्टर या पंजीकृत आहार विशेषज्ञ से पुष्टि करें: ख़ासकर गुर्दा रोग में, या यदि आप थायरॉइड या ख़ून पतला करने की दवा लेते हैं।",

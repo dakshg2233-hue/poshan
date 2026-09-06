@@ -11,6 +11,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MacroPersonalizer } from "@/components/poshan/macro-personalizer"
 import type { GoalKey } from "@/lib/poshan-data"
 import { TodayWidget } from "@/components/poshan/today-widget"
+import { TodayRecommendation } from "@/components/poshan/today-recommendation"
+import { PantryTracker } from "@/components/poshan/pantry-tracker"
+import { WeightTracker } from "@/components/poshan/weight-tracker"
+import { WeeklyReview } from "@/components/poshan/weekly-review"
+import { GroceryList } from "@/components/poshan/grocery-list"
+import { WeeklyPlan } from "@/components/poshan/weekly-plan"
+import { PortionCalibration } from "@/components/poshan/portion-calibration"
+import { StreakBadges } from "@/components/poshan/streak-badges"
+import { HouseholdStreaks } from "@/components/poshan/household-streaks"
+import { Leaderboard } from "@/components/poshan/leaderboard"
+import { GamificationSettings } from "@/components/poshan/gamification-settings"
+import { EatingOutAdvisor } from "@/components/poshan/eating-out-advisor"
+import { SymptomJournal } from "@/components/poshan/symptom-journal"
+import { AdherenceOutcome } from "@/components/poshan/adherence-outcome"
+import { ReminderOptIn } from "@/components/poshan/reminder-optin"
 import { FamilyProfiles } from "@/components/poshan/family-profiles"
 import { PatientCare } from "@/components/poshan/patient-care"
 import { Activity, Heart, Droplet, TrendingUp } from "lucide-react"
@@ -102,6 +117,27 @@ export default function Dashboard() {
             <TodayWidget profile={profile} />
           </div>
 
+          {/* The Daily Decision Engine: what to eat today, built from the
+              same real signals as the clinician's care-plan drafter, plus
+              what this account itself has logged, has at home, and set as
+              today's busy/budget context. */}
+          <div className="mb-8">
+            <TodayRecommendation />
+          </div>
+
+          <div className="mb-8">
+            <ReminderOptIn />
+          </div>
+
+          <div className="mb-8">
+            <WeeklyPlan />
+          </div>
+
+          <div className="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <GroceryList />
+            <EatingOutAdvisor />
+          </div>
+
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             {statCards.map(({ icon: Icon, label, value }, i) => (
@@ -169,6 +205,22 @@ export default function Dashboard() {
             </Card>
           </div>
 
+          {/* Pantry + weight: the other two Daily Decision Engine inputs
+              that live outside the meal log itself. */}
+          <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <PantryTracker />
+            <WeightTracker />
+          </div>
+
+          <div className="mt-8">
+            <PortionCalibration />
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <SymptomJournal />
+            <AdherenceOutcome />
+          </div>
+
           {/* Family profiles (Premium only — the gate itself is enforced
               server-side in /api/family, this just reflects it). */}
           <div className="mt-8">
@@ -193,17 +245,37 @@ export default function Dashboard() {
             </div>
           )}
 
+          {/* Weekly close of the daily loop. */}
+          <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <WeeklyReview />
+            <StreakBadges />
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <HouseholdStreaks />
+            <Leaderboard />
+          </div>
+
+          <div className="mt-8">
+            <GamificationSettings />
+          </div>
+
           {/* Quick Actions */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
             <button
               onClick={() => router.push("/dashboard/meals")}
-              className="p-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">
+              className="p-4 rounded-lg font-medium text-white transition hover:opacity-90"
+              style={{ background: "var(--kesar-fill)" }}>
               🍛 Browse Meals (130+)
             </button>
-            <button className="p-4 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 transition">
+            <button
+              className="p-4 rounded-lg font-medium text-white transition hover:opacity-90"
+              style={{ background: "var(--haldi, var(--kesar-fill))" }}>
               ➕ Add Biomarker
             </button>
-            <button className="p-4 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition">
+            <button
+              className="p-4 rounded-lg font-medium text-white transition hover:opacity-90"
+              style={{ background: "var(--elaichi, var(--kesar-fill))" }}>
               ⚙️ Edit Profile
             </button>
           </div>

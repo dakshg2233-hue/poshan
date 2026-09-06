@@ -16,6 +16,25 @@ import { ScannerPage } from "./scanner-page";
 import { Conditions } from "./conditions";
 import { MotionLayer } from "./motion-layer";
 import { Clinics } from "./clinics";
+/* The Daily Decision Engine's signed-in widgets — grafted into the
+   restructured tabs below (yourmeals, health) rather than the "plate"/
+   "meals" tabs they originally shipped on, which this branch had already
+   merged into "yourmeals" by the time these landed on main. */
+import { TodayRecommendation } from "./today-recommendation";
+import { PantryTracker } from "./pantry-tracker";
+import { WeightTracker } from "./weight-tracker";
+import { WeeklyReview } from "./weekly-review";
+import { GroceryList } from "./grocery-list";
+import { WeeklyPlan } from "./weekly-plan";
+import { PortionCalibration } from "./portion-calibration";
+import { StreakBadges } from "./streak-badges";
+import { HouseholdStreaks } from "./household-streaks";
+import { Leaderboard } from "./leaderboard";
+import { GamificationSettings } from "./gamification-settings";
+import { EatingOutAdvisor } from "./eating-out-advisor";
+import { SymptomJournal } from "./symptom-journal";
+import { AdherenceOutcome } from "./adherence-outcome";
+import { ReminderOptIn } from "./reminder-optin";
 import { PointerLight } from "./pointer-light";
 import { StickyCta } from "./sticky-cta";
 import { Consent } from "./consent";
@@ -232,11 +251,39 @@ function MainContent({
           bmi={bmi}
           band={band}
           plan={plan}
+          goal={goal}
+          diet={diet}
         />
         <Bands />
       </TabPanel>
 
       <TabPanel tab="yourmeals">
+        {/* Signed-in visitors get the real Daily Decision Engine — built
+            from their actual account (goal, conditions, logged history,
+            pantry, today's context) — ahead of the general meal builder
+            below. Signed-out visitors go straight to the builder: there is
+            no account yet for the engine to read from. */}
+        {signedIn && (
+          <div className="w-[min(1180px,100%-2.5rem)] mx-auto pt-14 md:pt-24 space-y-8">
+            <ReminderOptIn />
+            <TodayRecommendation />
+            <WeeklyPlan />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <GroceryList />
+              <EatingOutAdvisor />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <PantryTracker />
+              <WeeklyReview />
+            </div>
+            <StreakBadges />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <HouseholdStreaks />
+              <Leaderboard />
+            </div>
+            <GamificationSettings />
+          </div>
+        )}
         <MealLibrary goal={goal} plan={plan} bandName={band.name} />
       </TabPanel>
 
@@ -256,6 +303,14 @@ function MainContent({
 
       <TabPanel tab="health">
         <Biomarkers />
+        {signedIn && (
+          <div className="w-[min(1180px,100%-2.5rem)] mx-auto pb-14 md:pb-24 space-y-8">
+            <WeightTracker />
+            <PortionCalibration />
+            <SymptomJournal />
+            <AdherenceOutcome />
+          </div>
+        )}
         <Conditions />
       </TabPanel>
 
