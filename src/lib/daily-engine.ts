@@ -196,6 +196,18 @@ const REASON = {
   budget: { en: "Fits today's budget", hi: "आज के बजट में" } as Bi,
   variety: { en: "Something different from the last two days", hi: "पिछले दो दिनों से अलग" } as Bi,
   vrat: { en: "Fasting-friendly for today", hi: "आज के व्रत के लिए उपयुक्त" } as Bi,
+  /**
+   * MEAL_LIBRARY has no sweets/festival dishes to swap in (it's built for
+   * everyday home cooking — see dishText/isVratFriendly above for the same
+   * limitation on vrat days), so "festival-aware" here means something
+   * honest given that gap: bias today's home-cooked meals lighter, to
+   * leave calorie room for the mithai/biryani/etc. eaten outside the app,
+   * rather than fabricate a festival dish the data doesn't have.
+   */
+  festival: (festivalName?: string): Bi => ({
+    en: `Lighter pick — leaves room for ${festivalName ? festivalName + " " : ""}treats today`,
+    hi: `हल्का विकल्प — ${festivalName ? festivalName + " " : ""}की मिठाइयों के लिए जगह छोड़ता है`,
+  }),
 } as const;
 
 /**
@@ -217,8 +229,12 @@ export function recommendToday(input: {
   isBusy: boolean;
   budgetPref: CostTier | null;
   /** "vrat" tries fasting-friendly dishes first, falling back to the normal
-   *  candidate set when none are safe and eligible for a given meal-time. */
+   *  candidate set when none are safe and eligible for a given meal-time.
+   *  "festival" keeps the normal candidate set but nudges scoring toward
+   *  lighter dishes — see REASON.festival for why. */
   dayType?: DayType;
+  /** Only read when dayType is "festival"; folded into REASON.festival's text. */
+  festivalName?: string;
 }): DailyRecommendation {
   const goalDef = GOALS.find((g) => g.key === input.goal);
   const targetKcal = Math.max(1200, (input.maintenanceKcal ?? 2000) + (goalDef?.kcal ?? 0));
@@ -287,6 +303,11 @@ export function recommendToday(input: {
         reasons.push(REASON.variety);
       }
 
+      if (dayType === "festival" && meal.kcal < perMealBudget * 0.85) {
+        score += 3;
+        reasons.push(REASON.festival(input.festivalName));
+      }
+
       score -= Math.abs(meal.kcal - perMealBudget) / 50; // tie-break toward the calorie budget
 
       return { meal, score, reasons, costTier, quick };
@@ -332,7 +353,7 @@ export interface WeeklyDayPlan {
  * as free as it already is today.
  */
 export function recommendWeek(
-  input: Omit<Parameters<typeof recommendToday>[0], "isBusy" | "budgetPref" | "dayType">,
+  input: Omit<Parameters<typeof recommendToday>[0], "isBusy" | "budgetPref" | "dayType" | "festivalName">,
   days = 7
 ): WeeklyDayPlan[] {
   const plans: WeeklyDayPlan[] = [];

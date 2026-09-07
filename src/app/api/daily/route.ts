@@ -96,6 +96,7 @@ export async function GET(request: NextRequest) {
         isBusy: contextRow?.is_busy ?? false,
         budgetPref: (contextRow?.budget_pref as CostTier | null) ?? null,
         dayType: (contextRow?.day_type as DayType | undefined) ?? "normal",
+        festivalName: contextRow?.festival_name ?? undefined,
       })
     : null;
 
