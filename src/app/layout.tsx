@@ -98,10 +98,21 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
+/**
+ * Same kill-switch shape as GAMIFICATION_ENABLED: one env var, checked
+ * server-side, reversible by unsetting it — no code change needed either
+ * way. Applied on the server-rendered <html> tag (not via client JS) so
+ * there is no flash of Sindoor before a client effect corrects it.
+ * PaletteControl (dev-only) still reads whatever this sets as the current
+ * palette and can preview others on top of it locally.
+ */
+const DEFAULT_PALETTE = process.env.NEXT_PUBLIC_DEFAULT_PALETTE;
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      data-palette={DEFAULT_PALETTE || undefined}
       className={`${display.variable} ${wordmark.variable} ${uiSans.variable} ${uiSans.variable} ${mono.variable} ${pixel.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">

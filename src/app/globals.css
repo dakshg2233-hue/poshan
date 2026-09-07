@@ -466,6 +466,41 @@
   --panel: #1c1424;
 }
 
+/* --- Shwet-Shyam (श्वेत-श्याम, "white-black"): true monochrome ------
+       Every other palette here picks a HUE. This one deliberately
+       doesn't: kesar/haldi/elaichi/imli/mirch all collapse to shades of
+       grey and black, no colour left standing.
+
+       One deviation, matching Seed's own precedent above: --verdict-good/
+       -caution/-avoid stay real green/amber/red. Seed already established
+       that a health-safety badge is not a style choice — an "avoid" that
+       isn't red reads as safe when it isn't. That rule doesn't bend just
+       because this palette otherwise removes every other colour.
+       ------------------------------------------------------------------ */
+:root[data-palette="shwetshyam"] {
+  --roti: #ffffff;   --roti-2: #f2f2f2;  --line: #dcdcdc;
+  --ink: #111111;    --ink-soft: #5c5c5c;
+  --steel: #8a8a8a;  --steel-lo: #d6d6d6;
+
+  /* The one accent this palette has left is depth itself: kesar is pure
+     black, the darkest and most "said" thing on the page; elaichi/imli/
+     mirch step down through greys rather than through hues, so some
+     visual hierarchy survives even with no colour to carry it. */
+  --kesar: #000000;  --kesar-fill: #000000;
+  --haldi: #d9d9d9;  --haldi-ink: #333333;
+  --elaichi: #2b2b2b; --elaichi-fill: #2b2b2b;
+  --imli: #4a4a4a;    --imli-fill: #4a4a4a;
+  --mirch: #1a1a1a;
+
+  --panel: #111111;
+  --panel-ink: #fbfbfb;
+
+  /* Deliberate deviation — see comment above. */
+  --verdict-good: #3d6b4f;
+  --verdict-caution: #7a5312;
+  --verdict-avoid: #9c2b1c;
+}
+
 /* Inside an always-dark panel, re-point the light-theme tokens at panel values.
    Descendants keep writing var(--ink) / var(--roti) as usual and simply resolve
    correctly, instead of every nested caption needing its own dark-mode override

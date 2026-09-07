@@ -15,7 +15,7 @@ import { useState, useEffect } from "react";
  */
 
 export type PaletteKey =
-  | "sindoor" | "seed" | "kaali" | "patta" | "neel" | "madhu" | "tulsi" | "kesari" | "kaajal" | "jamun";
+  | "sindoor" | "seed" | "kaali" | "patta" | "neel" | "madhu" | "tulsi" | "kesari" | "kaajal" | "jamun" | "shwetshyam";
 
 export const PALETTES: {
   key: PaletteKey;
@@ -82,6 +82,12 @@ export const PALETTES: {
     name: "Jamun",
     note: "Deep plum. Distinctive and nobody in the category uses it, which is either an opportunity or a warning.",
     swatch: ["#FCFAFD", "#6B21A8", "#D9A52C"],
+  },
+  {
+    key: "shwetshyam",
+    name: "Shwet-Shyam",
+    note: "White-black: true monochrome, no accent hue at all. Verdict badges (favour/caution/avoid) stay coloured on purpose, same deviation Seed makes for its greens — a safety badge that isn't red is a regression, not a style choice.",
+    swatch: ["#FFFFFF", "#000000", "#8A8A8A"],
   },
 ];
 
