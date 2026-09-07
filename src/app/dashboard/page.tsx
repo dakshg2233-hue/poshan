@@ -26,6 +26,7 @@ import { EatingOutAdvisor } from "@/components/poshan/eating-out-advisor"
 import { SymptomJournal } from "@/components/poshan/symptom-journal"
 import { AdherenceOutcome } from "@/components/poshan/adherence-outcome"
 import { ReminderOptIn } from "@/components/poshan/reminder-optin"
+import { WidgetBridge } from "@/components/poshan/widget-bridge"
 import { FamilyProfiles } from "@/components/poshan/family-profiles"
 import { PatientCare } from "@/components/poshan/patient-care"
 import { Activity, Heart, Droplet, TrendingUp } from "lucide-react"
@@ -116,6 +117,8 @@ export default function Dashboard() {
           <div className="mb-8">
             <TodayWidget profile={profile} />
           </div>
+
+          <WidgetBridge />
 
           {/* The Daily Decision Engine: what to eat today, built from the
               same real signals as the clinician's care-plan drafter, plus

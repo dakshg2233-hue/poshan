@@ -35,6 +35,7 @@ import { EatingOutAdvisor } from "./eating-out-advisor";
 import { SymptomJournal } from "./symptom-journal";
 import { AdherenceOutcome } from "./adherence-outcome";
 import { ReminderOptIn } from "./reminder-optin";
+import { WidgetBridge } from "./widget-bridge";
 import { PointerLight } from "./pointer-light";
 import { StickyCta } from "./sticky-cta";
 import { Consent } from "./consent";
@@ -265,6 +266,7 @@ function MainContent({
             no account yet for the engine to read from. */}
         {signedIn && (
           <div className="w-[min(1180px,100%-2.5rem)] mx-auto pt-14 md:pt-24 space-y-8">
+            <WidgetBridge />
             <ReminderOptIn />
             <TodayRecommendation />
             <WeeklyPlan />
