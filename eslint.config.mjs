@@ -12,6 +12,14 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Agent worktrees. These hold whole checkouts of other repositories,
+    // built `dist/` bundles included. Without this, `eslint` at the repo
+    // root walks into them, Babel deoptimises on every file over 500KB,
+    // and the run dies with a JS heap OOM after about twelve minutes —
+    // so `npm run lint` did not fail, it crashed. The script is scoped to
+    // `src` as well; this is the belt to that's braces, for anyone
+    // running eslint directly.
+    ".claude/**",
   ]),
 ]);
 

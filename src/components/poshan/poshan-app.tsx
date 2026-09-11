@@ -42,7 +42,7 @@ import { Consent } from "./consent";
 import { ChatWidget, ChatProvider } from "./chat-widget";
 import { GlassFilter } from "@/components/ui/glass-filter";
 import { MagneticCursor } from "@/components/ui/magnetic-cursor";
-import { TabProvider, TabPanel, useSwipeNav } from "./tabs";
+import { TabProvider, TabPanel } from "./tabs";
 import { Bands, Biomarkers, Testimonials, ClosingCta, Footer } from "./sections";
 import {
   bandFor,
@@ -179,10 +179,10 @@ function PoshanAppInner({
 }
 
 /**
- * Split out from PoshanAppInner for one reason: useSwipeNav() reads tab
- * context, and a component can't consume the context that its own render
- * also creates — the TabProvider has to be an ancestor of the component
- * calling the hook, not the same function that renders <TabProvider>.
+ * Split out from PoshanAppInner because it reads tab context, and a
+ * component can't consume the context that its own render also creates —
+ * the TabProvider has to be an ancestor of the component reading it, not
+ * the same function that renders <TabProvider>.
  */
 function MainContent({
   height,
@@ -227,12 +227,11 @@ function MainContent({
   setRegion: (v: RegionKey) => void;
   signedIn: boolean;
 }) {
-  const swipeRef = useSwipeNav<HTMLElement>();
-
   return (
-    <main id="top" className="flex-1" ref={swipeRef}>
-      {/* One tab mounts at a time. The sections themselves are unchanged;
-          only which of them is in the document at once has moved. */}
+    <main id="top" className="flex-1">
+      {/* Every section is mounted, stacked in reading order, and the nav
+          scrolls between them. A visitor who never touches the nav still
+          passes the whole product on the way down. */}
       <TabPanel tab="dashboard">
         <Dashboard />
       </TabPanel>

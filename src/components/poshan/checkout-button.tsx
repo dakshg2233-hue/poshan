@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useLang } from "./lang-provider";
+import { track } from "@/lib/analytics";
 import { PREMIUM } from "@/lib/poshan-data";
 
 /* Razorpay's checkout script is loaded from their domain only when the
@@ -50,6 +51,10 @@ export function CheckoutButton({
   const pay = useCallback(async () => {
     setBusy(true);
     setStatus(null);
+    /* Fired on intent, before the order call — the drop-off between this
+       and a completed payment is the number worth having, and an event
+       that only fires on success cannot measure it. */
+    track("checkout_started", { product, term: yearly ? "yearly" : "monthly", signedIn });
     try {
       const res = await fetch("/api/razorpay/subscription", {
         method: "POST",
@@ -127,7 +132,7 @@ export function CheckoutButton({
     } finally {
       setBusy(false);
     }
-  }, [yearly, product, T]);
+  }, [yearly, product, T, signedIn]);
 
   if (!signedIn) {
     return (

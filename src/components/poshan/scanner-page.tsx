@@ -1,8 +1,9 @@
 "use client";
 
 import { useLang, useReveal } from "./lang-provider";
-import { FoodScanner } from "./food-scanner";
+import { PlateScanner } from "./plate-scanner";
 import { BuildYourPlan } from "./premium";
+import { useProfile } from "@/lib/hooks/use-profile";
 import type { GoalKey, DietKey, RegionKey } from "@/lib/poshan-data";
 
 /**
@@ -10,6 +11,15 @@ import type { GoalKey, DietKey, RegionKey } from "@/lib/poshan-data";
  * customiser, together — both answer the same question ("what am I actually
  * eating / going to eat"), so they no longer live on two unrelated tabs
  * (Meals, and what used to be Poshan Home).
+ *
+ * The logger here is <PlateScanner>, which reads every dish on the plate
+ * with an editable portion. It replaced <FoodScanner>, which returned a
+ * single dish id and its recorded calories — the wrong shape for a thali,
+ * and wrong by a factor of three on one. FoodScanner is still mounted
+ * inside <Conditions> and <MealsShowcase>, where a single matched dish is
+ * genuinely what the caller wants (the condition checker reacts to one id
+ * via onScanned); this surface is the one where "what am I eating" means
+ * the whole plate.
  */
 export function ScannerPage({
   baseKcal,
@@ -33,6 +43,7 @@ export function ScannerPage({
   isPremium: boolean;
 }) {
   const { T } = useLang();
+  const { profile } = useProfile();
   const reveal = useReveal<HTMLDivElement>();
 
   return (
@@ -56,7 +67,11 @@ export function ScannerPage({
           </div>
 
           <div id="scan" className="mb-8">
-            <FoodScanner isPremium={isPremium} />
+            {/* portionScale is the user's own katori, measured against a ₹10
+                coin in <PortionCalibration>. Defaulting to 1 for a signed-out
+                visitor is the honest fallback: the reference katori, not a
+                guess at theirs. */}
+            <PlateScanner isPremium={isPremium} portionScale={profile?.portion_scale ?? 1} />
           </div>
 
           <BuildYourPlan

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { Bi } from "@/lib/poshan-data";
 import type { CostTier, DayType } from "@/lib/daily-engine";
+import { track } from "@/lib/analytics";
 
 export interface DailyPick {
   id: string;
@@ -45,6 +46,11 @@ export interface DailyData {
 export function useDaily(familyMemberId?: string | null) {
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(true);
+  /* A 401 here used to collapse into `data: null`, which is the same state
+     as "signed in, no plan yet" — so a screen built on this hook could not
+     tell a visitor to sign in without guessing. Surfaced explicitly now;
+     see use-timeline.ts for the same change on the newer hooks. */
+  const [signedOut, setSignedOut] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const url = familyMemberId ? `/api/daily?family_member_id=${encodeURIComponent(familyMemberId)}` : "/api/daily";
@@ -56,9 +62,11 @@ export function useDaily(familyMemberId?: string | null) {
       const response = await fetch(url);
       if (response.status === 401) {
         setData(null);
+        setSignedOut(true);
         return;
       }
       if (!response.ok) throw new Error("Failed to load today's plan");
+      setSignedOut(false);
       setData(await response.json());
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -77,12 +85,18 @@ export function useDaily(familyMemberId?: string | null) {
       try {
         const response = await fetch(url);
         if (response.status === 401) {
-          if (!cancelled) setData(null);
+          if (!cancelled) {
+            setData(null);
+            setSignedOut(true);
+          }
           return;
         }
         if (!response.ok) throw new Error("Failed to load today's plan");
         const result = await response.json();
-        if (!cancelled) setData(result);
+        if (!cancelled) {
+          setSignedOut(false);
+          setData(result);
+        }
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
@@ -102,6 +116,10 @@ export function useDaily(familyMemberId?: string | null) {
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error ?? "Failed to log meal");
+    /* `source` and `meal_time` only — never the dish. What someone ate is
+       exactly the kind of behaviour rule 2 in analytics.ts keeps out of a
+       third-party tool. */
+    track("meal_logged", { source, meal_time });
     await load();
     return result;
   };
@@ -114,9 +132,14 @@ export function useDaily(familyMemberId?: string | null) {
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error ?? "Failed to update today's context");
+    track("day_context_set", {
+      day_type: updates.day_type ?? null,
+      is_busy: updates.is_busy ?? null,
+      budget_pref: updates.budget_pref ?? null,
+    });
     await load();
     return result;
   };
 
-  return { data, loading, error, logMeal, setContext, reload: load };
+  return { data, loading, signedOut, error, logMeal, setContext, reload: load };
 }

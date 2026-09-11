@@ -3,18 +3,20 @@
 import { useLang } from "./lang-provider";
 import { LangHint } from "./lang-hint";
 import { SiteSearch } from "./site-search";
-import { CursorPicker } from "./cursor-picker";
-import { PaletteControl } from "./palette-control";
 import { ChatBottomBarButton } from "./chat-widget";
 
 /**
  * Thin utility bar, fixed to the bottom of the viewport in every view.
  *
- * Layout is deliberately search-centred: display/theme controls (palette,
- * cursor, language) sit to the left of the search field, and the two
- * "talk to something" controls (chat, account) sit to the right — so the
- * one thing most people actually reach for here has a fixed, predictable
- * spot in the middle rather than being just another icon in a long row.
+ * Layout is deliberately search-centred: the language toggle sits to the
+ * left of the search field and the two "talk to something" controls (chat,
+ * account) sit to the right — so the one thing most people actually reach
+ * for here has a fixed, predictable spot in the middle rather than being
+ * just another icon in a long row.
+ *
+ * The palette and cursor pickers used to sit on the left too. They moved to
+ * <Nav> at the top: they change how the whole site looks, and the bottom
+ * bar is where you go on purpose rather than where you notice something.
  */
 export function BottomBar({ signedIn = false }: { signedIn?: boolean }) {
   const { lang, setLang, T } = useLang();
@@ -26,8 +28,6 @@ export function BottomBar({ signedIn = false }: { signedIn?: boolean }) {
     >
       <div className="w-[min(1180px,100%-2rem)] mx-auto flex items-center gap-2 h-[52px]">
         {/* ---------- left of the search bar ---------- */}
-        {process.env.NODE_ENV === "development" && <PaletteControl />}
-        <CursorPicker />
         <div className="flex items-center gap-2 shrink-0 relative">
           <div className="hidden sm:block"><LangHint /></div>
           <div

@@ -13,12 +13,25 @@ import { useLang } from "./lang-provider";
 import type { Bi } from "@/lib/poshan-data";
 
 /**
- * Tabs as the site's navigation.
+ * Section navigation for a single continuous page.
  *
- * The page used to be one continuous scroll: every section stacked into a
- * single <main>, with the nav offering four anchor links into it. Finding the
- * meal library meant scrolling past the BMI tool, the bands and the plate.
- * Each tab now owns a group of sections and only the active group mounts.
+ * This has been round the loop twice, so the reasoning is worth keeping.
+ * Originally the page was one long scroll with anchor links. That was
+ * replaced by real tabs — one group of sections mounted at a time — because
+ * reaching the meal library meant scrolling past the BMI tool, the bands
+ * and the plate.
+ *
+ * Tabs solved that and introduced a worse problem: a visitor saw about a
+ * sixth of Poshan and had no way to know the rest existed. On a marketing
+ * page that is the expensive failure. Scrolling past a section you don't
+ * need costs one flick; never discovering the clinician platform or the
+ * conditions engine costs the customer.
+ *
+ * So: every section is mounted, all the time, and the tab strip drives
+ * scrolling rather than mounting. The nav behaves identically to a user —
+ * click "Biomarkers", land on biomarkers — but everything else is above
+ * and below rather than discarded. A scroll-spy keeps the active pill
+ * matched to what is on screen.
  *
  * Why client state and not routes. The body profile (height, weight, goal,
  * diet, region) is held in PoshanAppInner and threaded into Hero, Meals,
@@ -26,11 +39,13 @@ import type { Bi } from "@/lib/poshan-data";
  * on would mean lifting all of it into a provider and re-reading it per route,
  * a far larger change than the navigation itself calls for.
  *
- * The URL still carries the tab. The hash is written on every change and read
- * back on load, so a tab is linkable, bookmarkable, survives reload, and the
- * browser back button steps through tabs the way it would through pages. The
- * old anchor links (#check, #plate, #bios, #premium) still resolve, because
- * each tab claims the section ids it contains.
+ * The URL still carries the section. The hash is written on every click and
+ * read back on load, so a section is linkable, bookmarkable and survives
+ * reload, and back/forward step through the sections you clicked. Scrolling
+ * deliberately does NOT write history — otherwise reading the page top to
+ * bottom would bury the back button. The old anchor links (#check, #plate,
+ * #bios, #premium) still resolve, because each tab claims the section ids it
+ * contains.
  */
 
 export type TabKey = "dashboard" | "home" | "yourmeals" | "scanner" | "health" | "premium";
@@ -81,6 +96,9 @@ export const TABS: Tab[] = [
 
 const DEFAULT_TAB: TabKey = "dashboard";
 
+/** Height of the fixed nav, so a section never lands underneath it. */
+const NAV_OFFSET = 62;
+
 /** Resolve a raw hash to a tab. Accepts both tab keys and owned section ids. */
 export function tabFromHash(hash: string): TabKey | null {
   const id = hash.replace(/^#/, "").trim();
@@ -114,37 +132,137 @@ export function TabProvider({ children }: { children: React.ReactNode }) {
     return tabFromHash(window.location.hash) ?? DEFAULT_TAB;
   });
 
-  /* A section to scroll to after the new tab has mounted. Held in a ref so
-     setting it never costs a render of its own. */
-  const pending = useRef<string | null>(null);
+  /* Set while a click-driven scroll is in flight. The scroll-spy below has
+     to stand down for its duration: a smooth scroll from the last section
+     to the first crosses every section on the way, and letting the spy
+     react would drag the highlight backwards through all of them before
+     settling. */
+  const scrolling = useRef(false);
 
-  const go = useCallback((key: TabKey, target?: string) => {
-    pending.current = target ?? null;
-    setActive(key);
-    const hash = `#${target ?? key}`;
-    if (window.location.hash !== hash) {
-      history.pushState(null, "", hash);
-    }
-    /* Every tab starts at its own top. Without this a tab entered from
-       halfway down the previous one opens mid-section. */
-    if (!target) window.scrollTo({ top: 0, behavior: "auto" });
+  const scrollToSection = useCallback((key: TabKey, target?: string) => {
+    const el =
+      (target && document.getElementById(target)) ||
+      document.getElementById(`panel-${key}`);
+    if (!el) return;
+
+    const from = window.scrollY;
+    const to = Math.max(0, el.getBoundingClientRect().top + from - NAV_OFFSET);
+    if (Math.abs(to - from) < 2) return;
+
+    scrolling.current = true;
+    window.scrollTo({ top: to, behavior: "smooth" });
+
+    /* Smooth scrolling cannot be relied on here. Something in this page's
+       motion stack (GSAP/framer/MotionLayer all listen on scroll) swallows
+       programmatic smooth scrolls entirely — verified in the browser:
+       scrollIntoView({behavior:"smooth"}) left scrollY at 0 while the same
+       call with "auto" moved it 7,569px. Rather than track down which
+       library and leave navigation hostage to it, this checks whether the
+       scroll actually started and jumps outright if it didn't.
+       Getting there instantly is worse than gliding; not getting there is
+       broken. */
+    window.setTimeout(() => {
+      if (Math.abs(window.scrollY - from) < 2) {
+        window.scrollTo({ top: to, behavior: "auto" });
+      }
+    }, 150);
+
+    /* No scrollend event in Safari yet, so releasing the spy is
+       time-based. Long enough to cover a full-page scroll, short enough
+       that the spy is live again before anyone reads the next section. */
+    window.setTimeout(() => {
+      scrolling.current = false;
+    }, 800);
   }, []);
 
-  /* Back and forward move between tabs, because each switch pushed an entry. */
+  const go = useCallback(
+    (key: TabKey, target?: string) => {
+      setActive(key);
+      const hash = `#${target ?? key}`;
+      if (window.location.hash !== hash) {
+        history.pushState(null, "", hash);
+      }
+      scrollToSection(key, target);
+    },
+    [scrollToSection]
+  );
+
+  /* Back and forward move between sections, because each click pushed an
+     entry. Scrolls as well as highlights, so the button does what it looks
+     like it does. */
   useEffect(() => {
-    const onPop = () => setActive(tabFromHash(window.location.hash) ?? DEFAULT_TAB);
+    const onPop = () => {
+      const key = tabFromHash(window.location.hash) ?? DEFAULT_TAB;
+      setActive(key);
+      scrollToSection(key);
+    };
     addEventListener("popstate", onPop);
     return () => removeEventListener("popstate", onPop);
-  }, []);
+  }, [scrollToSection]);
 
-  /* Deep links into a section: the tab mounts first, then we scroll. */
+  /* Land on the right section when the page is opened at a hash. Runs once,
+     after mount, because the target has to exist before it can be scrolled
+     to — and with every section now mounted, it always will. */
   useEffect(() => {
-    if (!pending.current) return;
-    const id = pending.current;
-    pending.current = null;
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [active]);
+    const id = window.location.hash.replace(/^#/, "").trim();
+    if (!id) return;
+    const key = tabFromHash(window.location.hash);
+    if (!key) return;
+    /* rAF rather than a bare call: fonts and images are still settling on
+       first paint and a scroll measured now lands short. */
+    requestAnimationFrame(() => scrollToSection(key, id !== key ? id : undefined));
+  }, [scrollToSection]);
+
+  /* Scroll-spy: keeps the nav pill matched to whatever is actually on
+     screen. Deliberately does NOT touch history — only a click does that,
+     so reading the page top to bottom doesn't bury the back button under
+     fifty entries.
+
+     A plain rAF-throttled scroll listener rather than an
+     IntersectionObserver. IO is the usual tool and would be the right one
+     for hundreds of targets, but there are six, a rect read on six
+     elements per frame is free, and this version has no dependency on
+     observer callbacks firing — which are suspended in some embedded and
+     backgrounded contexts, where the nav would silently stop tracking. */
+  useEffect(() => {
+    let raf = 0;
+
+    const measure = () => {
+      raf = 0;
+      if (scrolling.current) return;
+
+      const sections = document.querySelectorAll<HTMLElement>("[data-tab-section]");
+      if (sections.length === 0) return;
+
+      /* The current section is the last one whose top has passed just
+         under the nav — i.e. the one you have scrolled into most recently.
+         Falls back to the first, so the top of the page reads as section
+         one rather than as nothing. */
+      let current: TabKey | null = null;
+      for (const s of sections) {
+        if (s.getBoundingClientRect().top - NAV_OFFSET <= 1) {
+          current = s.getAttribute("data-tab-section") as TabKey;
+        }
+      }
+      const first = sections[0].getAttribute("data-tab-section") as TabKey;
+      const key = current ?? first;
+      setActive((prev) => (prev === key ? prev : key));
+    };
+
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(measure);
+    };
+
+    measure();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
 
   const value = useMemo(() => ({ active, go }), [active, go]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
@@ -252,81 +370,33 @@ export function TabLink({
   );
 }
 
-/**
- * Swipe left/right anywhere in the tab content to move between tabs, the
- * same order as the tab strip. Touch only — a mouse drag doesn't trigger it,
- * so nothing changes for desktop pointer users.
+/* useSwipeNav() lived here: swipe left/right to move between tabs.
  *
- * Ignores a touch that starts inside anything marked `data-no-swipe` (the
- * food scanner's live camera view, so a finger moving across the preview
- * doesn't fire a tab change) or inside an element that itself scrolls
- * horizontally (so a swipe meant to scroll a filter row or carousel isn't
- * stolen for navigation).
+ * Removed with the move to one continuous page. A horizontal swipe that
+ * jumps you to another part of a vertically-scrolling document is a
+ * gesture nothing else on the web does — and now that the sections are
+ * simply above and below each other, the gesture it replaces is just
+ * scrolling, which phones already do very well.
  */
-export function useSwipeNav<T extends HTMLElement>() {
-  const { active, go } = useTabs();
-  const ref = useRef<T>(null);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
 
-    let startX = 0;
-    let startY = 0;
-    let tracking = false;
-
-    function horizontallyScrollable(node: EventTarget | null): boolean {
-      let n = node instanceof Element ? node : null;
-      while (n && n !== el) {
-        if (n.closest("[data-no-swipe]")) return true;
-        const style = getComputedStyle(n);
-        const scrollsX = style.overflowX === "auto" || style.overflowX === "scroll";
-        if (scrollsX && n.scrollWidth > n.clientWidth) return true;
-        n = n.parentElement;
-      }
-      return false;
-    }
-
-    function onStart(e: TouchEvent) {
-      if (e.touches.length !== 1) return;
-      if (horizontallyScrollable(e.target)) return;
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
-      tracking = true;
-    }
-
-    function onEnd(e: TouchEvent) {
-      if (!tracking) return;
-      tracking = false;
-      const touch = e.changedTouches[0];
-      const dx = touch.clientX - startX;
-      const dy = touch.clientY - startY;
-
-      /* Mostly horizontal, and a real gesture rather than a tap: shorter
-         swipes read as noise, especially on a page that also scrolls
-         vertically. */
-      if (Math.abs(dx) < 64 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-
-      const i = VISIBLE_TABS.findIndex((t) => t.key === active);
-      if (i === -1) return;
-      /* Swipe left (negative dx) = next tab, swipe right = previous —
-         matches how a horizontal carousel reads in a left-to-right layout. */
-      const next = dx < 0 ? Math.min(i + 1, VISIBLE_TABS.length - 1) : Math.max(i - 1, 0);
-      if (next !== i) go(VISIBLE_TABS[next].key);
-    }
-
-    el.addEventListener("touchstart", onStart, { passive: true });
-    el.addEventListener("touchend", onEnd, { passive: true });
-    return () => {
-      el.removeEventListener("touchstart", onStart);
-      el.removeEventListener("touchend", onEnd);
-    };
-  }, [active, go]);
-
-  return ref;
-}
-
-/** Wraps one tab's sections. Only the active panel is in the document. */
+/**
+ * One section of the page. Every section is in the document, always.
+ *
+ * This used to unmount everything but the active tab, which meant a visitor
+ * saw roughly a sixth of Poshan at a time and had to already know the other
+ * five existed to go looking for them. For a signed-out visitor deciding
+ * whether this product is for them, that is the wrong trade: scrolling past
+ * something you don't need costs a flick, while never learning it exists
+ * costs the sale.
+ *
+ * So the tabs are section links now, not mount switches. The nav still
+ * works exactly as before — click "Biomarkers", land on biomarkers — but
+ * the rest of the page is above and below it rather than discarded.
+ *
+ * `scroll-mt-[62px]` clears the fixed nav so a section scrolled to by hash
+ * or click doesn't start underneath the bar.
+ */
 export function TabPanel({
   tab,
   children,
@@ -334,24 +404,21 @@ export function TabPanel({
   tab: TabKey;
   children: React.ReactNode;
 }) {
-  const { active } = useTabs();
-  if (active !== tab) return null;
+  const { T } = useLang();
+  const label = TABS.find((t) => t.key === tab)?.label;
+
   return (
-    /* key on the tab so React remounts the node on every switch: a CSS entry
-       animation only runs on mount, and without the key React would reuse the
-       element and the new panel would appear with no transition at all.
-       There is no exit half deliberately - the outgoing panel is gone the
-       moment state changes, and holding it on screen to animate out would
-       delay the content the user just asked for. */
-    <div
-      key={tab}
-      className="panel-in"
-      role="tabpanel"
+    <section
       id={`panel-${tab}`}
-      aria-labelledby={`tab-${tab}`}
-      tabIndex={-1}
+      data-tab-section={tab}
+      className="scroll-mt-[62px]"
+      /* A labelled region rather than a tabpanel: with every section
+         mounted at once this is a landmark on a long page, not one of a
+         set of swapped panels, and role="tabpanel" would promise a screen
+         reader a tab widget that no longer exists. */
+      aria-label={label ? T(label) : undefined}
     >
       {children}
-    </div>
+    </section>
   );
 }

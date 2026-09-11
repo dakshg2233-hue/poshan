@@ -1597,7 +1597,24 @@ main section#meals .lift {
     background: var(--roti);
     color: var(--ink);
     font-family: var(--font-ui), system-ui, sans-serif;
-    overflow-x: hidden;
+    /* `clip`, not `hidden`, and the difference is not cosmetic.
+     *
+     * `overflow-x: hidden` forces the other axis to compute as `auto`
+     * rather than `visible`, which makes <body> a scroll container. Body's
+     * height always equals its content, so that container can never
+     * actually scroll — but it is still the nearest scrollport, so
+     * `scrollIntoView()` targets it, finds nothing to scroll, and stops
+     * without ever reaching <html>. Every section link on the page was
+     * silently doing nothing: the hash changed, the nav highlighted, the
+     * page stayed put.
+     *
+     * `overflow-x: clip` does the same visual job — no sideways scrollbar
+     * from a full-bleed hero — without establishing a scrollport, so
+     * <html> remains the only scroller and scrolling behaves normally.
+     * It also fixes a painting bug this caused: with two competing scroll
+     * contexts, content above the viewport stopped repainting after a
+     * scroll on long pages (/faq and /bmi both showed it). */
+    overflow-x: clip;
   }
   :focus-visible {
     outline: 3px solid var(--kesar);

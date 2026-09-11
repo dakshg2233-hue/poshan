@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import { MARKERS } from "@/lib/clinical-markers";
+import { ClinicianTriage } from "@/components/poshan/clinician-triage";
 
 type MeState =
   | { state: "unregistered"; application: { status: string; created_at: string } | null }
@@ -356,6 +357,18 @@ function ClinicianDashboard({ clinician }: { clinician: Clinician }) {
 
   return (
     <div className="grid gap-8">
+      {/* Triage first, deliberately. A clinician opening this page has one
+          question — who do I need to look at today — and the panels below
+          (clinic admin, invites, the full roster) are all answers to
+          questions they ask far less often. This is also the only view on
+          the page that works properly on a phone, which is where it will
+          actually be read: between patients, standing up. */}
+      <Card className="card-in border-[var(--line)] bg-[var(--surface)]">
+        <CardContent className="pt-6">
+          <ClinicianTriage />
+        </CardContent>
+      </Card>
+
       <ClinicPanel membership={membership} onChange={load} />
 
       {membership && membership.role === "admin" && membership.departments.length > 0 && (

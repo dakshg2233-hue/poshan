@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLang, useReveal } from "./lang-provider";
 import { CheckoutButton } from "./checkout-button";
+import { useTabs } from "./tabs";
+import { track } from "@/lib/analytics";
 import { Spotlight } from "@/components/ui/spotlight";
 import {
   PREMIUM,
@@ -23,8 +25,19 @@ export function Premium({ signedIn }: { signedIn: boolean }) {
   const { T } = useLang();
   const reveal = useReveal<HTMLDivElement>();
   const revealCards = useReveal<HTMLDivElement>();
+  const { active } = useTabs();
 
   const [yearly, setYearly] = useState(true);
+
+  /* Keyed on the tab becoming active, not on mount. Every TabPanel is
+     mounted at once (see tabs.tsx) — a mount-time event here would fire
+     for every visitor who loaded the homepage and never looked at
+     pricing, which is precisely the population this metric exists to
+     distinguish from. */
+  useEffect(() => {
+    if (active === "premium") track("premium_viewed", { signedIn });
+  }, [active, signedIn]);
+
   const price = yearly ? PREMIUM.yearly : PREMIUM.monthly;
 
   return (

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useLang } from "./lang-provider";
 import { TabBar, TabLink } from "./tabs";
+import { PaletteControl } from "./palette-control";
+import { CursorPicker } from "./cursor-picker";
 
 /**
  * Whether the page has scrolled far enough for the bar to read as
@@ -105,15 +107,25 @@ export function Nav() {
           </span>
         </TabLink>
 
-        {/* Scrolls sideways rather than hiding below lg. The whole bar is
-            now just this: with search, language and account gone, the tab
-            strip gets the full remaining width instead of a leftover sliver. */}
+        {/* Scrolls sideways rather than hiding below lg. */}
         <nav
           className="flex-1 min-w-0 overflow-x-auto no-scrollbar"
           aria-label="Main"
         >
           <TabBar className="nav-tabs w-max" />
         </nav>
+
+        {/* Appearance controls, at the top where they're findable.
+            They used to sit in <BottomBar>, which put "how does this site
+            look" at the far edge of the screen next to search and account —
+            a spot people reach for deliberately, not one they discover. The
+            palette is one of the more distinctive things about Poshan and it
+            was effectively hidden. Kept to the right of the section links so
+            they never push navigation off a narrow screen. */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <PaletteControl />
+          <CursorPicker />
+        </div>
       </div>
     </header>
   );

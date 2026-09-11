@@ -6,12 +6,37 @@ import { useState } from "react";
 import { Menu, X, LogOut } from "lucide-react";
 import { browserClient } from "@/lib/supabase-browser";
 
+/**
+ * The signed-in navigation.
+ *
+ * Single source of links, rendered twice (desktop row, mobile sheet).
+ * It used to be two hand-maintained copies of the same list, which is how
+ * /today, /timeline and /privacy-centre ended up shipping with no way to
+ * reach them: adding a route meant remembering to edit two places, and the
+ * cost of forgetting was a page that existed and was invisible. One array
+ * makes that failure mode structurally impossible.
+ */
+const LINKS: { href: string; label: string; exact?: boolean }[] = [
+  /* Today first: it is the screen a phone should open to, and the one
+     answering the question people actually have when they open Poshan. */
+  { href: "/today", label: "Today" },
+  { href: "/dashboard", label: "Dashboard", exact: true },
+  { href: "/dashboard/meals", label: "🍛 Meals" },
+  { href: "/timeline", label: "Timeline" },
+  { href: "/privacy-centre", label: "Privacy" },
+  { href: "/profile", label: "Profile" },
+];
+
 export function DashboardNavbar() {
   const router = useRouter();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
-  const isActive = (path: string) => pathname.startsWith(path);
+  /* `exact` exists for /dashboard, which is a prefix of /dashboard/meals —
+     without it both light up at once and the highlight stops meaning
+     "where you are". */
+  const isActive = (path: string, exact?: boolean) =>
+    exact ? pathname === path : pathname.startsWith(path);
 
   async function handleLogout() {
     const supabase = browserClient();
@@ -34,37 +59,21 @@ export function DashboardNavbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
-            <Link
-              href="/dashboard"
-              className={`text-sm font-medium transition ${
-                isActive("/dashboard") && !isActive("/dashboard/meals")
-                  ? "text-orange-600"
-                  : "text-gray-700 dark:text-gray-300 hover:text-orange-600"
-              }`}
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/dashboard/meals"
-              className={`text-sm font-medium transition ${
-                isActive("/dashboard/meals")
-                  ? "text-orange-600"
-                  : "text-gray-700 dark:text-gray-300 hover:text-orange-600"
-              }`}
-            >
-              🍛 Meals (130+)
-            </Link>
-            <Link
-              href="/profile"
-              className={`text-sm font-medium transition ${
-                isActive("/profile")
-                  ? "text-orange-600"
-                  : "text-gray-700 dark:text-gray-300 hover:text-orange-600"
-              }`}
-            >
-              Profile
-            </Link>
+          <div className="hidden md:flex items-center gap-6">
+            {LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`text-sm font-medium transition ${
+                  isActive(link.href, link.exact)
+                    ? "text-orange-600"
+                    : "text-gray-700 dark:text-gray-300 hover:text-orange-600"
+                }`}
+                aria-current={isActive(link.href, link.exact) ? "page" : undefined}
+              >
+                {link.label}
+              </Link>
+            ))}
           </div>
 
           {/* Desktop Logout Button */}
@@ -80,6 +89,8 @@ export function DashboardNavbar() {
           <button
             className="md:hidden p-2"
             onClick={() => setIsOpen(!isOpen)}
+            aria-expanded={isOpen}
+            aria-label={isOpen ? "Close menu" : "Open menu"}
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -88,27 +99,19 @@ export function DashboardNavbar() {
         {/* Mobile Navigation */}
         {isOpen && (
           <div className="md:hidden pb-4 space-y-2">
-            <Link
-              href="/dashboard"
-              className="block px-4 py-2 text-sm font-medium hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded"
-              onClick={() => setIsOpen(false)}
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/dashboard/meals"
-              className="block px-4 py-2 text-sm font-medium hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded"
-              onClick={() => setIsOpen(false)}
-            >
-              🍛 Meals (130+)
-            </Link>
-            <Link
-              href="/profile"
-              className="block px-4 py-2 text-sm font-medium hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded"
-              onClick={() => setIsOpen(false)}
-            >
-              Profile
-            </Link>
+            {LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`block px-4 py-2 text-sm font-medium hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded ${
+                  isActive(link.href, link.exact) ? "text-orange-600" : ""
+                }`}
+                aria-current={isActive(link.href, link.exact) ? "page" : undefined}
+                onClick={() => setIsOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
             <button
               onClick={() => {
                 handleLogout();

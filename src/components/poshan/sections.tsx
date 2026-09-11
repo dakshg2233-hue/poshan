@@ -531,6 +531,12 @@ export function Footer() {
         style={{ borderTop: "1px solid var(--line)" }}
       >
         {[
+          /* /bmi is a real route, not the in-page calculator the row above
+             scrolls to. It is ranked 0.9 in the sitemap — the page most
+             likely to be found in search — and until this link existed
+             nothing on the site pointed at it, which is the one thing that
+             reliably stops a page being indexed at all. */
+          { href: "/bmi", en: "BMI calculator", hi: "बीएमआई कैलकुलेटर" },
           { href: "/faq", en: "FAQ", hi: "सवाल-जवाब" },
           { href: "/privacy", en: "Privacy", hi: "निजता" },
           { href: "/terms", en: "Terms", hi: "शर्तें" },

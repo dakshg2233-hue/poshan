@@ -1,0 +1,43 @@
+-- Fixes the timeline backfill, which silently wrote nothing.
+--
+-- 20260911000000 created the dedup index as a PARTIAL one:
+--
+--   create unique index idx_timeline_source_unique
+--     on timeline_events(user_id, source_table, source_id)
+--     where source_id is not null;
+--
+-- The predicate was there to say "only rows that point at a source row are
+-- deduplicated; self-reported events, which have no source, are not." That
+-- intent is right. Expressing it as a partial index was wrong, for two
+-- reasons.
+--
+-- First, it broke every write. Postgres will only use an index to resolve
+-- ON CONFLICT if it can *infer* it from the conflict target, and it cannot
+-- infer a partial index unless the statement repeats the index predicate
+-- (ON CONFLICT (...) WHERE source_id is not null). PostgREST — and so the
+-- supabase-js .upsert() that backfillTimeline() calls — has no way to emit
+-- that clause. Every backfill therefore failed with
+--
+--   42P10: there is no unique or exclusion constraint matching the
+--          ON CONFLICT specification
+--
+-- and, because backfillTimeline() catches and discards its errors so a
+-- failed index never breaks the write it describes, the failure was
+-- invisible: the timeline simply stayed empty, which reads exactly like a
+-- user with no history rather than like a bug.
+--
+-- Second, the predicate was not needed in the first place. A plain unique
+-- index in Postgres treats NULLs as distinct (the default is NULLS
+-- DISTINCT), so rows with a null source_id never collide with each other
+-- anyway — many self-reported events per user are already allowed. The
+-- partial clause bought nothing and cost the ON CONFLICT inference.
+--
+-- Non-partial gives exactly the intended semantics:
+--   * source_id present  -> (user_id, source_table, source_id) unique, so a
+--                           re-run of the backfill is a no-op
+--   * source_id null     -> NULLs distinct, so self-reported events repeat
+--                           freely
+drop index if exists public.idx_timeline_source_unique;
+
+create unique index if not exists idx_timeline_source_unique
+  on public.timeline_events(user_id, source_table, source_id);
