@@ -39,6 +39,15 @@ const csp = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false, // do not advertise the framework version
+  /* Pin the workspace root to this directory.
+     Turbopack infers the root by walking up for a lockfile, and there is a
+     stray package-lock.json in C:\Users\Daksh — so it was inferring the
+     home directory as the workspace, warning on every dev start and every
+     build. Whose machine this runs on should not change what gets
+     compiled. */
+  turbopack: {
+    root: __dirname,
+  },
   // Next.js blocks dev-server asset/HMR requests from any origin but
   // localhost by default. The LAN IP covers same-Wi-Fi phone testing; the
   // trycloudflare.com host is a temporary tunnel used only to get a real
