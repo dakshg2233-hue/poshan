@@ -152,11 +152,20 @@ function LoginForm() {
     if (sb) {
       const { data: { user } } = await sb.auth.getUser();
       if (user) {
+        /* Keyed on `id`. profiles references auth.users(id) directly
+           (schema.sql:13) and has no user_id column, so this select was
+           failing outright — which left `profile` undefined, made the
+           check below always true, and sent every returning user back
+           through onboarding on every single sign-in.
+
+           maybeSingle rather than single: a genuinely new user has no
+           profile row yet, and that is the one case here that legitimately
+           returns nothing. */
         const { data: profile } = await sb
           .from("profiles")
           .select("onboarding_completed")
-          .eq("user_id", user.id)
-          .single();
+          .eq("id", user.id)
+          .maybeSingle();
 
         // If onboarding not completed, send to onboarding page
         if (!profile?.onboarding_completed) {

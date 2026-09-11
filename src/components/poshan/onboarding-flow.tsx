@@ -2,15 +2,20 @@
 
 import { useState } from "react";
 import { useLang } from "./lang-provider";
-import { TDEECalculatorUI } from "./tdee-calculator-ui";
+import { TDEECalculatorUI, type TDEEResult } from "./tdee-calculator-ui";
 import { MacroPersonalizer } from "./macro-personalizer";
-import { REGIONS, DIETS, type RegionKey, type DietKey } from "@/lib/poshan-data";
+import { REGIONS, DIETS, type RegionKey, type DietKey, type GoalKey } from "@/lib/poshan-data";
 
 type OnboardingStep = "welcome" | "tdee" | "goal" | "region-diet" | "macros" | "complete";
 
+/* The steps the progress bar tracks, in order. "goal" is deliberately
+   absent: it is part of the TDEE step's own form, not a screen of its
+   own, so the bar would show a segment nobody ever lands on. */
+const PROGRESS_STEPS = ["welcome", "tdee", "region-diet", "macros", "complete"] as const;
+
 interface OnboardingData {
   tdee?: number;
-  goal?: string;
+  goal?: GoalKey;
   region?: RegionKey;
   diet?: DietKey;
   isPremium: boolean;
@@ -21,7 +26,7 @@ export function OnboardingFlow({ onComplete, isPremium }: { onComplete?: (data: 
   const [step, setStep] = useState<OnboardingStep>("welcome");
   const [data, setData] = useState<OnboardingData>({ isPremium });
 
-  const handleTDEEComplete = (tdeeData: any) => {
+  const handleTDEEComplete = (tdeeData: TDEEResult) => {
     setData({ ...data, tdee: tdeeData.tdee, goal: tdeeData.goal });
     setStep("region-diet");
   };
@@ -64,18 +69,30 @@ export function OnboardingFlow({ onComplete, isPremium }: { onComplete?: (data: 
           gap: "8px",
         }}
       >
-        {(["welcome", "tdee", "region-diet", "macros", "complete"] as const).map((s, i) => (
-          <div
-            key={s}
-            style={{
-              flex: 1,
-              height: "4px",
-              background: ["welcome", "tdee", "region-diet", "macros"].includes(s) && ["welcome", "tdee", "region-diet", "macros"].indexOf(s as any) < ["welcome", "tdee", "region-diet", "macros"].indexOf(step as any) ? "var(--flag)" : step === s ? "var(--consumer)" : "var(--line)",
-              borderRadius: "2px",
-              transition: "background 0.3s",
-            }}
-          />
-        ))}
+        {PROGRESS_STEPS.map((s, i) => {
+          /* Compared by index against the current step. The previous
+             version measured both against a four-element list that left
+             "complete" out, so indexOf(step) returned -1 on the final
+             screen and every earlier segment reverted to empty — the
+             progress bar drained itself exactly when the user finished.
+             Using the same ordered list for both sides fixes that, and
+             `i` is the index the map already provides rather than a
+             second lookup that had to be cast to compile. */
+          const current = PROGRESS_STEPS.indexOf(step as (typeof PROGRESS_STEPS)[number]);
+          const done = current > -1 && i < current;
+          return (
+            <div
+              key={s}
+              style={{
+                flex: 1,
+                height: "4px",
+                background: done ? "var(--flag)" : step === s ? "var(--consumer)" : "var(--line)",
+                borderRadius: "2px",
+                transition: "background 0.3s",
+              }}
+            />
+          );
+        })}
       </div>
 
       <div style={{ maxWidth: "800px", margin: "0 auto" }}>
@@ -245,7 +262,7 @@ export function OnboardingFlow({ onComplete, isPremium }: { onComplete?: (data: 
               })}
             </h2>
             {data.tdee && data.goal && (
-              <MacroPersonalizer tdee={data.tdee} goal={data.goal as any} isPremium={true} />
+              <MacroPersonalizer tdee={data.tdee} goal={data.goal} isPremium={true} />
             )}
             <button
               onClick={handleMacrosComplete}

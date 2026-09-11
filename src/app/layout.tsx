@@ -41,9 +41,18 @@ const display = Anek_Devanagari({
   display: "swap",
 });
 
-/* Mukta is by Ek Type, Mumbai: drawn for Indian screens. */
+/* Mukta is by Ek Type, Mumbai: drawn for Indian screens. It carries the
+   Devanagari that DM Sans does not, so it is the second face in the UI
+   stack rather than a replacement for it.
+
+   It used to declare `variable: "--font-ui"` — the same name DM Sans
+   claims — and the <html> className applied `uiSans.variable` twice and
+   this one never. So Mukta was downloaded on every page load, bound to
+   nothing, and every Devanagari string on the site fell through to
+   system-ui: the exact outcome the comment above says this face exists to
+   prevent. Its own variable now, with globals.css listing both. */
 const ui = Mukta({
-  variable: "--font-ui",
+  variable: "--font-ui-deva",
   weight: ["400", "600", "800"],
   subsets: ["devanagari", "latin"],
   display: "swap",
@@ -72,6 +81,12 @@ const DESCRIPTION =
   "Poshan reads your Body Mass Index on Asian-Indian cutoffs, tracks the biomarkers that actually fail in India, and builds the thali you already eat.";
 
 export const metadata: Metadata = {
+  /* Every relative image in the metadata below — the OG card, the Twitter
+     card, the icons — is resolved against this. Unset, Next falls back to
+     http://localhost:3000 and says so at build time, which means a link
+     shared from production carries a preview image pointing at the
+     sharer's own machine. Same origin the sitemap and robots.txt use. */
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://poshan.app"),
   title: "Poshan: पोषण · Know your body. Eat like home.",
   description: DESCRIPTION,
   applicationName: "Poshan",
@@ -113,7 +128,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       data-palette={DEFAULT_PALETTE || undefined}
-      className={`${display.variable} ${wordmark.variable} ${uiSans.variable} ${uiSans.variable} ${mono.variable} ${pixel.variable} h-full antialiased`}
+      className={`${display.variable} ${wordmark.variable} ${uiSans.variable} ${ui.variable} ${mono.variable} ${pixel.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <LangProvider>{children}</LangProvider>

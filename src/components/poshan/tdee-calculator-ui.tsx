@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { useLang } from "./lang-provider";
 import { calculateTDEE, getAdjustedCalories, compareToBand, type ActivityLevel, type Gender } from "@/lib/tdee-calculator";
-import { BANDS, type BandKey } from "@/lib/poshan-data";
+import { BANDS, type BandKey, type GoalKey } from "@/lib/poshan-data";
 
-interface TDEEResult {
+/** What onComplete hands back. Exported so <OnboardingFlow> can type its
+ *  handler against it instead of taking `any` — the two were coupled
+ *  already, just not in a way the compiler could see. */
+export interface TDEEResult {
   weight: number;
   height: number;
   age: number;
@@ -13,7 +16,16 @@ interface TDEEResult {
   activity: ActivityLevel;
   tdee: number;
   band: BandKey;
-  goal: string;
+  /* The select below offers exactly the five GoalKey values, so a plain
+     `string` here was wider than the data ever is — and it was the reason
+     every consumer needed a cast. */
+  goal: GoalKey;
+}
+
+/** What this component additionally shows on screen but does not pass on. */
+interface TDEEDisplay extends TDEEResult {
+  adjustedCals: number;
+  comparison: ReturnType<typeof compareToBand>;
 }
 
 export function TDEECalculatorUI({ onComplete }: { onComplete?: (result: TDEEResult) => void }) {
@@ -23,8 +35,8 @@ export function TDEECalculatorUI({ onComplete }: { onComplete?: (result: TDEERes
   const [age, setAge] = useState(30);
   const [gender, setGender] = useState<Gender>("male");
   const [activity, setActivity] = useState<ActivityLevel>("moderate");
-  const [goal, setGoal] = useState("loss");
-  const [result, setResult] = useState<any>(null);
+  const [goal, setGoal] = useState<GoalKey>("loss");
+  const [result, setResult] = useState<TDEEDisplay | null>(null);
 
   const handleCalculate = () => {
     const tdeeResult = calculateTDEE(weight, height, age, gender, activity);
@@ -197,7 +209,7 @@ export function TDEECalculatorUI({ onComplete }: { onComplete?: (result: TDEERes
         </label>
         <select
           value={goal}
-          onChange={(e) => setGoal(e.target.value)}
+          onChange={(e) => setGoal(e.target.value as GoalKey)}
           style={{
             width: "100%",
             padding: "10px 12px",

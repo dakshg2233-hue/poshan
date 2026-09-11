@@ -13,6 +13,9 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
 
+  /* Inlined for the same reason as /dashboard/meals: `checkSubscription`
+     was a hoisted declaration below this effect, so the effect referenced
+     a binding that did not exist yet at the point it was written. */
   useEffect(() => {
     const supabase = browserClient();
     if (!supabase) {
@@ -20,36 +23,45 @@ export default function OnboardingPage() {
       return;
     }
 
-    supabase.auth.getUser().then(({ data }) => {
+    let cancelled = false;
+
+    const run = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (cancelled) return;
+
       if (!data.user) {
         router.push("/login");
-      } else {
-        setUser(data.user);
-        // Check if user has premium subscription
-        checkSubscription(data.user.id);
+        setLoading(false);
+        return;
       }
-      setLoading(false);
-    });
+      setUser(data.user);
+
+      try {
+        const { data: subscription } = await supabase
+          .from("subscriptions")
+          .select("id")
+          .eq("user_id", data.user.id)
+          .in("product", ["home", "college"])
+          .in("status", ["trialing", "active"])
+          /* maybeSingle, not single: `single()` treats "no subscription"
+             as an error, so the free-tier case — the common one — went
+             through the catch. Same outcome here, but the catch should
+             mean something went wrong, not that the user hasn't paid. */
+          .maybeSingle();
+
+        if (!cancelled) setIsPremium(FORCE_PREMIUM || !!subscription);
+      } catch {
+        if (!cancelled) setIsPremium(FORCE_PREMIUM);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
-
-  async function checkSubscription(userId: string) {
-    const supabase = browserClient();
-    if (!supabase) return;
-
-    try {
-      const { data } = await supabase
-        .from("subscriptions")
-        .select("*")
-        .eq("user_id", userId)
-        .in("product", ["home", "college"])
-        .in("status", ["trialing", "active"])
-        .single();
-
-      setIsPremium(FORCE_PREMIUM || !!data);
-    } catch {
-      setIsPremium(FORCE_PREMIUM);
-    }
-  }
 
   if (loading) {
     return (

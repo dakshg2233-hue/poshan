@@ -22,13 +22,6 @@ const ClockIcon = () => (
   </svg>
 );
 
-const GlobeIcon = () => (
-  <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-    <circle cx="12" cy="12" r="9" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3.6 9h16.8M3.6 15h16.8M11.5 3a17 17 0 000 18M12.5 3a17 17 0 010 18" />
-  </svg>
-);
-
 const BlurText = ({ text }: { text: string }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.1 });
@@ -152,9 +145,11 @@ const FadingVideo = ({
 };
 
 export function LandingHero() {
-  const currentPalette = typeof window !== "undefined"
-    ? localStorage.getItem("poshan-palette") || "kaali"
-    : "kaali";
+  /* A `currentPalette` read of localStorage sat here, unused. It was also
+     read during render, which differs between server and client and is a
+     hydration mismatch waiting to be noticed — the palette is owned by
+     <PaletteControl> and applied via a data-attribute on <html>, so
+     nothing here needs to know it. */
 
   return (
     <section id="home" className="relative w-full min-h-screen bg-black overflow-hidden flex flex-col justify-between">
@@ -177,7 +172,7 @@ export function LandingHero() {
           className="liquid-glass rounded-full p-1 pr-4 flex items-center gap-3 mb-6"
         >
           <span className="bg-white text-black px-3 py-1 rounded-full text-xs font-semibold">New</span>
-          <span className="text-sm text-white/90">India's Premier Health Intelligence & Diet Platform</span>
+          <span className="text-sm text-white/90">India&apos;s Premier Health Intelligence &amp; Diet Platform</span>
         </motion.div>
 
         {/* Main Headline: POSHAN */}

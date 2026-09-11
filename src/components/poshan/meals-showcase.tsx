@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { useLang } from "./lang-provider";
 import { FoodScanner } from "./food-scanner";
-import { MEAL_LIBRARY, REGIONS, DIETS, filterMeals, mealsByTier, type RegionKey, type DietKey, type GoalKey } from "@/lib/poshan-data";
+import { REGIONS, DIETS, filterMeals, mealsByTier, type RegionKey, type DietKey, type GoalKey, type FoodCategory } from "@/lib/poshan-data";
 
 export function MealsShowcase({
   isPremium,
@@ -24,9 +24,23 @@ export function MealsShowcase({
     // Then apply other filters
     const mealIds = new Set(tierMeals.map(m => m.id));
 
+    /* MEAL_LIBRARY only carries veg/nonveg. Vegan and Jain are stricter
+       subsets of veg, so both narrow to "veg" here and the finer
+       distinction is carried by the meal's own tags. Written as a
+       statement rather than inline so TypeScript can actually narrow
+       DietKey down to FoodCategory — the nested ternary it replaces
+       needed an `any` to compile, which turned a type error into a
+       silent cast. */
+    const category: FoodCategory | null =
+      selectedDiet === null
+        ? null
+        : selectedDiet === "vegan" || selectedDiet === "jain"
+          ? "veg"
+          : selectedDiet;
+
     return filterMeals({
       region: selectedRegion,
-      category: selectedDiet === "vegan" || selectedDiet === "jain" ? "veg" : selectedDiet ? (selectedDiet as any) : null,
+      category,
       goal: goal,
     }).filter((m) => {
       // Only show meals available in user's tier

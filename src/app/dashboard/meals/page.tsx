@@ -7,14 +7,21 @@ import { DashboardNavbar } from "@/components/poshan/dashboard-navbar";
 import { MealsShowcase } from "@/components/poshan/meals-showcase";
 import type { User } from "@supabase/supabase-js";
 import { FORCE_PREMIUM } from "@/lib/dev-flags";
+import type { GoalKey } from "@/lib/poshan-data";
 
 export default function MealsPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
-  const [goal, setGoal] = useState<string | undefined>();
+  const [goal, setGoal] = useState<GoalKey | undefined>();
 
+  /* Everything the page needs, in one effect.
+     `loadUserData` used to be a function declaration below this, called
+     from inside the .then(). Hoisting made that run, but the effect was
+     capturing a binding declared after it — so the version it called was
+     not guaranteed to be the current one, which is what
+     react-hooks/immutability objects to. Inlining removes the question. */
   useEffect(() => {
     const supabase = browserClient();
     if (!supabase) {
@@ -22,48 +29,57 @@ export default function MealsPage() {
       return;
     }
 
-    supabase.auth.getUser().then(({ data }) => {
+    let cancelled = false;
+
+    const run = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (cancelled) return;
+
       if (!data.user) {
         router.push("/login");
-      } else {
-        setUser(data.user);
-        loadUserData(data.user.id);
+        setLoading(false);
+        return;
       }
-      setLoading(false);
-    });
+      setUser(data.user);
+
+      try {
+        /* profiles is keyed on `id`, not `user_id` — it references
+           auth.users(id) directly (schema.sql:13), and every other query
+           in the codebase uses `id`. With `user_id` this select failed on
+           an unknown column, the catch below swallowed it, and `goal`
+           was never set: the meals list silently stopped personalising to
+           the user's goal and nobody saw an error. */
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("goal")
+          .eq("id", data.user.id)
+          .single();
+
+        if (!cancelled && profile?.goal) setGoal(profile.goal as GoalKey);
+
+        // subscriptions IS keyed on user_id — different table, different shape.
+        const { data: subscription } = await supabase
+          .from("subscriptions")
+          .select("id")
+          .eq("user_id", data.user.id)
+          .in("product", ["home", "college"])
+          .in("status", ["trialing", "active"])
+          .maybeSingle();
+
+        if (!cancelled) setIsPremium(FORCE_PREMIUM || !!subscription);
+      } catch (error) {
+        console.error("Failed to load user data:", error);
+        if (!cancelled) setIsPremium(FORCE_PREMIUM);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
-
-  async function loadUserData(userId: string) {
-    const supabase = browserClient();
-    if (!supabase) return;
-
-    try {
-      // Get profile with goal
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("goal")
-        .eq("user_id", userId)
-        .single();
-
-      if (profile?.goal) {
-        setGoal(profile.goal);
-      }
-
-      // Check if premium
-      const { data: subscription } = await supabase
-        .from("subscriptions")
-        .select("*")
-        .eq("user_id", userId)
-        .in("product", ["home", "college"])
-        .in("status", ["trialing", "active"])
-        .single();
-
-      setIsPremium(FORCE_PREMIUM || !!subscription);
-    } catch (error) {
-      console.error("Failed to load user data:", error);
-      setIsPremium(FORCE_PREMIUM);
-    }
-  }
 
   if (loading) {
     return (
@@ -82,7 +98,7 @@ export default function MealsPage() {
     <>
       <DashboardNavbar />
       <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
-        <MealsShowcase isPremium={isPremium} goal={goal as any} />
+        <MealsShowcase isPremium={isPremium} goal={goal} />
       </div>
     </>
   );

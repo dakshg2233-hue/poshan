@@ -54,7 +54,6 @@ export function MacroPersonalizer({
         break;
     }
 
-    const proteinCals = proteinGrams * 4;
     const carbPct = customGoal === "diabetes" || customGoal === "pcos" ? 40 : 45;
     const fatPct = 100 - proteinPct - carbPct;
 

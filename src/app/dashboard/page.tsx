@@ -60,7 +60,10 @@ export default function Dashboard() {
           .eq("user_id", userId)
           .in("product", ["home", "college"])
           .in("status", ["trialing", "active"])
-          .single()
+          /* No subscription is the free tier, not an error. single()
+             rejects on zero rows, so the common case was being handled by
+             the catch below. */
+          .maybeSingle()
 
         setIsPremium(FORCE_PREMIUM || !!data)
       } catch {

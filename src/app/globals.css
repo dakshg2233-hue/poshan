@@ -1596,7 +1596,12 @@ main section#meals .lift {
   body {
     background: var(--roti);
     color: var(--ink);
-    font-family: var(--font-ui), system-ui, sans-serif;
+    /* DM Sans leads and Mukta follows. A browser resolves a font stack per
+       glyph, not per element, so Latin renders in DM Sans and Devanagari —
+       which DM Sans does not carry — falls to Mukta rather than to
+       system-ui. Both faces have to actually be bound for that to work;
+       see the note on Mukta in layout.tsx for how long they weren't. */
+    font-family: var(--font-ui), var(--font-ui-deva), system-ui, sans-serif;
     /* `clip`, not `hidden`, and the difference is not cosmetic.
      *
      * `overflow-x: hidden` forces the other axis to compute as `auto`

@@ -4,6 +4,10 @@ import { NextResponse, type NextRequest } from "next/server";
 /**
  * Refreshes the Supabase session cookie, and gates the private pages.
  *
+ * Named `proxy`, in `src/proxy.ts`: Next 16 deprecated the `middleware`
+ * file convention and renamed it to `proxy`. Only the file name and the
+ * exported function name changed — the behaviour below is untouched.
+ *
  * Two jobs:
  *  1. Touching getUser() refreshes the access token, so a session does not
  *     silently expire mid-visit.
@@ -25,7 +29,7 @@ import { NextResponse, type NextRequest } from "next/server";
  */
 const PRIVATE_PREFIXES = ["/profile", "/dashboard"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

@@ -78,7 +78,7 @@ export function ChatBottomBarButton() {
  */
 export function ChatWidget({ signedIn }: { signedIn: boolean }) {
   const { T, lang } = useLang();
-  const { open, setOpen, kind, setKind } = useChat();
+  const { open, kind, setKind } = useChat();
   const [messages, setMessages] = useState<Record<ChatKind, Msg[]>>({ nutrition: [], health: [] });
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
