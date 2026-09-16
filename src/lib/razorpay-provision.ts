@@ -113,3 +113,30 @@ export async function provisionRecurringCharge(
 
   return !error;
 }
+
+/**
+ * Ends access when Razorpay says billing has stopped.
+ *
+ * Every premium gate in the app reads `status in ('trialing','active')` —
+ * ten of them, from /api/chat to the dashboard — and until now nothing in
+ * the codebase ever wrote any other value. A subscriber who cancelled, or
+ * whose card failed through every retry, kept full paid access forever:
+ * Razorpay stopped charging them and Poshan never noticed.
+ *
+ * An update, not an upsert. No row for this subscription id means there is
+ * nothing to revoke, and inventing one would be worse than doing nothing.
+ */
+export async function markSubscriptionEnded(
+  subscriptionId: string,
+  status: "cancelled" | "expired"
+): Promise<boolean> {
+  const db = serviceClient();
+  if (!db) return false;
+
+  const { error } = await db
+    .from("subscriptions")
+    .update({ status })
+    .eq("razorpay_subscription_id", subscriptionId);
+
+  return !error;
+}

@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { serviceClient } from "@/lib/supabase";
-import { provisionRecurringCharge } from "@/lib/razorpay-provision";
+import { markSubscriptionEnded, provisionRecurringCharge } from "@/lib/razorpay-provision";
 
 /**
  * Razorpay webhook: the actual source of truth for billing.
@@ -11,12 +11,16 @@ import { provisionRecurringCharge } from "@/lib/razorpay-provision";
  * it. Razorpay retries this webhook until it gets a 2xx, so this is what you
  * reconcile against, never the client.
  *
- * Set the endpoint and secret in the Razorpay dashboard, subscribe to
- * `subscription.charged` (moves status to "active" on every real billing
- * cycle, initial or renewal) — `subscription.cancelled` and
- * `subscription.halted` are real gaps this does not yet close: neither is
- * handled here, so a cancelled-in-Razorpay subscription stays "active" in
- * Poshan's own database until someone adds that.
+ * Set the endpoint and secret in the Razorpay dashboard, and subscribe to
+ * four events: `subscription.charged` (moves status to "active" on every
+ * real billing cycle, initial or renewal) plus `subscription.cancelled`,
+ * `subscription.halted` and `subscription.completed`, which are the three
+ * ways billing stops and so the three ways access has to stop with it.
+ *
+ * `subscription.paused` is deliberately not handled. Pausing only happens
+ * if something calls Razorpay's pause API, which nothing here does, and
+ * handling it properly needs a `subscription.resumed` path to restore
+ * access — half of that pair is worse than neither.
  *
  * ⚠ The payload shape below (`payload.subscription.entity` +
  * `payload.payment.entity`) follows Razorpay's documented resource.action
@@ -25,6 +29,21 @@ import { provisionRecurringCharge } from "@/lib/razorpay-provision";
  * `subscription.charged` payload once one exists and fix the field paths
  * below if they differ.
  */
+
+/**
+ * Razorpay events that mean billing has stopped, mapped to the status this
+ * app stores. The `subscriptions.status` check constraint accepts exactly
+ * 'trialing', 'active', 'cancelled' and 'expired', so these are the only
+ * two terminal values that can be written — 'halted' is not one of them,
+ * and a halted subscription is a cancelled one from the customer's side:
+ * Razorpay has exhausted its retries and will not charge again.
+ */
+const SUBSCRIPTION_ENDED: Record<string, "cancelled" | "expired"> = {
+  "subscription.cancelled": "cancelled",
+  "subscription.halted": "cancelled",
+  /* Ran out its total_count honestly rather than being stopped. */
+  "subscription.completed": "expired",
+};
 
 export async function POST(request: Request) {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
@@ -71,7 +90,21 @@ export async function POST(request: Request) {
   const subscriptionId = (subscription?.id ?? payment?.subscription_id) as string | undefined;
   const amount = payment?.amount as number | undefined;
 
-  if (!paymentId || !subscriptionId) {
+  if (!subscriptionId) {
+    return Response.json({ ok: true, ignored: true });
+  }
+
+  /* Handled before the paymentId guard below, because an event that ends a
+     subscription carries no payment entity at all — there is no charge to
+     describe. That guard used to run first and drop every one of them,
+     which is exactly how a cancelled subscription kept its access. */
+  const endedAs = SUBSCRIPTION_ENDED[event.event ?? ""];
+  if (endedAs) {
+    const revoked = await markSubscriptionEnded(subscriptionId, endedAs);
+    return Response.json({ ok: true, event: event.event, status: endedAs, revoked });
+  }
+
+  if (!paymentId) {
     return Response.json({ ok: true, ignored: true });
   }
 
