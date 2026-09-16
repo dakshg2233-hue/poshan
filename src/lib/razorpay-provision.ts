@@ -74,6 +74,43 @@ export async function provisionTrialStart(
 }
 
 /**
+ * Compares what Razorpay actually charged against what Poshan's own code
+ * said this SKU costs when checkout started (checkout_orders, written by
+ * /api/razorpay/subscription from the PREMIUM and COLLEGE_PLAN constants).
+ *
+ * Recorded, never enforced. By the time this runs the customer's money has
+ * already moved, so refusing them access over an accounting discrepancy
+ * punishes the only person in the transaction who did nothing wrong. What
+ * it buys instead is that a Plan edited in the Razorpay dashboard stops
+ * being invisible:
+ *
+ *   select * from checkout_orders where amount_mismatch;
+ *
+ * Failures here are swallowed deliberately. Reconciliation is bookkeeping;
+ * it must never be the reason a paid subscription fails to provision.
+ */
+async function reconcileCharge(subscriptionId: string, amountPaise: number): Promise<void> {
+  const db = serviceClient();
+  if (!db) return;
+
+  const { data: order } = await db
+    .from("checkout_orders")
+    .select("id, expected_amount_paise")
+    .eq("razorpay_subscription_id", subscriptionId)
+    .maybeSingle();
+
+  if (!order) return;
+
+  await db
+    .from("checkout_orders")
+    .update({
+      last_charged_amount_paise: amountPaise,
+      amount_mismatch: amountPaise !== order.expected_amount_paise,
+    })
+    .eq("id", order.id);
+}
+
+/**
  * Called on the webhook's `subscription.charged` event — the source of
  * truth for every actual billing cycle, initial or renewal alike.
  */
@@ -110,6 +147,10 @@ export async function provisionRecurringCharge(
     },
     { onConflict: "razorpay_subscription_id" }
   );
+
+  /* After the grant, never before it: bookkeeping must not stand between a
+     paying customer and the thing they paid for. */
+  await reconcileCharge(subscriptionId, amountPaise);
 
   return !error;
 }

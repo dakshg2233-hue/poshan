@@ -72,6 +72,18 @@ export function CheckoutButton({
         );
         return;
       }
+      if (res.status === 403) {
+        /* Poshan Plus is student-priced, and the server checks the account's
+           own email rather than trusting this button. Say which address it
+           wants, or the message reads as an unexplained refusal. */
+        setStatus(
+          T({
+            en: "Poshan Plus is for students. Sign in with your college address (.ac.in, .edu.in or .edu), or choose Poshan Home.",
+            hi: "पोषण प्लस छात्रों के लिए है। अपने कॉलेज के पते (.ac.in, .edu.in या .edu) से साइन इन करें, या पोषण घर चुनें।",
+          })
+        );
+        return;
+      }
       if (res.status === 401) {
         setStatus(
           T({

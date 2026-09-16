@@ -1,6 +1,9 @@
+import crypto from "node:crypto";
 import { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import { PREMIUM } from "@/lib/poshan-data";
+import { COLLEGE_PLAN, PREMIUM } from "@/lib/poshan-data";
+import { canBuyCollegePlan } from "@/lib/college-eligibility";
+import { serviceClient } from "@/lib/supabase";
 import { clientIp, rateLimit, tooMany, readJsonCapped } from "@/lib/rate-limit";
 
 /**
@@ -89,6 +92,43 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  /* Poshan Plus is ₹999/year against Poshan Home's ₹2499, for the same
+     premium gates minus multi-profile family. Which one you are buying was
+     decided entirely by a string in the request body, so the ₹1500
+     difference was available to anyone who sent the cheaper one. Checked
+     against the session's own email, server-side — see college-eligibility
+     for the domain rules and the off switch. */
+  if (product === "college" && !canBuyCollegePlan(user.email)) {
+    return Response.json(
+      {
+        eligible: false,
+        reason:
+          "Poshan Plus is for students: sign in with your college address (.ac.in, .edu.in or .edu) to buy it, or choose Poshan Home.",
+      },
+      { status: 403 }
+    );
+  }
+
+  /* Poshan's own idea of the price, from its own constants — not from
+     Razorpay and not from the client. Recorded now so a later charge can be
+     reconciled against something this app actually asserted. */
+  const expectedAmountPaise =
+    (product === "college" ? COLLEGE_PLAN.yearly : plan === "yearly" ? PREMIUM.yearly : PREMIUM.monthly) * 100;
+  const orderId = `POSHAN-${crypto.randomBytes(6).toString("hex").toUpperCase()}`;
+
+  const db = serviceClient();
+  /* Written before Razorpay is called, so a checkout that is started and
+     abandoned still leaves a row — that gap is worth being able to see. */
+  if (db) {
+    await db.from("checkout_orders").insert({
+      id: orderId,
+      user_id: user.id,
+      product,
+      plan,
+      expected_amount_paise: expectedAmountPaise,
+    });
+  }
+
   /* Ten years of cycles. Razorpay Subscriptions require a finite total_count
      — there is no "forever" option — so this is a large-but-bounded stand-in
      for indefinite billing; a fresh subscription can be created if anyone
@@ -111,7 +151,7 @@ export async function POST(request: NextRequest) {
         /* The only durable link between this subscription and an account:
            neither /verify nor the webhook is ever handed a user id by
            Razorpay itself, so provisioning reads it back from here. */
-        notes: { plan, product, user_id: user.id },
+        notes: { plan, product, user_id: user.id, order_id: orderId },
       }),
     });
 
@@ -124,6 +164,16 @@ export async function POST(request: NextRequest) {
     }
 
     const subscription = await res.json();
+
+    /* Now the two sides of the ledger are joinable: this is the only place
+       that knows both ids at once. */
+    if (db && subscription.id) {
+      await db
+        .from("checkout_orders")
+        .update({ razorpay_subscription_id: subscription.id })
+        .eq("id", orderId);
+    }
+
     return Response.json({
       configured: true,
       subscriptionId: subscription.id,
