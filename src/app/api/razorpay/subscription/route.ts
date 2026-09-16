@@ -93,11 +93,14 @@ export async function POST(request: NextRequest) {
   }
 
   /* Poshan Plus is ₹999/year against Poshan Home's ₹2499, for the same
-     premium gates minus multi-profile family. Which one you are buying was
-     decided entirely by a string in the request body, so the ₹1500
-     difference was available to anyone who sent the cheaper one. Checked
-     against the session's own email, server-side — see college-eligibility
-     for the domain rules and the off switch. */
+     premium gates minus multi-profile family, and which one you are buying
+     is decided by a string in the request body.
+
+     Left open on purpose: student pricing runs on the honour system, so
+     this passes unless COLLEGE_VERIFICATION=on. When it is on, the check
+     reads the session's own email server-side — never the body, which is
+     the whole point of doing it here. See college-eligibility for why the
+     default is the permissive one. */
   if (product === "college" && !canBuyCollegePlan(user.email)) {
     return Response.json(
       {

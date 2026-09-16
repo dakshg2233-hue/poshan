@@ -12,33 +12,39 @@
  * read server-side from the Supabase session — never from the request body,
  * which is the whole point.
  *
- * ── The trade-off, stated plainly ────────────────────────────────────────
+ * ── Off by default, and that is the decision, not an oversight ───────────
  * Plenty of real Indian students have no college address at all and sign up
- * with Gmail. This gate turns them away, and that is a worse failure than
- * letting a few non-students through: it refuses money from exactly the
- * people the SKU exists for. So it is built to be loosened, not just
- * enforced:
+ * with Gmail. Gating on an academic domain turns those students away, which
+ * is a worse failure than letting some non-students in at ₹999: it refuses
+ * money from exactly the people the SKU exists for, on launch day, silently.
+ * Poshan runs student pricing on the honour system — the same way Spotify
+ * and Apple ran theirs for years before buying verification.
  *
- *   COLLEGE_EMAIL_DOMAINS=snu.edu.in,ashoka.edu.in   extra domains
- *   COLLEGE_VERIFICATION=off                          gate off entirely
+ * So the check is opt-IN:
  *
- * Turning it off restores the honour system, which is a legitimate choice —
- * Spotify and Apple both ran student pricing that way for years before
- * buying verification. Make it deliberately, not by forgetting.
+ *   COLLEGE_VERIFICATION=on                           turn the check on
+ *   COLLEGE_EMAIL_DOMAINS=snu.edu.in,ashoka.edu.in    extra domains for it
+ *
+ * The default is deliberately the permissive one. An env var whose absence
+ * produces the behaviour you did not want is a trap: forget it on one
+ * environment and the gate quietly closes on paying students. This way
+ * forgetting it changes nothing, and turning the gate on is an explicit act
+ * in one place.
  */
 
 /** Suffix match, so `students.iitm.ac.in` passes on `.ac.in` without listing it. */
 const ACADEMIC_SUFFIXES = [".ac.in", ".edu.in", ".edu", ".ac.uk"];
 
 /**
- * Off switch. Anything other than the literal "off" leaves the gate on.
+ * On switch. Only the literal "on" enables the check — unset, blank, "off"
+ * or a typo all leave student pricing open, which is the intended default.
  *
  * Read per call rather than captured at module load: this decides who is
  * charged what, so it has to be testable without reloading the module, and
  * an operator flipping it should not need a redeploy to take effect.
  */
 export function collegeVerificationOn(): boolean {
-  return process.env.COLLEGE_VERIFICATION !== "off";
+  return process.env.COLLEGE_VERIFICATION === "on";
 }
 
 function extraDomains(): string[] {
@@ -68,7 +74,7 @@ export function isCollegeEmail(email: string | null | undefined): boolean {
   return extraDomains().some((d) => domain === d || domain.endsWith(`.${d}`));
 }
 
-/** Gate off, or a genuine academic address. */
+/** Gate off (the default), or a genuine academic address. */
 export function canBuyCollegePlan(email: string | null | undefined): boolean {
   return !collegeVerificationOn() || isCollegeEmail(email);
 }

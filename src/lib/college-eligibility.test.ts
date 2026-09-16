@@ -64,20 +64,26 @@ describe("isCollegeEmail", () => {
 });
 
 describe("canBuyCollegePlan", () => {
-  it("blocks a consumer address while the gate is on", () => {
-    expect(collegeVerificationOn()).toBe(true);
-    expect(canBuyCollegePlan("a@gmail.com")).toBe(false);
-  });
-
-  it("lets anyone through once the gate is switched off", () => {
-    process.env.COLLEGE_VERIFICATION = "off";
+  it("is open by default, so a student on Gmail can buy Poshan Plus", () => {
+    /* The product decision: student pricing runs on the honour system.
+       A default that quietly refused those students would be the trap this
+       is written to avoid. */
     expect(collegeVerificationOn()).toBe(false);
     expect(canBuyCollegePlan("a@gmail.com")).toBe(true);
     expect(canBuyCollegePlan(null)).toBe(true);
   });
 
-  it("only the literal \"off\" disables it — a typo leaves the gate on", () => {
-    process.env.COLLEGE_VERIFICATION = "false";
+  it("checks the domain once verification is explicitly turned on", () => {
+    process.env.COLLEGE_VERIFICATION = "on";
+    expect(collegeVerificationOn()).toBe(true);
     expect(canBuyCollegePlan("a@gmail.com")).toBe(false);
+    expect(canBuyCollegePlan("a@iitd.ac.in")).toBe(true);
+  });
+
+  it("only the literal \"on\" enables it — a typo leaves student pricing open", () => {
+    for (const value of ["true", "yes", "ON", "1", "off", ""]) {
+      process.env.COLLEGE_VERIFICATION = value;
+      expect(canBuyCollegePlan("a@gmail.com")).toBe(true);
+    }
   });
 });
