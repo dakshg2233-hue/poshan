@@ -23,7 +23,7 @@ export function Bands() {
   const reveal = useReveal<HTMLDivElement>();
 
   return (
-    <section className="py-14 md:py-24" style={{ background: "var(--roti-2)" }}>
+    <section className="py-12 md:py-16" style={{ background: "var(--roti-2)" }}>
       <div className={SHELL}>
         <div ref={reveal} className="rise">
           <div className="max-w-[56ch] mb-11">
@@ -148,7 +148,7 @@ export function Meals({ band, plan }: { band: Band; plan: Plan }) {
   const reveal = useReveal<HTMLDivElement>();
 
   return (
-    <section id="plate" className="py-14 md:py-24">
+    <section id="plate" className="py-12 md:py-16">
       <div className={SHELL}>
         <div ref={reveal} className="rise">
           <div className="max-w-[56ch] mb-11">
@@ -266,7 +266,7 @@ export function Biomarkers() {
   const reveal = useReveal<HTMLDivElement>();
 
   return (
-    <section id="bios" className="py-14 md:py-24" style={{ background: "var(--roti-2)" }}>
+    <section id="bios" className="py-12 md:py-16" style={{ background: "var(--roti-2)" }}>
       <div className={SHELL}>
         <div ref={reveal} className="rise">
           <div className="max-w-[56ch] mb-11">
@@ -369,7 +369,7 @@ export function Testimonials() {
   const reveal = useReveal<HTMLDivElement>();
 
   return (
-    <section className="py-14 md:py-24">
+    <section className="py-12 md:py-16">
       <div className={SHELL}>
         <div ref={reveal} className="rise">
           <div className="max-w-[56ch] mb-11">

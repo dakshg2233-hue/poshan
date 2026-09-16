@@ -132,24 +132,23 @@ export function TabProvider({ children }: { children: React.ReactNode }) {
     return tabFromHash(window.location.hash) ?? DEFAULT_TAB;
   });
 
-  /* Set while a click-driven scroll is in flight. The scroll-spy below has
-     to stand down for its duration: a smooth scroll from the last section
-     to the first crosses every section on the way, and letting the spy
-     react would drag the highlight backwards through all of them before
-     settling. */
-  const scrolling = useRef(false);
-
   const scrollToSection = useCallback((key: TabKey, target?: string) => {
-    const el =
-      (target && document.getElementById(target)) ||
-      document.getElementById(`panel-${key}`);
+    /* With one panel visible at a time, switching tabs means starting the
+       new one from its top — not scrolling to an offset, because there is
+       nothing above it any more. Only a deep link to a specific section
+       inside the panel still needs measuring. */
+    if (!target) {
+      window.scrollTo({ top: 0, behavior: "auto" });
+      return;
+    }
+
+    const el = document.getElementById(target) || document.getElementById(`panel-${key}`);
     if (!el) return;
 
     const from = window.scrollY;
     const to = Math.max(0, el.getBoundingClientRect().top + from - NAV_OFFSET);
     if (Math.abs(to - from) < 2) return;
 
-    scrolling.current = true;
     window.scrollTo({ top: to, behavior: "smooth" });
 
     /* Smooth scrolling cannot be relied on here. Something in this page's
@@ -167,12 +166,6 @@ export function TabProvider({ children }: { children: React.ReactNode }) {
       }
     }, 150);
 
-    /* No scrollend event in Safari yet, so releasing the spy is
-       time-based. Long enough to cover a full-page scroll, short enough
-       that the spy is live again before anyone reads the next section. */
-    window.setTimeout(() => {
-      scrolling.current = false;
-    }, 800);
   }, []);
 
   const go = useCallback(
@@ -200,69 +193,29 @@ export function TabProvider({ children }: { children: React.ReactNode }) {
     return () => removeEventListener("popstate", onPop);
   }, [scrollToSection]);
 
-  /* Land on the right section when the page is opened at a hash. Runs once,
-     after mount, because the target has to exist before it can be scrolled
-     to — and with every section now mounted, it always will. */
+  /* Land on the right section when the page is opened at a hash.
+     `active` is already seeded from the hash above, so the owning panel is
+     the one on screen by the time this runs; a target inside it is
+     therefore measurable. Two rAFs rather than one, because the panel
+     switched from hidden to shown on the first of them and its children
+     have no layout until the second. */
   useEffect(() => {
     const id = window.location.hash.replace(/^#/, "").trim();
     if (!id) return;
     const key = tabFromHash(window.location.hash);
-    if (!key) return;
-    /* rAF rather than a bare call: fonts and images are still settling on
-       first paint and a scroll measured now lands short. */
-    requestAnimationFrame(() => scrollToSection(key, id !== key ? id : undefined));
+    if (!key || id === key) return;
+    requestAnimationFrame(() => requestAnimationFrame(() => scrollToSection(key, id)));
   }, [scrollToSection]);
 
-  /* Scroll-spy: keeps the nav pill matched to whatever is actually on
-     screen. Deliberately does NOT touch history — only a click does that,
-     so reading the page top to bottom doesn't bury the back button under
-     fifty entries.
-
-     A plain rAF-throttled scroll listener rather than an
-     IntersectionObserver. IO is the usual tool and would be the right one
-     for hundreds of targets, but there are six, a rect read on six
-     elements per frame is free, and this version has no dependency on
-     observer callbacks firing — which are suspended in some embedded and
-     backgrounded contexts, where the nav would silently stop tracking. */
-  useEffect(() => {
-    let raf = 0;
-
-    const measure = () => {
-      raf = 0;
-      if (scrolling.current) return;
-
-      const sections = document.querySelectorAll<HTMLElement>("[data-tab-section]");
-      if (sections.length === 0) return;
-
-      /* The current section is the last one whose top has passed just
-         under the nav — i.e. the one you have scrolled into most recently.
-         Falls back to the first, so the top of the page reads as section
-         one rather than as nothing. */
-      let current: TabKey | null = null;
-      for (const s of sections) {
-        if (s.getBoundingClientRect().top - NAV_OFFSET <= 1) {
-          current = s.getAttribute("data-tab-section") as TabKey;
-        }
-      }
-      const first = sections[0].getAttribute("data-tab-section") as TabKey;
-      const key = current ?? first;
-      setActive((prev) => (prev === key ? prev : key));
-    };
-
-    const onScroll = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(measure);
-    };
-
-    measure();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      cancelAnimationFrame(raf);
-    };
-  }, []);
+  /* The scroll-spy that used to live here is gone.
+     It walked every [data-tab-section] on scroll and set `active` to
+     whichever had most recently passed under the nav — the right
+     behaviour when all six panels were stacked in one document and the
+     tab strip was really a set of scroll anchors. With one panel visible
+     at a time there is only ever one section on screen, so it could only
+     ever re-assert the tab that was already active, while fighting `go()`
+     for ownership of that state. The `scrolling` ref and its 800ms
+     stand-down timer existed solely to keep the two from arguing. */
 
   const value = useMemo(() => ({ active, go }), [active, go]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
@@ -381,18 +334,30 @@ export function TabLink({
 
 
 /**
- * One section of the page. Every section is in the document, always.
+ * One section of the page. Only the active one is shown.
  *
- * This used to unmount everything but the active tab, which meant a visitor
- * saw roughly a sixth of Poshan at a time and had to already know the other
- * five existed to go looking for them. For a signed-out visitor deciding
- * whether this product is for them, that is the wrong trade: scrolling past
- * something you don't need costs a flick, while never learning it exists
- * costs the sale.
+ * The history here is worth keeping, because this has now been both ways.
+ * It started as a mount switch, was changed to always-mounted so a visitor
+ * would not see "roughly a sixth of Poshan at a time and have to already
+ * know the other five existed", and is now a switch again — but a different
+ * one, which is what makes the earlier objection no longer apply.
  *
- * So the tabs are section links now, not mount switches. The nav still
- * works exactly as before — click "Biomarkers", land on biomarkers — but
- * the rest of the page is above and below it rather than discarded.
+ * Always-mounted concatenated all six panels into a single 14,330px page:
+ * 12.9 screens of everything at once, with the tab strip reduced to a set
+ * of scroll anchors. That reads as a site talking over itself, and it is
+ * the specific thing this change is fixing.
+ *
+ * Two details answer the discovery problem the old comment raised:
+ *
+ *  - `hidden`, not unmounted. The markup for all six panels stays in the
+ *    document, so a crawler still sees every word of the product and the
+ *    deep links in the footer still resolve. Only paint and layout are
+ *    skipped.
+ *  - The Dashboard tab — the one a visitor lands on — carries a card for
+ *    each of the other five (see dashboard.tsx#LINKS). With the panels
+ *    stacked, that grid was duplicating the tab strip directly above it.
+ *    With one panel at a time it is doing the job the old comment was
+ *    worried about: telling you the other five exist.
  *
  * `scroll-mt-[62px]` clears the fixed nav so a section scrolled to by hash
  * or click doesn't start underneath the bar.
@@ -404,19 +369,24 @@ export function TabPanel({
   tab: TabKey;
   children: React.ReactNode;
 }) {
-  const { T } = useLang();
-  const label = TABS.find((t) => t.key === tab)?.label;
+  const { active } = useTabs();
+  const on = active === tab;
 
   return (
     <section
       id={`panel-${tab}`}
       data-tab-section={tab}
       className="scroll-mt-[62px]"
-      /* A labelled region rather than a tabpanel: with every section
-         mounted at once this is a landmark on a long page, not one of a
-         set of swapped panels, and role="tabpanel" would promise a screen
-         reader a tab widget that no longer exists. */
-      aria-label={label ? T(label) : undefined}
+      /* role="tabpanel" is honest again. <TabBar> already renders real
+         role="tab" buttons with aria-controls pointing here, so this
+         completes a contract that was half-built while the panels were
+         only scroll anchors. */
+      role="tabpanel"
+      aria-labelledby={`tab-${tab}`}
+      /* The attribute, not a class: Tailwind's preflight carries
+         [hidden]{display:none} and the attribute is also what assistive
+         tech reads, so one declaration covers both. */
+      hidden={!on}
     >
       {children}
     </section>

@@ -2,11 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useLang } from "./lang-provider";
-import { Thali } from "./thali";
-import { Thali3D } from "./thali-3d";
+import { ThaliInteractive } from "./thali-interactive";
 import { TabLink } from "./tabs";
 import { usePrefersReducedMotion } from "@/lib/use-media-query";
-import type { Band, Plan, GoalKey, DietKey } from "@/lib/poshan-data";
+import type { Band, GoalKey, DietKey } from "@/lib/poshan-data";
 import {
   estimateMaintenanceKcal,
   ACTIVITY_LEVELS,
@@ -71,7 +70,6 @@ export function Hero({
   setActivityLevel,
   bmi,
   band,
-  plan,
   goal,
   diet,
 }: {
@@ -87,7 +85,6 @@ export function Hero({
   setActivityLevel: (a: ActivityLevel) => void;
   bmi: number;
   band: Band;
-  plan: Plan;
   goal: GoalKey;
   diet: DietKey;
 }) {
@@ -119,7 +116,7 @@ export function Hero({
       : { className, style };
 
   return (
-    <section id="check" className="py-10 md:py-16">
+    <section id="check" className="py-9 md:py-12">
       <div className="w-[min(1180px,100%-2.5rem)] mx-auto grid gap-10 lg:grid-cols-[1fr_1.02fr] items-center">
         <div>
           <p
@@ -184,11 +181,21 @@ export function Hero({
         </div>
 
         <div>
-          {age !== undefined && sex && activityLevel ? (
-            <Thali3D body={{ height, weight, goal, diet, age, sex, activityLevel }} />
-          ) : (
-            <Thali bmi={bmi} band={band} plan={plan} />
-          )}
+          {/* One thali, not two. This used to switch between <Thali3D> (a
+              WebGL plate, shown only once age/sex/activity were filled in)
+              and <Thali> (a static SVG otherwise) — so the visual a visitor
+              had been looking at was replaced by an entirely different one
+              the moment they completed their profile, which reads as the
+              page breaking rather than as progress.
+
+              <ThaliInteractive> covers both states: the portions respond to
+              whatever the profile currently supports, and filling in age and
+              activity sharpens the same plate instead of swapping it. */}
+          <ThaliInteractive
+            profile={{ height, weight, goal, diet, age, sex, activityLevel }}
+            bmi={bmi}
+            band={band}
+          />
 
           <div
             className="mt-6 max-w-[520px] mx-auto grid grid-cols-[auto_1fr] gap-x-5 gap-y-1 items-baseline"

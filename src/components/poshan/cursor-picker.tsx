@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLang } from "./lang-provider";
+import { AnchoredPanel } from "./anchored-panel";
 import type { Bi } from "@/lib/poshan-data";
 
 /**
@@ -50,12 +51,40 @@ export function CursorPicker() {
         window.matchMedia("(prefers-reduced-motion: reduce)").matches)
   );
   const [open, setOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
   const [active, setActive] = useState("ladoo");
+  const panelRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved && FOOD_CURSORS.some((f) => f.key === saved)) apply(saved);
   }, []);
+
+  /* Close on an outside click or Escape — this had neither, so the list
+     stayed open until you picked something, which for a control you might
+     have opened by accident is the one behaviour nobody expects. Both refs
+     are checked because the panel is portalled to <body> and is not a
+     descendant of the trigger's wrapper. */
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as Node;
+      if (toggleRef.current?.contains(t) || panelRef.current?.contains(t)) return;
+      setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        toggleRef.current?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
 
   function apply(key: string) {
     setActive(key);
@@ -81,19 +110,40 @@ export function CursorPicker() {
        signal here. */
     <div className="relative hidden lg:flex items-center print:hidden">
       <button
+        ref={toggleRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-label={T({ en: "Cursor", hi: "कर्सर" }) + `: ${T(current.name)}`}
-        className="flex items-center justify-center h-9 w-9 rounded-full cursor-pointer shrink-0"
-        style={{ color: "#fff", border: "1px solid rgb(255 255 255 / .28)" }}
+        /* Tokens rather than #fff, and an actual word — same two problems
+           the palette control had when both moved up into the nav: a white
+           glyph on a white hairline over a var(--roti) bar, unlabelled. */
+        className="flex items-center gap-1.5 h-8 px-2 rounded-full cursor-pointer shrink-0 transition-colors hover:bg-[var(--roti-2)] focus-visible:outline-2 focus-visible:outline-offset-2"
+        style={{ color: "var(--ink)", border: "1px solid var(--line)", outlineColor: "var(--kesar)" }}
+        title={T({ en: "Cursor", hi: "कर्सर" })}
       >
-        <span aria-hidden data-swatch={current.key} className="food-swatch block w-[18px] h-[18px] shrink-0" />
+        <span aria-hidden data-swatch={current.key} className="food-swatch block w-[16px] h-[16px] shrink-0" />
+        <span className="hidden md:inline text-[0.74rem] font-semibold tracking-wide">
+          {T({ en: "Cursor", hi: "कर्सर" })}
+        </span>
       </button>
 
-      {open && (
+      <AnchoredPanel
+        anchorRef={toggleRef}
+        open={open}
+        width={178}
+        align="end"
+        className="popover-in rounded-2xl p-2 shadow-2xl border"
+        style={{
+          background: "color-mix(in srgb, var(--roti) 96%, transparent)",
+          borderColor: "var(--line)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+        }}
+      >
         <ul
-          className="liquid-glass-chrome refract popover-in popover-bl absolute bottom-full left-0 mb-2 w-[178px] rounded-2xl p-2 shadow-2xl grid gap-0.5 list-none"
+          ref={panelRef}
+          className="grid gap-0.5 list-none p-0 m-0"
           role="radiogroup"
           aria-label={T({ en: "Choose a cursor", hi: "कर्सर चुनें" })}
         >
@@ -103,7 +153,10 @@ export function CursorPicker() {
                 type="button"
                 role="radio"
                 aria-checked={active === f.key}
-                onClick={() => apply(f.key)}
+                onClick={() => {
+                  apply(f.key);
+                  setOpen(false);
+                }}
                 className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-[0.8rem] text-left cursor-pointer transition-colors"
                 style={
                   active === f.key
@@ -123,7 +176,7 @@ export function CursorPicker() {
             </li>
           ))}
         </ul>
-      )}
+      </AnchoredPanel>
     </div>
   );
 }

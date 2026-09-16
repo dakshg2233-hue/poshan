@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLang } from "./lang-provider";
 import { PALETTES, type PaletteKey } from "./palette-switcher";
+import { AnchoredPanel } from "./anchored-panel";
 
 /**
  * The palette chooser, as fixed chrome rather than nav furniture.
@@ -66,7 +67,13 @@ export function PaletteControl() {
   useEffect(() => {
     if (!open) return;
     const onDown = (e: PointerEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+      const t = e.target as Node;
+      /* Both, because the panel is portalled to <body> and so is NOT a
+         descendant of rootRef any more. Checking only the root would treat
+         every click on a palette as an outside click and close the list
+         before the choice registered. */
+      if (rootRef.current?.contains(t) || listRef.current?.contains(t)) return;
+      setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -130,19 +137,24 @@ export function PaletteControl() {
         {announce}
       </span>
 
-      {open && (
+      <AnchoredPanel
+        anchorRef={toggleRef}
+        open={open}
+        width={268}
+        align="end"
+        className="popover-in rounded-2xl p-2 shadow-2xl border"
+        style={{
+          background: "color-mix(in srgb, var(--roti) 96%, transparent)",
+          borderColor: "var(--line)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+        }}
+      >
         <div
           ref={listRef}
           role="radiogroup"
           aria-label={T({ en: "Colour palette", hi: "रंग पट्टिका" })}
           onKeyDown={onListKeyDown}
-          className="popover-in popover-br mb-2 absolute bottom-full right-0 w-[268px] max-h-[68vh] overflow-y-auto rounded-2xl p-2 shadow-2xl border"
-          style={{
-            background: "color-mix(in srgb, var(--roti) 94%, transparent)",
-            borderColor: "var(--line)",
-            backdropFilter: "blur(16px)",
-            WebkitBackdropFilter: "blur(16px)",
-          }}
         >
           {PALETTES.map((p, i) => {
             const checked = p.key === active;
@@ -184,7 +196,7 @@ export function PaletteControl() {
             );
           })}
         </div>
-      )}
+      </AnchoredPanel>
 
       <button
         ref={toggleRef}
@@ -196,13 +208,24 @@ export function PaletteControl() {
           en: `Change colour palette. Current: ${current.name}`,
           hi: `रंग बदलें। अभी: ${current.name}`,
         })}
-        className="flex items-center justify-center h-9 w-9 rounded-full cursor-pointer shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2"
-        style={{ color: "#fff", border: "1px solid rgb(255 255 255 / .28)", outlineColor: "var(--kesar)" }}
+        /* Tokens, not #fff. The hardcoded white belonged to the bottom bar
+           over a dark hero; the top nav paints var(--roti) at 82%, so a
+           white glyph on a white hairline was invisible in every light
+           palette. */
+        className="flex items-center gap-1.5 h-8 px-2 rounded-full cursor-pointer shrink-0 transition-colors hover:bg-[var(--roti-2)] focus-visible:outline-2 focus-visible:outline-offset-2"
+        style={{ color: "var(--ink)", border: "1px solid var(--line)", outlineColor: "var(--kesar)" }}
+        title={T({ en: "Colour palette", hi: "रंग पट्टिका" })}
       >
-        <span className="flex rounded-full overflow-hidden" aria-hidden>
+        <span className="flex rounded-full overflow-hidden shrink-0" aria-hidden>
           {current.swatch.map((c) => (
             <span key={c} className="block w-[5px] h-4" style={{ background: c }} />
           ))}
+        </span>
+        {/* A word, because two 15px swatch stacks side by side are a puzzle,
+            not a control. Hidden on the narrowest screens where the tab
+            strip needs the room. */}
+        <span className="hidden md:inline text-[0.74rem] font-semibold tracking-wide">
+          {T({ en: "Theme", hi: "रंग" })}
         </span>
       </button>
     </div>

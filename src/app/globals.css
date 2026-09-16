@@ -1819,6 +1819,29 @@ main section#meals .lift {
 }
 
 /* ------------------------------------------------------------------
+   TAB PANEL RHYTHM
+
+   Section padding is an inter-section gap: it exists to separate a block
+   from the one above it. The first section in a panel has nothing above
+   it — the panel is the top of the view — so the full gap there is just
+   dead space under the nav, and on a phone it pushed the first heading
+   most of a screen down.
+
+   Only the first child, and only when it is a section: the Dashboard
+   panel opens with a full-bleed hero wrapper instead, which owns its own
+   vertical rhythm and must not be touched.
+   ------------------------------------------------------------------ */
+[role="tabpanel"] > section:first-child {
+  padding-top: 1.75rem;
+}
+
+@media (min-width: 768px) {
+  [role="tabpanel"] > section:first-child {
+    padding-top: 2.5rem;
+  }
+}
+
+/* ------------------------------------------------------------------
    ONBOARDING CELEBRATION
 
    The one spot in the whole flow that gets a real flourish, and the

@@ -23,7 +23,7 @@ export function Clinics() {
   const revealCards = useReveal<HTMLDivElement>();
 
   return (
-    <section id="clinics" className="py-14 md:py-24" style={{ background: "var(--roti-2)" }}>
+    <section id="clinics" className="py-12 md:py-16" style={{ background: "var(--roti-2)" }}>
       <div className="w-[min(1180px,100%-2.5rem)] mx-auto">
         <div ref={reveal} className="rise max-w-[60ch] mb-11">
           <div className="shiro w-[72px] mb-5" />

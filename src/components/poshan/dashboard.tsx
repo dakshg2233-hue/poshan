@@ -58,7 +58,7 @@ export function Dashboard() {
 
       <HeroVideo />
 
-      <section className="py-14 md:py-20">
+      <section className="py-12 md:py-16">
         <div className="w-[min(1180px,100%-2.5rem)] mx-auto">
           <div className="flex items-center justify-between gap-4 flex-wrap mb-6">
             <h2

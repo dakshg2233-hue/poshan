@@ -47,7 +47,7 @@ export function ScannerPage({
   const reveal = useReveal<HTMLDivElement>();
 
   return (
-    <section className="py-14 md:py-24">
+    <section className="py-12 md:py-16">
       <div className="w-[min(1180px,100%-2.5rem)] mx-auto">
         <div ref={reveal} className="rise">
           <div className="max-w-[56ch] mb-9">

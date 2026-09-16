@@ -270,7 +270,7 @@ export function MealLibrary({ goal, plan, bandName }: { goal: GoalKey; plan: Pla
   const canAdd = primary !== "all";
 
   return (
-    <section id="meals" className="py-14 md:py-24">
+    <section id="meals" className="py-12 md:py-16">
       <div className="w-[min(1180px,100%-2.5rem)] mx-auto">
         <div ref={reveal} className="rise">
           <div className="max-w-[56ch] mb-6">

@@ -41,7 +41,7 @@ export function Premium({ signedIn }: { signedIn: boolean }) {
   const price = yearly ? PREMIUM.yearly : PREMIUM.monthly;
 
   return (
-    <section id="premium" className="py-14 md:py-24" style={{ background: "var(--roti-2)" }}>
+    <section id="premium" className="py-12 md:py-16" style={{ background: "var(--roti-2)" }}>
       <div className="w-[min(1180px,100%-2.5rem)] mx-auto">
         <div ref={reveal} className="rise max-w-[56ch] mb-11">
           <div className="shiro w-[72px] mb-5" />

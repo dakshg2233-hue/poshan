@@ -250,7 +250,6 @@ function MainContent({
           setActivityLevel={setActivityLevel}
           bmi={bmi}
           band={band}
-          plan={plan}
           goal={goal}
           diet={diet}
         />
