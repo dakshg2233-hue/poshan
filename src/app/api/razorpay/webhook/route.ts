@@ -17,10 +17,17 @@ import { markSubscriptionEnded, provisionRecurringCharge } from "@/lib/razorpay-
  * `subscription.halted` and `subscription.completed`, which are the three
  * ways billing stops and so the three ways access has to stop with it.
  *
+ * Subscribe `refund.processed` too: a refund reverses a charge that already
+ * granted access, so access has to go back with the money.
+ *
  * `subscription.paused` is deliberately not handled. Pausing only happens
  * if something calls Razorpay's pause API, which nothing here does, and
  * handling it properly needs a `subscription.resumed` path to restore
  * access — half of that pair is worse than neither.
+ *
+ * Every delivery is recorded in `webhook_events` keyed on Razorpay's own
+ * x-razorpay-event-id before anything is acted on, so a retried event is
+ * answered 200 and dropped rather than processed twice.
  *
  * ⚠ The payload shape below (`payload.subscription.entity` +
  * `payload.payment.entity`) follows Razorpay's documented resource.action
@@ -76,6 +83,7 @@ export async function POST(request: Request) {
     payload?: {
       payment?: { entity?: Record<string, unknown> };
       subscription?: { entity?: Record<string, unknown> };
+      refund?: { entity?: Record<string, unknown> };
     };
   };
   try {
@@ -84,14 +92,48 @@ export async function POST(request: Request) {
     return Response.json({ error: "Malformed payload." }, { status: 400 });
   }
 
+  /* Replay protection, before anything is acted on. Razorpay reuses this id
+     across every retry of the same event, so the primary key on
+     webhook_events is what makes "handled exactly once" true of the
+     database rather than of each handler in turn. A delivery with no id
+     (or no database configured) still gets processed — the individual
+     handlers below are each idempotent on their own — it just loses this
+     outer guarantee. */
+  const eventId = request.headers.get("x-razorpay-event-id");
+  const db = serviceClient();
+  if (eventId && db) {
+    const { error } = await db
+      .from("webhook_events")
+      .insert({ razorpay_event_id: eventId, event: event.event ?? "unknown" });
+    /* 23505 = unique violation, i.e. this exact delivery was already handled. */
+    if (error?.code === "23505") {
+      return Response.json({ ok: true, duplicate: true });
+    }
+  }
+
   const payment = event.payload?.payment?.entity;
   const subscription = event.payload?.subscription?.entity;
+  const refund = event.payload?.refund?.entity;
   const paymentId = payment?.id as string | undefined;
   const subscriptionId = (subscription?.id ?? payment?.subscription_id) as string | undefined;
   const amount = payment?.amount as number | undefined;
 
   if (!subscriptionId) {
     return Response.json({ ok: true, ignored: true });
+  }
+
+  /* Money going back out. A full refund reverses the charge that granted
+     access, so the access goes with it. A partial refund is deliberately
+     left alone: "half the money back" has no obvious access answer, and
+     guessing one wrong either robs a paying customer or gives away the
+     product — a human should decide that one. */
+  if (event.event === "refund.created" || event.event === "refund.processed") {
+    const refunded = refund?.amount as number | undefined;
+    if (refunded && amount && refunded >= amount) {
+      const revoked = await markSubscriptionEnded(subscriptionId, "cancelled");
+      return Response.json({ ok: true, event: event.event, status: "cancelled", revoked });
+    }
+    return Response.json({ ok: true, event: event.event, partialRefund: true });
   }
 
   /* Handled before the paymentId guard below, because an event that ends a
@@ -108,7 +150,6 @@ export async function POST(request: Request) {
     return Response.json({ ok: true, ignored: true });
   }
 
-  const db = serviceClient();
   if (db) {
     /* The unique constraint on razorpay_payment_id makes this idempotent:
        Razorpay retries webhooks, and a retry must not extend a subscription
