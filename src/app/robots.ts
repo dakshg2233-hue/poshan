@@ -1,7 +1,6 @@
 import type { MetadataRoute } from "next";
 
-/** Site origin. Set NEXT_PUBLIC_SITE_URL at deploy time. */
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://poshan.app";
+import { SITE_URL as SITE } from "@/lib/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {

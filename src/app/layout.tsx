@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Anek_Devanagari, Mukta, IBM_Plex_Mono, Instrument_Serif, DM_Sans, Press_Start_2P } from "next/font/google";
 import "./globals.css";
 import { LangProvider } from "@/components/poshan/lang-provider";
+import { SITE_URL } from "@/lib/site";
 
 /* One face covering Latin and Devanagari, so the two scripts share a single
    design intent instead of being bolted together.
@@ -86,7 +87,7 @@ export const metadata: Metadata = {
      http://localhost:3000 and says so at build time, which means a link
      shared from production carries a preview image pointing at the
      sharer's own machine. Same origin the sitemap and robots.txt use. */
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://poshan.app"),
+  metadataBase: new URL(SITE_URL),
   title: "Poshan: पोषण · Know your body. Eat like home.",
   description: DESCRIPTION,
   applicationName: "Poshan",

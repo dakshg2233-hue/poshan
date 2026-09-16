@@ -35,7 +35,7 @@
     },
     "NEXT_PUBLIC_SITE_URL": {
       "required": true,
-      "description": "Production domain URL (e.g., https://poshan.app)"
+      "description": "Absolute site origin, no trailing slash (production: https://poshan.co.in)"
     },
     "NEXT_PUBLIC_ANALYTICS_ID": {
       "required": false,
