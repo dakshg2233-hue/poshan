@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { preload } from "react-dom";
 import { useLang } from "./lang-provider";
 
 /**
@@ -25,6 +26,25 @@ import { useLang } from "./lang-provider";
 /* Swap for real botanical stills when they exist. */
 const STILL = "/thali-hero.jpg";
 const MOTION = "/thali-hero.jpg";
+
+/**
+ * Start the hero photo downloading with the HTML, not after it.
+ *
+ * The still is painted as a CSS `background-image`, which the browser cannot
+ * discover until it has fetched the stylesheet, built the box and decided
+ * the element is actually painted — late, on the critical path, and after
+ * everything else has already queued. Until it lands the section shows its
+ * own `#0a0b0a`, and the three dark gradient scrims above it have nothing
+ * underneath to darken, so a first-time visitor on a slow connection gets a
+ * black screen and reasonably concludes the site is broken. That happened to
+ * a real person looking at the first deploy, which is why this is here.
+ *
+ * `preload` is React's own hoist-to-<head> primitive, called during render.
+ * It lives in this component rather than the root layout deliberately: the
+ * hero only renders on the home page, and preloading 300KB on /dashboard or
+ * /login would be a straight tax on the pages people actually return to.
+ */
+preload(STILL, { as: "image", fetchPriority: "high" });
 
 /** Poshan Leaf: the only action and status colour in this design. */
 const LEAF = "#8FBF72";
