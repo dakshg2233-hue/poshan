@@ -25,6 +25,20 @@ function resendClient() {
  * lead is already durably stored in clinic_leads by the time this is called,
  * so a failed email here should never fail the visitor's submission.
  */
+/**
+ * Sender addresses use poshan.co.in, the domain Poshan actually owns.
+ *
+ * They said `@poshan.health` until now — a domain that was on the
+ * shortlist when the name was being chosen and never bought. Nothing
+ * fails at build time when a `from:` address is wrong; it fails later and
+ * silently, at the provider, because Resend refuses to send from a domain
+ * that is not verified on the account. Every email this file sends would
+ * have been rejected in production.
+ *
+ * Verify poshan.co.in in Resend (Domains > Add domain) and add the DKIM
+ * and SPF records it gives you. Those go in Netlify DNS now, not GoDaddy,
+ * since the nameservers moved to Netlify.
+ */
 export async function sendClinicLeadEmail(lead: {
   tier: "hospital" | "enterprise";
   name: string;
@@ -34,7 +48,7 @@ export async function sendClinicLeadEmail(lead: {
   message?: string;
 }) {
   return resendClient().emails.send({
-    from: "Poshan <leads@poshan.health>",
+    from: "Poshan <leads@poshan.co.in>",
     to: "dakshg2233@gmail.com",
     replyTo: lead.email,
     subject: `${lead.tier === "hospital" ? "Hospital" : "Enterprise"} lead: ${lead.org}`,
@@ -51,7 +65,7 @@ export async function sendClinicLeadEmail(lead: {
 
 export async function sendConfirmationEmail(email: string) {
   return resendClient().emails.send({
-    from: "Poshan <auth@poshan.health>",
+    from: "Poshan <auth@poshan.co.in>",
     to: email,
     subject: "Account Confirmed ✅",
     html: `
