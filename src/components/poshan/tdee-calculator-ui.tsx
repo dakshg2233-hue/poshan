@@ -2,8 +2,38 @@
 
 import { useState } from "react";
 import { useLang } from "./lang-provider";
-import { calculateTDEE, getAdjustedCalories, compareToBand, type ActivityLevel, type Gender } from "@/lib/tdee-calculator";
+import { getAdjustedCalories, compareToBand } from "@/lib/tdee-calculator";
+import {
+  ACTIVITY_LEVELS,
+  estimateMaintenanceKcal,
+  type ActivityLevel,
+  type Sex,
+} from "@/lib/energy-requirement";
 import { BANDS, type BandKey, type GoalKey } from "@/lib/poshan-data";
+
+/**
+ * Onboarding's calorie estimate, from the same model as the rest of the app.
+ *
+ * This screen used to call calculateTDEE (Mifflin-St Jeor) while every other
+ * surface — the daily plan, the week plan, the Today widget, the clinician
+ * plans, the hero — used estimateMaintenanceKcal (ICMR-NIN 2020 kcal/kg).
+ * The two disagree by 139 to 898 kcal for the same person, and onboarding's
+ * number was always the lower one.
+ *
+ * That difference did not stay on this screen. Onboarding writes its result
+ * to profiles.tdee, and /api/daily reads `target.tdee ?? estimate...`, so the
+ * saved number wins and the ICMR path is never reached again. Every calorie
+ * target a user ever saw was the Mifflin one, several hundred kcal under the
+ * model the product is actually built on.
+ *
+ * The activity scale was wrong too. This screen offered five levels —
+ * sedentary, light, moderate, active, veryActive — while both the ICMR table
+ * and the profiles.activity_level check constraint accept exactly three. The
+ * extra two could not be stored and had no kcal/kg value behind them.
+ *
+ * ACTIVITY_LEVELS is now the single source for both the options and their
+ * copy, so the screen cannot drift from the table again.
+ */
 
 /** What onComplete hands back. Exported so <OnboardingFlow> can type its
  *  handler against it instead of taking `any` — the two were coupled
@@ -12,7 +42,7 @@ export interface TDEEResult {
   weight: number;
   height: number;
   age: number;
-  gender: Gender;
+  gender: Sex;
   activity: ActivityLevel;
   tdee: number;
   band: BandKey;
@@ -33,22 +63,31 @@ export function TDEECalculatorUI({ onComplete }: { onComplete?: (result: TDEERes
   const [weight, setWeight] = useState(70);
   const [height, setHeight] = useState(170);
   const [age, setAge] = useState(30);
-  const [gender, setGender] = useState<Gender>("male");
+  const [gender, setGender] = useState<Sex>("male");
   const [activity, setActivity] = useState<ActivityLevel>("moderate");
   const [goal, setGoal] = useState<GoalKey>("loss");
   const [result, setResult] = useState<TDEEDisplay | null>(null);
+  const [tooYoung, setTooYoung] = useState(false);
 
   const handleCalculate = () => {
-    const tdeeResult = calculateTDEE(weight, height, age, gender, activity);
+    /* Null below the age the ICMR adult table covers — the model declines to
+       guess rather than quietly extrapolating onto a teenager. */
+    const maintenance = estimateMaintenanceKcal(weight, age, gender, activity);
+    if (maintenance === null) {
+      setResult(null);
+      setTooYoung(true);
+      return;
+    }
+    setTooYoung(false);
     const bmi = weight / Math.pow(height / 100, 2);
     let band: BandKey = "normal";
     if (bmi < 18.5) band = "under";
     else if (bmi >= 25) band = "obese";
     else if (bmi >= 23) band = "over";
 
-    const adjustedCals = getAdjustedCalories(tdeeResult.tdee, goal);
+    const adjustedCals = getAdjustedCalories(maintenance, goal);
     const bandBaseline = 2000; // Standard baseline for comparison
-    const comparison = compareToBand(tdeeResult.tdee, bandBaseline);
+    const comparison = compareToBand(maintenance, bandBaseline);
 
     setResult({
       weight,
@@ -56,7 +95,7 @@ export function TDEECalculatorUI({ onComplete }: { onComplete?: (result: TDEERes
       age,
       gender,
       activity,
-      tdee: tdeeResult.tdee,
+      tdee: maintenance,
       band,
       goal,
       adjustedCals,
@@ -64,7 +103,7 @@ export function TDEECalculatorUI({ onComplete }: { onComplete?: (result: TDEERes
     });
 
     if (onComplete) {
-      onComplete({ weight, height, age, gender, activity, tdee: tdeeResult.tdee, band, goal });
+      onComplete({ weight, height, age, gender, activity, tdee: maintenance, band, goal });
     }
   };
 
@@ -143,7 +182,7 @@ export function TDEECalculatorUI({ onComplete }: { onComplete?: (result: TDEERes
           </label>
           <select
             value={gender}
-            onChange={(e) => setGender(e.target.value as Gender)}
+            onChange={(e) => setGender(e.target.value as Sex)}
             style={{
               width: "100%",
               padding: "10px 12px",
@@ -166,7 +205,7 @@ export function TDEECalculatorUI({ onComplete }: { onComplete?: (result: TDEERes
           {T({ en: "Activity Level", hi: "गतिविधि स्तर" })}
         </label>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "10px" }}>
-          {(["sedentary", "light", "moderate", "active", "veryActive"] as const).map((level) => (
+          {ACTIVITY_LEVELS.map(({ key: level, label }) => (
             <button
               key={level}
               onClick={() => setActivity(level)}
@@ -181,22 +220,7 @@ export function TDEECalculatorUI({ onComplete }: { onComplete?: (result: TDEERes
                 fontWeight: activity === level ? 600 : 400,
               }}
             >
-              {T({
-                en: {
-                  sedentary: "Sedentary",
-                  light: "Light",
-                  moderate: "Moderate",
-                  active: "Active",
-                  veryActive: "Very Active",
-                }[level],
-                hi: {
-                  sedentary: "कम सक्रिय",
-                  light: "हल्का",
-                  moderate: "मध्यम",
-                  active: "सक्रिय",
-                  veryActive: "बहुत सक्रिय",
-                }[level],
-              })}
+              {T(label)}
             </button>
           ))}
         </div>
@@ -247,6 +271,28 @@ export function TDEECalculatorUI({ onComplete }: { onComplete?: (result: TDEERes
       </button>
 
       {/* Results */}
+      {/* The ICMR-NIN adult table starts at 19. Below that the model returns
+          null rather than extrapolating, and saying so is better than showing
+          a number that was never meant to apply to a teenager. */}
+      {tooYoung && (
+        <div
+          role="alert"
+          style={{
+            marginTop: "20px",
+            padding: "14px 16px",
+            borderRadius: "10px",
+            border: "1.5px solid color-mix(in srgb, var(--kesar) 45%, transparent)",
+            background: "color-mix(in srgb, var(--kesar) 10%, transparent)",
+            fontSize: "0.9rem",
+          }}
+        >
+          {T({
+            en: "The guidance Poshan uses for maintenance calories covers adults from 19. We would rather say so than show you a number that was not built for your age — the rest of Poshan still works.",
+            hi: "पोषण जिस मार्गदर्शन का उपयोग करता है वह 19 वर्ष से ऊपर के वयस्कों के लिए है। आपकी आयु के लिए न बना आंकड़ा दिखाने से बेहतर है यह बता देना — बाकी पोषण फिर भी काम करता है।",
+          })}
+        </div>
+      )}
+
       {result && (
         // Card-in, not panel-in: this is a result appearing in response to a
         // click rather than a whole screen changing, and card-in's added

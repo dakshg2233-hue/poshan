@@ -12,6 +12,7 @@ export default function OnboardingPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
+  const [saveFailed, setSaveFailed] = useState(false);
 
   /* Inlined for the same reason as /dashboard/meals: `checkSubscription`
      was a hoisted declaration below this effect, so the effect referenced
@@ -77,31 +78,75 @@ export default function OnboardingPage() {
   if (!user) return null;
 
   return (
-    <OnboardingFlow
+    <>
+      {saveFailed && (
+        <div
+          role="alert"
+          className="mx-auto mt-4 w-[min(52ch,100%-2rem)] rounded-xl px-4 py-3 text-[0.9rem]"
+          style={{
+            border: "1.5px solid color-mix(in srgb, var(--kesar) 45%, transparent)",
+            background: "color-mix(in srgb, var(--kesar) 10%, transparent)",
+            color: "var(--ink)",
+          }}
+        >
+          We could not save your answers. Nothing has been lost from this
+          screen — try Finish again, and tell us if it keeps failing.
+        </div>
+      )}
+      <OnboardingFlow
       isPremium={isPremium}
       onComplete={async (data) => {
         // Save onboarding data to profile
         const supabase = browserClient();
         if (!supabase) return;
 
-        try {
-          await supabase
-            .from("profiles")
-            .update({
-              tdee: data.tdee,
-              goal: data.goal,
-              region: data.region,
-              diet: data.diet,
-              onboarding_completed: true,
-            })
-            .eq("user_id", user.id);
+        /* Keyed on `id`. profiles.id IS the auth user id — the table has no
+           user_id column and never had one, so the `.eq("user_id", ...)`
+           this used to send matched nothing and PostgREST rejected the
+           whole statement. Every other query against profiles in this
+           codebase already keys on id; this was the one that did not.
 
-          // Redirect to dashboard
-          router.push("/dashboard");
-        } catch (error) {
-          console.error("Failed to save onboarding data:", error);
+           It failed in total silence. supabase-js resolves with
+           { data, error } rather than throwing, so the try/catch here never
+           fired, the returned error was never read, and the redirect ran as
+           though the save had worked. Nothing was written: not the calorie
+           target, not the goal, not the region or diet, and not
+           onboarding_completed — which is why finishing onboarding never
+           actually finished it.
+
+           The body inputs go in alongside the target now. Without them the
+           profile held a maintenance figure the app could not recompute,
+           and /api/daily reads `target.tdee ?? estimate(...)`, so that one
+           frozen number would have won for as long as the account existed,
+           through every weight change. */
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            tdee: data.tdee,
+            goal: data.goal,
+            region: data.region,
+            diet: data.diet,
+            weight_kg: data.weight,
+            height_cm: data.height,
+            age: data.age,
+            sex: data.sex,
+            activity_level: data.activityLevel,
+            onboarding_completed: true,
+          })
+          .eq("id", user.id);
+
+        if (error) {
+          /* Surfaced rather than swallowed: sending someone to a dashboard
+             that has none of their answers is worse than telling them the
+             save failed. */
+          console.error("Failed to save onboarding data:", error.message);
+          setSaveFailed(true);
+          return;
         }
+
+        router.push("/dashboard");
       }}
-    />
+      />
+    </>
   );
 }

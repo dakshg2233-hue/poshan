@@ -5,6 +5,7 @@ import { useLang } from "./lang-provider";
 import { TDEECalculatorUI, type TDEEResult } from "./tdee-calculator-ui";
 import { MacroPersonalizer } from "./macro-personalizer";
 import { REGIONS, DIETS, type RegionKey, type DietKey, type GoalKey } from "@/lib/poshan-data";
+import type { ActivityLevel, Sex } from "@/lib/energy-requirement";
 
 type OnboardingStep = "welcome" | "tdee" | "goal" | "region-diet" | "macros" | "complete";
 
@@ -18,6 +19,16 @@ interface OnboardingData {
   goal?: GoalKey;
   region?: RegionKey;
   diet?: DietKey;
+  /* The inputs the estimate was made from. Onboarding used to keep only the
+     resulting number and throw these away, which left the profile holding a
+     maintenance figure the app had no way to recompute — /api/daily reads
+     `target.tdee ?? estimate(...)`, so a stale saved number wins forever.
+     Kept now so a weight change can move the target. */
+  weight?: number;
+  height?: number;
+  age?: number;
+  sex?: Sex;
+  activityLevel?: ActivityLevel;
   isPremium: boolean;
 }
 
@@ -27,7 +38,16 @@ export function OnboardingFlow({ onComplete, isPremium }: { onComplete?: (data: 
   const [data, setData] = useState<OnboardingData>({ isPremium });
 
   const handleTDEEComplete = (tdeeData: TDEEResult) => {
-    setData({ ...data, tdee: tdeeData.tdee, goal: tdeeData.goal });
+    setData({
+      ...data,
+      tdee: tdeeData.tdee,
+      goal: tdeeData.goal,
+      weight: tdeeData.weight,
+      height: tdeeData.height,
+      age: tdeeData.age,
+      sex: tdeeData.gender,
+      activityLevel: tdeeData.activity,
+    });
     setStep("region-diet");
   };
 
