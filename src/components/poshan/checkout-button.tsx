@@ -72,6 +72,18 @@ export function CheckoutButton({
         );
         return;
       }
+      if (res.status === 409) {
+        /* Already subscribed. The server is the one that knows — this
+           button is only told whether the visitor is signed in. */
+        setStatus(
+          data.reason ??
+            T({
+              en: "This account already has a Poshan subscription.",
+              hi: "इस खाते पर पहले से पोषण सदस्यता है।",
+            })
+        );
+        return;
+      }
       if (res.status === 403) {
         /* Poshan Plus is student-priced, and the server checks the account's
            own email rather than trusting this button. Say which address it

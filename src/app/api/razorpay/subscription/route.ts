@@ -112,6 +112,47 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  /* Someone who is already paying must not be able to start a second
+     subscription. Nothing stopped them: this route never looked, the
+     subscriptions table has no unique constraint on user_id, and
+     CheckoutButton is only told whether the visitor is signed in — not
+     whether they already subscribe — so it renders "Start 7 days free" to
+     existing subscribers exactly as it does to everyone else. Two clicks
+     and Razorpay is billing the same person twice, on two live
+     subscriptions, with the app showing premium either way and nothing in
+     it aware anything is wrong.
+
+     Checked here rather than in the UI because the UI cannot be trusted
+     with it: this route is reachable directly. 409 rather than 400 — the
+     request is well-formed, it conflicts with state that already exists. */
+  const db = serviceClient();
+  if (db) {
+    const { data: existing } = await db
+      .from("subscriptions")
+      .select("product, plan, status, current_period_end")
+      .eq("user_id", user.id)
+      .in("status", ["trialing", "active"])
+      .limit(1);
+
+    const current = existing?.[0];
+    if (current) {
+      return Response.json(
+        {
+          alreadySubscribed: true,
+          product: current.product,
+          plan: current.plan,
+          status: current.status,
+          currentPeriodEnd: current.current_period_end,
+          reason:
+            current.status === "trialing"
+              ? "This account is already on a Poshan trial. Cancel it first if you want a different plan."
+              : "This account already has an active Poshan subscription. Cancel it first if you want a different plan.",
+        },
+        { status: 409 }
+      );
+    }
+  }
+
   /* Poshan's own idea of the price, from its own constants — not from
      Razorpay and not from the client. Recorded now so a later charge can be
      reconciled against something this app actually asserted. */
@@ -119,7 +160,6 @@ export async function POST(request: NextRequest) {
     (product === "college" ? COLLEGE_PLAN.yearly : plan === "yearly" ? PREMIUM.yearly : PREMIUM.monthly) * 100;
   const orderId = `POSHAN-${crypto.randomBytes(6).toString("hex").toUpperCase()}`;
 
-  const db = serviceClient();
   /* Written before Razorpay is called, so a checkout that is started and
      abandoned still leaves a row — that gap is worth being able to see. */
   if (db) {
