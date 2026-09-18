@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthedSupabase } from "@/lib/api-auth";
+import { today } from "@/lib/day";
 
 /**
  * Weight history. profiles.weight_kg (and family_members.weight_kg) only
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
     if (!fm) return NextResponse.json({ error: "Not your family member." }, { status: 403 });
   }
 
-  const day = typeof logged_on === "string" ? logged_on : new Date().toISOString().slice(0, 10);
+  const day = typeof logged_on === "string" ? logged_on : today();
 
   const { data, error } = await supabase
     .from("weight_logs")

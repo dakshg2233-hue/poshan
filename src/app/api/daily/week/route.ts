@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthedSupabase } from "@/lib/api-auth";
+import { daysAgo } from "@/lib/day";
 
 /**
  * The dashboard's weekly review card: how many of the last 7 days had at
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
   if ("error" in auth) return auth.error;
   const { supabase, user } = auth;
 
-  const since = new Date(Date.now() - 6 * 86_400_000).toISOString().slice(0, 10);
+  const since = daysAgo(6);
 
   const { data, error } = await supabase
     .from("daily_meal_logs")

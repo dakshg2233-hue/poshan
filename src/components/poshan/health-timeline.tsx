@@ -6,6 +6,7 @@ import { useTimeline, type TimelineEvent } from "@/lib/hooks/use-timeline";
 import { KIND_META, type TimelineKind } from "@/lib/timeline";
 import { SignInPrompt } from "./sign-in-prompt";
 import { track } from "@/lib/analytics";
+import { today } from "@/lib/day";
 
 /**
  * The health timeline: every lab, plan, weight and consultation on one
@@ -257,7 +258,7 @@ function AddEventForm({
   const { T } = useLang();
   const [kind, setKind] = useState<TimelineKind>("consultation");
   const [title, setTitle] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(today());
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -302,7 +303,7 @@ function AddEventForm({
       <input
         type="date"
         value={date}
-        max={new Date().toISOString().slice(0, 10)}
+        max={today()}
         onChange={(e) => setDate(e.target.value)}
         className="rounded-lg px-3 py-2 text-[0.92rem] tabular-nums"
         style={{ background: "var(--roti)", border: "1px solid var(--line, rgba(0,0,0,0.12))" }}

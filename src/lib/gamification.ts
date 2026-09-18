@@ -8,6 +8,8 @@
  * lets one person opt out without touching anyone else.
  */
 
+import { dayOf } from "@/lib/day";
+
 export type BadgeId =
   | "streak_3"
   | "streak_7"
@@ -65,8 +67,11 @@ const STREAK_THRESHOLDS: { badge: BadgeId; days: number }[] = [
   { badge: "streak_200", days: 200 },
 ];
 
+/* Streaks are counted in Indian days. A UTC day boundary broke a streak
+   for anyone who logged a late dinner after midnight: the meal landed on
+   the previous date, so today looked empty. See lib/day.ts. */
 function toDateOnly(d: Date): string {
-  return d.toISOString().slice(0, 10);
+  return dayOf(d);
 }
 
 export interface StreakResult {

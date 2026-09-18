@@ -1,4 +1,5 @@
 import { type MarkerKey } from "./clinical-markers";
+import { dayOf } from "@/lib/day";
 
 /**
  * The triage engine behind the clinician dashboard's 🔴 / 🟠 / 🟢 buckets.
@@ -214,7 +215,7 @@ export function computeAdherence(
 
   if (joinedAt && effectiveDays < 3) return null;
 
-  const cutoff = effectiveStart.toISOString().slice(0, 10);
+  const cutoff = dayOf(effectiveStart);
   const logged = logDates.filter((d) => d >= cutoff).length;
 
   return Math.min(1, logged / (effectiveDays * 3));

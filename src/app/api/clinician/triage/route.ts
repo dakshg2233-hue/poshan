@@ -5,6 +5,7 @@ import { logAudit } from "@/lib/audit-log";
 import { checkConsent } from "@/lib/consent";
 import { triagePatient, computeAdherence, type TriageResult } from "@/lib/triage";
 import type { MarkerKey } from "@/lib/clinical-markers";
+import { daysAgo } from "@/lib/day";
 
 /**
  * The doctor's whole morning, in one request.
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
   if (!service) return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
 
   const patientIds = active.map((l) => l.patient_id as string);
-  const since = new Date(Date.now() - WINDOW_DAYS * 86_400_000).toISOString().slice(0, 10);
+  const since = daysAgo(WINDOW_DAYS);
 
   /* Four queries for the whole roster rather than four per patient. At 300
      patients the per-patient shape is 1,200 round trips and a dashboard

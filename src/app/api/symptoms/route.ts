@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthedSupabase } from "@/lib/api-auth";
+import { today } from "@/lib/day";
 
 /**
  * A daily symptom journal — energy, mood, bloating, cramps, cycle day —
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "cycle_day must be between 1 and 60." }, { status: 400 });
   }
 
-  const day = typeof log_date === "string" ? log_date : new Date().toISOString().slice(0, 10);
+  const day = typeof log_date === "string" ? log_date : today();
 
   const { data, error } = await supabase
     .from("symptom_logs")

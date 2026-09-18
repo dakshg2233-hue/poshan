@@ -4,6 +4,7 @@ import { recommendWeek, PANTRY_STAPLES, type PantryStapleKey } from "@/lib/daily
 import { estimateMaintenanceKcal, type ActivityLevel } from "@/lib/energy-requirement";
 import type { GoalKey, DietKey, RegionKey } from "@/lib/poshan-data";
 import type { ConditionKey } from "@/lib/conditions";
+import { daysAgo } from "@/lib/day";
 
 /**
  * The week-ahead plan behind the "This week" view and the weekly grocery
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
     (familyMemberId
       ? supabase.from("daily_meal_logs").select("dish_id, log_date").eq("user_id", user.id).eq("family_member_id", familyMemberId)
       : supabase.from("daily_meal_logs").select("dish_id, log_date").eq("user_id", user.id).is("family_member_id", null)
-    ).gte("log_date", new Date(Date.now() - 2 * 86_400_000).toISOString().slice(0, 10)),
+    ).gte("log_date", daysAgo(2)),
     supabase.from("pantry_items").select("item_key, in_stock").eq("user_id", user.id),
   ]);
 

@@ -6,6 +6,7 @@ import { checkConsent, CONSENT_DENIAL } from "@/lib/consent";
 import { computeAdherence } from "@/lib/triage";
 import { MARKER_LABEL } from "@/lib/clinical-markers";
 import { MEAL_LIBRARY } from "@/lib/poshan-data";
+import { dayOf } from "@/lib/day";
 
 /**
  * "AI summarises the last 30 days" — the line that replaces reading 300
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
   if (!service) return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
 
   const sinceDate = new Date(Date.now() - WINDOW_DAYS * 86_400_000);
-  const since = sinceDate.toISOString().slice(0, 10);
+  const since = dayOf(sinceDate);
 
   const canLabs = consent.scopes.includes("labs");
   const canNutrition = consent.scopes.includes("nutrition");

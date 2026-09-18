@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthedSupabase } from "@/lib/api-auth";
 import { backfillTimeline, recordTimelineEvent, type TimelineKind } from "@/lib/timeline";
+import { today } from "@/lib/day";
 
 /**
  * The patient's own health timeline.
@@ -76,13 +77,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "A title of up to 140 characters is required." }, { status: 400 });
   }
 
-  const occurredOn = body.occurredOn ?? new Date().toISOString().slice(0, 10);
+  const occurredOn = body.occurredOn ?? today();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(occurredOn)) {
     return NextResponse.json({ error: "Invalid date." }, { status: 400 });
   }
   /* A timeline is a record of what happened, so it cannot contain the
      future. Guards against a mistyped year burying every real entry. */
-  if (occurredOn > new Date().toISOString().slice(0, 10)) {
+  if (occurredOn > today()) {
     return NextResponse.json({ error: "That date is in the future." }, { status: 400 });
   }
 

@@ -5,6 +5,7 @@ import { serviceClient } from "@/lib/supabase";
 import { clientIp, rateLimit, tooMany, readJsonCapped } from "@/lib/rate-limit";
 import { buildNutritionContext, buildHealthContext } from "@/lib/chat-knowledge";
 import { checkAiSafety, gateAiReply, SAFE_REPLACEMENT } from "@/lib/ai-safety";
+import { startOfTodayIso } from "@/lib/day";
 
 /**
  * Both chatbots — "Ask Poshan" (food/nutrition) and "Health Companion"
@@ -13,7 +14,7 @@ import { checkAiSafety, gateAiReply, SAFE_REPLACEMENT } from "@/lib/ai-safety";
  * history storage, and the honesty rules in the system prompt.
  *
  * Free tier: 15 messages/day, shared across both chatbots, resets at UTC
- * midnight (see `startOfTodayUtc`). Any subscription row in "trialing" or
+ * midnight in IST (see `startOfTodayIso`). Any subscription row in "trialing" or
  * "active" status — any product, not just Poshan Home — gets unlimited.
  *
  * Grounding: relevant excerpts from Poshan's own already-sourced data
@@ -36,11 +37,6 @@ type ChatBody = { chatbot?: "nutrition" | "health"; message?: string; lang?: "en
  * anything the model could legitimately produce.
  */
 export const SAFETY_MARKER = "\u0000POSHAN_SAFETY\u0000";
-
-function startOfTodayUtc(): string {
-  const d = new Date();
-  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())).toISOString();
-}
 
 const NUTRITION_SYSTEM = `You are "Ask Poshan," a food and nutrition assistant inside the Poshan app — Indian home cooking, calories, macros, micronutrients, cultural dishes, "is X good for Y goal."
 
@@ -109,7 +105,7 @@ export async function POST(request: NextRequest) {
     .select("id", { count: "exact", head: true })
     .eq("user_id", user.id)
     .eq("role", "user")
-    .gte("created_at", startOfTodayUtc());
+    .gte("created_at", startOfTodayIso());
 
   const { data: subRow } = await db
     .from("subscriptions")

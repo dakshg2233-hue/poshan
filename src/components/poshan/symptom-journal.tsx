@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HeartPulse } from "lucide-react";
 import { useSymptoms } from "@/lib/hooks/use-symptoms";
 import { useConditions } from "@/lib/hooks/use-conditions";
+import { today as todayIst } from "@/lib/day";
 
 const FACE = ["😞", "🙁", "😐", "🙂", "😄"];
 
@@ -52,7 +53,7 @@ export function SymptomJournal() {
     }
   }
 
-  const today = logs[0]?.log_date === new Date().toISOString().slice(0, 10) ? logs[0] : null;
+  const today = logs[0]?.log_date === todayIst() ? logs[0] : null;
 
   return (
     <Card className="card-in border-[var(--line)] bg-[var(--surface)]">

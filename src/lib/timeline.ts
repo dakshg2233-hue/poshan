@@ -1,4 +1,5 @@
 import { serviceClient } from "./supabase";
+import { today } from "@/lib/day";
 
 /**
  * Writes to the health timeline.
@@ -55,7 +56,7 @@ export async function recordTimelineEvent(params: {
         user_id: params.userId,
         kind: params.kind,
         title: params.title,
-        occurred_on: params.occurredOn ?? new Date().toISOString().slice(0, 10),
+        occurred_on: params.occurredOn ?? today(),
         detail: params.detail ?? null,
         source_table: params.sourceTable ?? null,
         source_id: params.sourceId ?? null,

@@ -4,6 +4,7 @@ import { recommendToday, PANTRY_STAPLES, type PantryStapleKey, type CostTier, ty
 import { estimateMaintenanceKcal, type ActivityLevel } from "@/lib/energy-requirement";
 import type { GoalKey, DietKey, RegionKey } from "@/lib/poshan-data";
 import type { ConditionKey } from "@/lib/conditions";
+import { daysAgo, today as todayIst } from "@/lib/day";
 
 /**
  * The Today card's data: a fresh recommendation (recomputed every request —
@@ -53,18 +54,18 @@ export async function GET(request: NextRequest) {
             .eq("user_id", user.id)
             .is("family_member_id", null)
       )
-        .gte("log_date", new Date(Date.now() - 2 * 86_400_000).toISOString().slice(0, 10))
+        .gte("log_date", daysAgo(2))
         .order("log_date", { ascending: false }),
       supabase.from("pantry_items").select("item_key, in_stock").eq("user_id", user.id),
       supabase
         .from("daily_context")
         .select("*")
         .eq("user_id", user.id)
-        .eq("context_date", new Date().toISOString().slice(0, 10))
+        .eq("context_date", todayIst())
         .maybeSingle(),
     ]);
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIst();
   const todayLogs = (recentLogs ?? []).filter((l) => l.log_date === today);
   const yesterdayLogs = (recentLogs ?? []).filter((l) => l.log_date !== today);
 
@@ -178,7 +179,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "Invalid day_type." }, { status: 400 });
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIst();
   const { data, error } = await supabase
     .from("daily_context")
     .upsert(
