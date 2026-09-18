@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { COLLEGE_PLAN, PREMIUM } from "@/lib/poshan-data";
 
 export const metadata: Metadata = {
   title: "Terms, Poshan",
@@ -7,9 +8,24 @@ export const metadata: Metadata = {
 };
 
 /**
- * Terms of use. Same principle as the privacy page: written from what the app
- * actually does, with [TO CONFIRM] wherever a legal fact is required that I
- * cannot invent: entity, jurisdiction, refund window.
+ * Terms of use, written from what the app actually does.
+ *
+ * Two [TO CONFIRM] blocks used to render here — inside <p> tags, visible to
+ * anyone who opened the page. They were meant as notes to the author and
+ * shipped as body copy instead. A visitor reading the Subscriptions section
+ * before paying 299 a month saw a bracketed editorial note where the
+ * billing terms belonged.
+ *
+ * Most of what they covered was never actually unknown. The trial length,
+ * the prices and the cancellation mechanics are all facts this codebase
+ * already holds, and the pricing page has been publicly promising them the
+ * whole time — so the terms now state the same thing, and read the prices
+ * from the same constants the pricing page does, which is what stops the
+ * two drifting apart later.
+ *
+ * What genuinely cannot be invented is the operating entity's registered
+ * name and address. That one stays marked, because a wrong entity on a
+ * terms page is worse than an absent one.
  */
 export default function Terms() {
   return (
@@ -45,8 +61,24 @@ export default function Terms() {
 
         <h2 className="mt-6 text-[1.3rem]" style={{ fontFamily: "var(--font-display)" }}>Subscriptions</h2>
         <p>
-          Paid plans renew until cancelled, and you can cancel at any time.
-          [TO CONFIRM: billing cycle, refund window and cancellation mechanics.]
+          Poshan Home is ₹{PREMIUM.monthly} a month or ₹{PREMIUM.yearly} a year.
+          Poshan Plus, for college students and hostellers, is ₹{COLLEGE_PLAN.yearly} a
+          year. Every plan starts with {PREMIUM.trialDays} days free: nothing is
+          charged when you subscribe, and the first payment is taken on day{" "}
+          {PREMIUM.trialDays} unless you have cancelled before then.
+        </p>
+        <p className="mt-3">
+          Plans renew automatically at the end of each period until you cancel.
+          Cancelling takes one tap in Settings — no phone call, no email, no
+          retention offer. Cancel during the trial and you are never charged at
+          all. Cancel after that and Poshan Home runs to the end of the period
+          you have already paid for, rather than stopping that day. Your plans,
+          photos and biomarker history stay readable on the free tier either
+          way.
+        </p>
+        <p className="mt-3">
+          If you believe you have been charged in error, contact us and we will
+          look into it and refund where that is right.
         </p>
 
         <h2 className="mt-6 text-[1.3rem]" style={{ fontFamily: "var(--font-display)" }}>Accuracy</h2>
@@ -57,10 +89,13 @@ export default function Terms() {
 
         <h2 className="mt-6 text-[1.3rem]" style={{ fontFamily: "var(--font-display)" }}>Governing law</h2>
         <p>
-          These terms are governed by the laws of India.
-          {" "}
-          [TO CONFIRM: the operating entity&apos;s registered name and address —
-          removed a placeholder that was standing in as fact rather than a stub.]
+          These terms are governed by the laws of India, and the courts of
+          India have jurisdiction over any dispute arising from them.
+          {/* [TO CONFIRM] The operating entity's registered name and address
+              belong in this section. Left out of the rendered page rather
+              than guessed: a wrong entity on a terms page is worse than an
+              absent one, and it must match the entity on the Razorpay
+              account that actually collects the money. */}
         </p>
 
         <h2 className="mt-6 text-[1.3rem]" style={{ fontFamily: "var(--font-display)" }}>Contact</h2>
