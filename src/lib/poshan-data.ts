@@ -450,16 +450,27 @@ export const FREE_FEATURES: Bi[] = [
   { en: "Full app experience in Hindi or English", hi: "पूरी ऐप अनुभव हिंदी या अंग्रेज़ी में" },
 ];
 
+/* A "registered dietitian reviews your plan monthly" line used to sit at the
+   end of this list. Nothing behind it existed — no review queue, no
+   dietitian account, no scheduling, no record of a review ever happening —
+   so Poshan Home was selling a recurring human service it had no way to
+   deliver. Removed rather than left to become a refund request. Put it back
+   only alongside something that actually performs the review.
+
+   "Swap individual dishes in your meal plan and auto-adjust calories and
+   macros" went with it, for a smaller reason: swapping is free. The
+   week-plan route says so in its own comment — the per-day "log something
+   else" swap "is exactly as free on day 4 as it is on day 1". Listing it
+   here implied free users could not do it. The genuinely paid half of that
+   sentence is already item 4, personalised macro targets. */
 export const PREMIUM_FEATURES: Bi[] = [
   { en: "Meal plans built for your goal, diet and region", hi: "आपके लक्ष्य, आहार और क्षेत्र के अनुसार बने मील प्लान" },
   { en: "Photographed meal library with exact portions, access all 1000+ regional and condition-specific meals", hi: "सटीक मात्रा के साथ फ़ोटो मील लाइब्रेरी, सभी 1000+ भोजन तक पहुँच" },
   { en: "Unlimited camera food scans, identify any meal instantly and log nutrition", hi: "असीमित कैमरा स्कैन, किसी भी भोजन को पहचानें और पोषण दर्ज करें" },
   { en: "Personalized macronutrient targets: protein, carbs, and fat % tailored to your goal and condition", hi: "आपके लक्ष्य और स्थिति के अनुसार प्रोटीन, कार्ब्स, और वसा का % तय करें" },
-  { en: "Swap individual dishes in your meal plan and auto-adjust calories and macros", hi: "अपने भोजन योजना में व्यक्तिगत व्यंजन बदलें, कैलोरीज़ और मैक्रोज़ ख़ुद-ब-ख़ुद समायोजित हों" },
   { en: "Biomarker trends read against your plate, track all 4 biomarkers with historical trends and seasonal pattern analysis", hi: "आपकी थाली के सापेक्ष बायोमार्कर रुझान, 4 बायोमार्कर के साथ ट्रेंड और मौसमी पैटर्न देखें" },
   { en: "Condition support: diabetes, PCOS, thyroid, anaemia with personalized meal recommendations", hi: "स्थिति सहायता: डायबिटीज़, पीसीओएस, थायरॉइड, एनीमिया व्यक्तिगत सुझावों के साथ" },
   { en: "Up to six family profiles: manage nutrition for your whole household from one account", hi: "6 तक परिवार के सदस्य: एक खाते से पूरे परिवार का प्रबंधन करें" },
-  { en: "A registered dietitian reviews your plan monthly and adjusts for your progress", hi: "पंजीकृत आहार विशेषज्ञ हर माह आपका प्लान देखते हैं और समायोजन करते हैं" },
 ];
 
 /**
