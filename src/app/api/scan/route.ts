@@ -1,4 +1,7 @@
 import { MEAL_LIBRARY } from "@/lib/poshan-data";
+import type { NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { serviceClient } from "@/lib/supabase";
 import { clientIp, rateLimitShared, tooMany, readJsonCapped } from "@/lib/rate-limit";
 import { askVision } from "@/lib/vision-router";
 import { unitForDish, formatQty, type PortionUnit } from "@/lib/portion";
@@ -75,6 +78,55 @@ function parseItems(text: string): { id: string; qty: number; confidence: string
   }
 }
 
+/** What the pricing page promises the free tier. */
+const FREE_SCANS_PER_DAY = 2;
+
+/**
+ * Who this scan counts against, and whether it counts at all.
+ *
+ * A subscriber scans without limit. Everyone else is counted — by account
+ * when they are signed in, so the quota follows them across devices, and by
+ * IP when they are not, which is the best a public endpoint can do. Falling
+ * back to IP is deliberately imperfect: a shared connection shares the two
+ * scans. That is the right way to be wrong here, because the alternative —
+ * counting nothing for logged-out visitors — is what this is fixing.
+ */
+async function scanQuotaIdentity(
+  request: Request
+): Promise<{ key: string; unlimited: boolean }> {
+  const ipKey = `ip:${clientIp(request)}`;
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anon) return { key: ipKey, unlimited: false };
+
+  try {
+    const cookies = (request as NextRequest).cookies;
+    const supabase = createServerClient(url, anon, {
+      cookies: { getAll: () => cookies.getAll(), setAll: () => {} },
+    });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { key: ipKey, unlimited: false };
+
+    const db = serviceClient();
+    if (!db) return { key: `user:${user.id}`, unlimited: false };
+
+    const { data } = await db
+      .from("subscriptions")
+      .select("status")
+      .eq("user_id", user.id)
+      .in("status", ["trialing", "active"])
+      .limit(1);
+
+    return { key: `user:${user.id}`, unlimited: Boolean(data?.[0]) };
+  } catch {
+    /* Never let an auth or database hiccup hand out free model calls. */
+    return { key: ipKey, unlimited: false };
+  }
+}
+
 export async function POST(request: Request) {
   /* Each scan costs a model call, so this is the endpoint most worth
      protecting: an unthrottled loop bills you, not the attacker. */
@@ -85,6 +137,36 @@ export async function POST(request: Request) {
      across serverless instances rather than within one. */
   const gate = await rateLimitShared(`scan:${clientIp(request)}`, { limit: 12, windowMs: 60_000 });
   if (!gate.ok) return tooMany(gate.retryAfter);
+
+  /* The free tier's "2 scans a day" was only ever a number in localStorage.
+     The pricing page sells it, and the scanner UI honours it, but the server
+     never checked — so clearing site data, opening a private window, or
+     POSTing here directly gave unlimited free scans, each one a paid model
+     call. It also made "unlimited scans" meaningless as a premium feature,
+     because free was already unlimited to anyone who looked.
+
+     Enforced here instead, in the one place a client cannot reach around.
+     Signed-in subscribers skip it entirely; everyone else gets the two a
+     day the page promises, counted against their account where there is
+     one and their IP where there is not. */
+  const scanner = await scanQuotaIdentity(request);
+  if (!scanner.unlimited) {
+    const quota = await rateLimitShared(`scan-day:${scanner.key}`, {
+      limit: FREE_SCANS_PER_DAY,
+      windowMs: 24 * 60 * 60 * 1000,
+    });
+    if (!quota.ok) {
+      return Response.json(
+        {
+          quotaExhausted: true,
+          scansPerDay: FREE_SCANS_PER_DAY,
+          retryAfter: quota.retryAfter,
+          reason: `You have used today's ${FREE_SCANS_PER_DAY} free scans. Poshan Home has unlimited scanning, or tap the dishes by hand — the calorie count is exact either way.`,
+        },
+        { status: 429, headers: { "Retry-After": String(quota.retryAfter) } }
+      );
+    }
+  }
 
   if (!process.env.OPENAI_API_KEY && !process.env.OMNIROUTE_API_KEY) {
     return Response.json(
