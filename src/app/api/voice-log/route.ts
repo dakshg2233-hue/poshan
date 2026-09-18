@@ -1,5 +1,5 @@
 import { MEAL_LIBRARY } from "@/lib/poshan-data";
-import { clientIp, rateLimit, tooMany, readJsonCapped } from "@/lib/rate-limit";
+import { clientIp, rateLimitShared, tooMany, readJsonCapped } from "@/lib/rate-limit";
 import { matchAgainstMenu } from "@/lib/vision-router";
 
 /**
@@ -13,7 +13,10 @@ import { matchAgainstMenu } from "@/lib/vision-router";
  * touch any account data; logging the result does, via /api/daily.
  */
 export async function POST(request: Request) {
-  const gate = rateLimit(`voice-log:${clientIp(request)}`, { limit: 15, windowMs: 60_000 });
+  /* Same shape as /api/scan: unauthenticated by design, and every accepted
+     call sends a transcript to a paid model. The in-memory limiter resets
+     per instance on Netlify, so this one has to be the shared one. */
+  const gate = await rateLimitShared(`voice-log:${clientIp(request)}`, { limit: 15, windowMs: 60_000 });
   if (!gate.ok) return tooMany(gate.retryAfter);
 
   if (!process.env.OPENAI_API_KEY && !process.env.OMNIROUTE_API_KEY) {

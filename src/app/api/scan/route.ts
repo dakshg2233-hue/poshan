@@ -1,5 +1,5 @@
 import { MEAL_LIBRARY } from "@/lib/poshan-data";
-import { clientIp, rateLimit, tooMany, readJsonCapped } from "@/lib/rate-limit";
+import { clientIp, rateLimitShared, tooMany, readJsonCapped } from "@/lib/rate-limit";
 import { askVision } from "@/lib/vision-router";
 import { unitForDish, formatQty, type PortionUnit } from "@/lib/portion";
 
@@ -78,7 +78,12 @@ function parseItems(text: string): { id: string; qty: number; confidence: string
 export async function POST(request: Request) {
   /* Each scan costs a model call, so this is the endpoint most worth
      protecting: an unthrottled loop bills you, not the attacker. */
-  const gate = rateLimit(`scan:${clientIp(request)}`, { limit: 12, windowMs: 60_000 });
+  /* An uploaded photo goes to a vision model on every accepted call, and
+     this route takes no authentication — the Food Scanner is a nav tab a
+     logged-out visitor is meant to try. So the limit is the only thing
+     between a public URL and an unbounded API bill, and it has to hold
+     across serverless instances rather than within one. */
+  const gate = await rateLimitShared(`scan:${clientIp(request)}`, { limit: 12, windowMs: 60_000 });
   if (!gate.ok) return tooMany(gate.retryAfter);
 
   if (!process.env.OPENAI_API_KEY && !process.env.OMNIROUTE_API_KEY) {
