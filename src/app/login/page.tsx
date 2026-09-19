@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AuthSection, Field } from "@/components/ui/auth-section-1";
-import { MagneticCursor } from "@/components/ui/magnetic-cursor";
 import { browserClient, supabaseReady } from "@/lib/supabase-browser";
 
 type Step = "email" | "otp" | "done";
@@ -183,7 +182,7 @@ function LoginForm() {
   }
 
   return (
-    <MagneticCursor magneticFactor={0.35} cursorSize={28} blendMode="exclusion">
+    <>
       <AuthSection
         title={step === "otp" ? "Check your email" : "Sign in to Poshan"}
         subtitle={
@@ -330,7 +329,7 @@ function LoginForm() {
           </p>
         )}
       </AuthSection>
-    </MagneticCursor>
+    </>
   );
 }
 

@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useLang } from "./lang-provider";
 import { TabBar, TabLink } from "./tabs";
 import { PaletteControl } from "./palette-control";
-import { CursorPicker } from "./cursor-picker";
 
 /**
  * Whether the page has scrolled far enough for the bar to read as
@@ -124,7 +123,6 @@ export function Nav() {
             they never push navigation off a narrow screen. */}
         <div className="flex items-center gap-1.5 shrink-0">
           <PaletteControl />
-          <CursorPicker />
         </div>
       </div>
     </header>

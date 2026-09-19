@@ -41,7 +41,6 @@ import { StickyCta } from "./sticky-cta";
 import { Consent } from "./consent";
 import { ChatWidget, ChatProvider } from "./chat-widget";
 import { GlassFilter } from "@/components/ui/glass-filter";
-import { MagneticCursor } from "@/components/ui/magnetic-cursor";
 import { TabProvider, TabPanel } from "./tabs";
 import { Bands, Biomarkers, Testimonials, ClosingCta, Footer } from "./sections";
 import {
@@ -112,20 +111,13 @@ function PoshanAppInner({
   const plan = PLANS[band.key];
 
   return (
-    /* Cursor is site-wide, not login-only. It disables itself on touch devices
-       and eases to lerp 1 under reduced motion.
-     *
-     * blendMode goes to "normal" here: exclusion inverts whatever is beneath
-     * it, which turned a warm ladoo into a cyan blob over pale grounds. A food
-     * cursor has to keep its own colour to be a ladoo at all. */
-    <MagneticCursor
-      magneticFactor={0.3}
-      cursorSize={30}
-      blendMode="normal"
-      cursorClassName="food-cursor"
-      cursorColor="transparent"
-      contrastBoost={1}
-    >
+    /* A mithai used to follow the pointer here, chosen from a picker in the
+       nav. It never replaced the arrow — it rode alongside it as a second
+       element — so a 30px sweet sat on top of whatever the pointer was
+       aimed at, which on a page of numbers and portion sizes is exactly
+       the thing you were trying to read. The native arrow is the cursor
+       now, everywhere. */
+    <>
       {/* One copy for the document: filters are referenced by id. */}
       <GlassFilter />
       <MotionLayer />
@@ -174,7 +166,7 @@ function PoshanAppInner({
       <Consent />
       </ChatProvider>
       </TabProvider>
-    </MagneticCursor>
+    </>
   );
 }
 
