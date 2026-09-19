@@ -4,11 +4,12 @@ Written 2026-09-04. Covers every raster image shipped in this `public/` director
 
 ## Dish and hero photography
 
+Everything in `hero/` is in the landing page's rotation, one picked at random per visit. Anything added there must be recorded in this table before it ships — that is the whole point of the file, and a rotation is exactly the kind of thing that grows quietly.
+
 | File | Source |
 |---|---|
 | `dishes/chutney.jpg`, `dishes/dahi.jpg`, `dishes/dal.jpg`, `dishes/rice.jpg`, `dishes/roti.jpg`, `dishes/sabzi.jpg` | Generated with Google Gemini |
-| `meals/dosa.jpg`, `meals/paratha.jpg` | Generated with Google Gemini |
-| `thali-hero.jpg` (used as both the still and motion background in `hero-video.tsx`) | Generated with Google Gemini |
+| `hero/dosa.jpg`, `hero/paratha.jpg`, `hero/thali.jpg` | Generated with Google Gemini |
 
 **Rights position, as of the date above:** Google's terms for Gemini permit commercial use of generated output and do not claim ownership over it — confirmed via Google's published terms and Gemini's own support documentation before this file was written, not assumed. The one real limitation, and it's about *exclusivity* rather than *permission*: in most jurisdictions, a purely AI-generated image with no meaningful human creative input isn't independently copyrightable by the prompter. That means Poshan can use these images commercially without restriction, but couldn't stop a third party who generated a visually similar dish photo from using theirs too. For six food photos and a hero background, that's an acceptable trade — it would matter more for a brand mark, which is why the logo files below are handled differently.
 

@@ -29,7 +29,7 @@ export function HeroCinematic() {
     >
       {/* The photograph */}
       <Image
-        src="/thali-hero.jpg"
+        src="/hero/thali.jpg"
         alt=""
         aria-hidden
         fill

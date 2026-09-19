@@ -40,7 +40,7 @@ export default function NotFound() {
       <div
         aria-hidden="true"
         className="absolute inset-0 h-full w-full bg-cover bg-center"
-        style={{ backgroundImage: "url('/thali-hero.jpg')" }}
+        style={{ backgroundImage: "url('/hero/thali.jpg')" }}
       />
 
       {/* Header logo: centred, 233x40, white only, unanimated. */}
