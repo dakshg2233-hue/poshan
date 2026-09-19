@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Anek_Devanagari, Mukta, IBM_Plex_Mono, Instrument_Serif, DM_Sans, Press_Start_2P } from "next/font/google";
 import "./globals.css";
 import { LangProvider } from "@/components/poshan/lang-provider";
+import { HERO_PICK_SCRIPT } from "@/lib/hero-photos";
 import { SITE_URL } from "@/lib/site";
 
 /* One face covering Latin and Devanagari, so the two scripts share a single
@@ -132,6 +133,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${display.variable} ${wordmark.variable} ${uiSans.variable} ${ui.variable} ${mono.variable} ${pixel.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <script dangerouslySetInnerHTML={{ __html: HERO_PICK_SCRIPT }} />
         <LangProvider>{children}</LangProvider>
       </body>
     </html>
