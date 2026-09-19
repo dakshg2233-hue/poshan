@@ -36,7 +36,6 @@ import { SymptomJournal } from "./symptom-journal";
 import { AdherenceOutcome } from "./adherence-outcome";
 import { ReminderOptIn } from "./reminder-optin";
 import { WidgetBridge } from "./widget-bridge";
-import { PointerLight } from "./pointer-light";
 import { StickyCta } from "./sticky-cta";
 import { Consent } from "./consent";
 import { ChatWidget, ChatProvider } from "./chat-widget";
@@ -158,7 +157,6 @@ function PoshanAppInner({
           Cursor picker and (dev-only) palette control now live inside
           <BottomBar> as small icons, rather than floating independently. */}
       {/* The hero's pointer spotlight, carried down the whole page. */}
-      <PointerLight />
       <StickyCta />
       <ChatWidget signedIn={signedIn} />
       <BottomBar signedIn={signedIn} />
