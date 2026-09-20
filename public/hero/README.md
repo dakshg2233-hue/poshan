@@ -19,14 +19,29 @@ at random on each visit.
 
 Run `npm run hero:check` to verify all of that before committing.
 
-## Compressing a new photograph
+## Adding a photograph
+
+```
+npm run hero:add -- ~/Downloads/rajma-chawal.jpg
+```
+
+Takes any image, crops it to 1.83, resizes to 2000px wide and writes a
+progressive JPEG at quality 82 straight into this folder — everything the
+spec above asks for, without a manual export. Several at once is fine.
+
+The crop is attention-based, not centred, so a square or portrait source
+keeps the plate rather than whichever half it happened to sit in. A source
+under 2000px wide is refused rather than upscaled, and a name already in
+the folder is skipped rather than overwritten.
+
+To do it by hand instead:
 
 ```
 npx sharp-cli --input new.jpg --output public/hero/new.jpg \
   resize 2000 --withoutEnlargement jpeg --quality 82 --progressive
 ```
 
-Or open it in any editor and export progressive JPEG at quality 82.
+Either way, run `npm run hero:check` afterwards.
 
 ## Naming
 

@@ -39,6 +39,9 @@ export function heroPhotos(): string[] {
   return found.length > 0 ? found : [DEFAULT_HERO_PHOTO];
 }
 
+/** Where the last-shown photograph is remembered between visits. */
+const LAST_SHOWN_KEY = "poshan:hero:last";
+
 /**
  * Runs from the root layout, which is a server component, so this reaches
  * the browser as a real <script> the parser executes. The same markup
@@ -57,6 +60,15 @@ export function heroPhotos(): string[] {
  * load. A style element appended to head is not something React
  * reconciles.
  *
+ * The previous photograph is excluded from the draw. A plain random pick
+ * over a small folder repeats often — with three photographs, one visit in
+ * three shows the same one again, which reads as "the rotation is broken"
+ * rather than as chance. Remembering one filename in localStorage rather
+ * than sessionStorage means a new tab counts as a new visit too, which is
+ * how someone actually returns to the site. Storage is read and written
+ * inside their own try/catch: it throws outright in some private-browsing
+ * modes, and a hero that fails to paint is far worse than a repeat.
+ *
  * It preloads only the photograph it picked — preloading a default and
  * then showing a different one would fetch two to display one — and is
  * gated on the home path, since the hero renders nowhere else.
@@ -65,7 +77,12 @@ export function heroPickScript(): string {
   return `(function(){try{
 if(location.pathname!=='/')return;
 var p=${JSON.stringify(heroPhotos())};
-var c=p[Math.floor(Math.random()*p.length)];
+var k=${JSON.stringify(LAST_SHOWN_KEY)};
+var last=null;try{last=localStorage.getItem(k)}catch(e){}
+var pool=p.filter(function(x){return x!==last});
+if(pool.length===0)pool=p;
+var c=pool[Math.floor(Math.random()*pool.length)];
+try{localStorage.setItem(k,c)}catch(e){}
 var s=document.createElement('style');
 s.textContent=":root{--hero-photo:url('"+c+"')}";
 document.head.appendChild(s);
