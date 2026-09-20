@@ -23,9 +23,18 @@ export const metadata: Metadata = {
  * from the same constants the pricing page does, which is what stops the
  * two drifting apart later.
  *
- * What genuinely cannot be invented is the operating entity's registered
- * name and address. That one stays marked, because a wrong entity on a
- * terms page is worse than an absent one.
+ * The operating entity is Poshan Nutrition Pvt Ltd, Delhi, supplied by
+ * Daksh on 20 September 2026 and now stated under Governing law. Two
+ * things about it are still open, and the second matters more than it
+ * looks: the registered office's street address and CIN, and whether this
+ * name matches the entity on the Razorpay account. A terms page naming one
+ * company while the bank statement shows another is the version of this
+ * mistake a customer discovers at a chargeback.
+ *
+ * The jurisdiction clause deliberately still reads "the courts of India"
+ * rather than being narrowed to Delhi on the strength of where the company
+ * sits. Where a company is registered and which courts it wants exclusive
+ * jurisdiction in are separate decisions, and only one of them was made.
  */
 export default function Terms() {
   return (
@@ -35,7 +44,7 @@ export default function Terms() {
       </Link>
       <h1 className="mt-6 text-[2.4rem]" style={{ fontFamily: "var(--font-display)" }}>Terms</h1>
       <p className="mt-2 text-[0.85rem]" style={{ color: "var(--ink-soft)" }}>
-        Last updated: 17 August 2026
+        Last updated: 20 September 2026
       </p>
 
       <section className="mt-10 grid gap-4 text-[0.95rem] leading-relaxed">
@@ -89,13 +98,15 @@ export default function Terms() {
 
         <h2 className="mt-6 text-[1.3rem]" style={{ fontFamily: "var(--font-display)" }}>Governing law</h2>
         <p>
-          These terms are governed by the laws of India, and the courts of
-          India have jurisdiction over any dispute arising from them.
-          {/* [TO CONFIRM] The operating entity's registered name and address
-              belong in this section. Left out of the rendered page rather
-              than guessed: a wrong entity on a terms page is worse than an
-              absent one, and it must match the entity on the Razorpay
-              account that actually collects the money. */}
+          Poshan is operated by <strong>Poshan Nutrition Pvt Ltd</strong>,
+          Delhi, India. These terms are governed by the laws of India, and the
+          courts of India have jurisdiction over any dispute arising from them.
+          {/* [TO CONFIRM: the registered office's street address and the CIN,
+              and — separately — that this name matches the entity on the
+              Razorpay account that actually collects the money. A terms page
+              naming one company while a different one appears on the bank
+              statement is the version of this mistake that reaches a
+              chargeback. */}
         </p>
 
         <h2 className="mt-6 text-[1.3rem]" style={{ fontFamily: "var(--font-display)" }}>Contact</h2>
@@ -103,8 +114,6 @@ export default function Terms() {
           <a href="mailto:dakshg2233@gmail.com" style={{ color: "var(--kesar)" }}>dakshg2233@gmail.com</a>
           {" · "}
           <a href="tel:+918595607565" style={{ color: "var(--kesar)" }}>+91 85956 07565</a>
-          {" · "}
-          <a href="tel:+919773974039" style={{ color: "var(--kesar)" }}>+91 97739 74039</a>
           <br />
           Full contact details: <Link href="/contact" style={{ color: "var(--kesar)" }}>/contact</Link>.
         </p>

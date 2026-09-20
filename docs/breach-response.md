@@ -17,7 +17,7 @@ reporting is the part fully within our control.
 ## 0. The one-line version
 
 **Anything that looks like unauthorised access to personal data → tell Daksh
-and Gaurav immediately, write down the time, change nothing yet.**
+immediately, write down the time, change nothing yet.**
 
 Preserving evidence beats a fast fix in the first hour. A wiped server is
 both an unsolved breach and an unprovable one.
@@ -54,8 +54,11 @@ downgrade after review. The reverse never works.
 
 1. **Write down the clock.** When it started, when we noticed, how. A rough
    note now is worth more than a precise reconstruction next week.
-2. **Tell Daksh and Gaurav.** Both. Not a group chat that either might
-   mute — phone.
+2. **Tell Daksh.** By phone, not a group chat that can sit unread.
+
+   Worth fixing before you need it: a single named contact is also a
+   single point of failure. If Daksh is on a flight when this fires,
+   there is no second name in this file to call. Add one.
 3. **Preserve.** Screenshot, export logs, save the offending commit hash. Do
    not force-push, do not delete the branch, do not wipe the container.
 4. **Contain, if containment is reversible.** Rotating a key is reversible.

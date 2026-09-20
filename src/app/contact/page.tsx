@@ -39,9 +39,6 @@ export default function Contact() {
           <p className="m-0">
             <a href="tel:+918595607565" style={{ color: "var(--kesar)" }}>+91 85956 07565</a>
           </p>
-          <p className="m-0">
-            <a href="tel:+919773974039" style={{ color: "var(--kesar)" }}>+91 97739 74039</a>
-          </p>
         </div>
 
         <p className="text-[0.85rem]" style={{ color: "var(--ink-soft)" }}>

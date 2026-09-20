@@ -14,10 +14,15 @@ export const metadata: Metadata = {
  * Written from what this codebase ACTUALLY does — the tables in
  * supabase/schema.sql and the migrations, Supabase email-OTP auth, the
  * Anthropic and OpenAI calls in /api/chat and /api/scan, and Razorpay
- * checkout — rather than from a template. Anything marked [TO CONFIRM]
- * needs a legal detail only Daksh can supply; no entity name, address or
- * jurisdiction has been invented, because a privacy policy that states
- * false facts about a health product is worse than an incomplete one.
+ * checkout — rather than from a template. Nothing here is invented,
+ * because a privacy policy that states false facts about a health product
+ * is worse than an incomplete one.
+ *
+ * The Data Fiduciary is Poshan Nutrition Pvt Ltd, Delhi, supplied by Daksh
+ * on 20 September 2026. What remains marked [TO CONFIRM] is narrower than
+ * it was: the registered office's street address and the CIN. A city is
+ * not an address for service, so a Data Principal wanting to send a formal
+ * notice still cannot.
  *
  * The processor list is rendered from lib/dpdp.ts rather than typed out
  * again here. It is the same list the sign-up notice shows, and two
@@ -41,9 +46,9 @@ export default function Privacy() {
       <section className="mt-10 grid gap-4 text-[0.95rem] leading-relaxed">
         <p>
           This is written to meet India&apos;s Digital Personal Data Protection Act,
-          2023. In its language, you are the <em>Data Principal</em> and Poshan is
-          the <em>Data Fiduciary</em>: the rights below are yours, and the duties
-          are ours.
+          2023. In its language, you are the <em>Data Principal</em> and Poshan
+          Nutrition Pvt Ltd is the <em>Data Fiduciary</em>: the rights below are
+          yours, and the duties are ours.
         </p>
 
         <h2 className="mt-6 text-[1.3rem]" style={{ fontFamily: "var(--font-display)" }}>What we store</h2>
@@ -193,14 +198,11 @@ export default function Privacy() {
           complaints or grievances about how your data is handled can be raised with:
         </p>
         <p>
-          <strong>Daksh</strong> and <strong>Gaurav</strong>, Grievance Officers
+          <strong>Daksh</strong>, Grievance Officer
           <br />
           Email: <a href="mailto:dakshg2233@gmail.com" style={{ color: "var(--kesar)" }}>dakshg2233@gmail.com</a>
           <br />
           Phone: <a href="tel:+918595607565" style={{ color: "var(--kesar)" }}>+91 85956 07565</a>
-          {" (Daksh) · "}
-          <a href="tel:+919773974039" style={{ color: "var(--kesar)" }}>+91 97739 74039</a>
-          {" (Gaurav)"}
         </p>
         <p className="text-[0.85rem]" style={{ color: "var(--ink-soft)" }}>
           If we do not resolve your complaint, you may take it to the Data
@@ -209,17 +211,17 @@ export default function Privacy() {
 
         <h2 className="mt-6 text-[1.3rem]" style={{ fontFamily: "var(--font-display)" }}>Contact</h2>
         <p>
-          {/* [TO CONFIRM: legal entity name and registered address. Still not
-              invented. A privacy policy is one of the few documents where a
-              placeholder company name would be read as a statement of fact,
-              and under the DPDP Act the identity of the Data Fiduciary is
-              exactly what a complainant needs in order to complain. This is
-              the last blocking gap in this page. */}
+          <strong>Poshan Nutrition Pvt Ltd</strong>, Delhi, India — the Data
+          Fiduciary responsible for the data described above.
+          <br />
+          {/* [TO CONFIRM: the registered office's street address and the CIN.
+              The entity name is confirmed and stated; "Delhi" is a city, not
+              an address for service, and a Data Principal who wants to send
+              a formal notice cannot do it with this alone. Narrower than the
+              gap it replaces, but still a gap. */}
           Email: <a href="mailto:dakshg2233@gmail.com" style={{ color: "var(--kesar)" }}>dakshg2233@gmail.com</a>
           <br />
           Phone: <a href="tel:+918595607565" style={{ color: "var(--kesar)" }}>+91 85956 07565</a>
-          {" · "}
-          <a href="tel:+919773974039" style={{ color: "var(--kesar)" }}>+91 97739 74039</a>
         </p>
         <p className="text-[0.8rem]" style={{ color: "var(--ink-soft)" }}>
           Data protection queries go to the same address. Full contact details: <Link href="/contact" style={{ color: "var(--kesar)" }}>/contact</Link>.
