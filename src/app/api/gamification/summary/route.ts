@@ -3,6 +3,7 @@ import { getAuthedSupabase } from "@/lib/api-auth";
 import { GAMIFICATION_ENABLED } from "@/lib/dev-flags";
 import { computeStreak, earnedStreakBadges, earnedActivityBadges, BADGES } from "@/lib/gamification";
 import { MEAL_LIBRARY } from "@/lib/poshan-data";
+import { mustWithholdTracking } from "@/lib/dpdp";
 
 const mealRegionOf = (dishId: string) => MEAL_LIBRARY.find((m) => m.id === dishId)?.region;
 
@@ -29,12 +30,28 @@ export async function GET(request: NextRequest) {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("gamification_enabled, leaderboard_opt_in, leaderboard_handle")
+    .select("gamification_enabled, leaderboard_opt_in, leaderboard_handle, date_of_birth, age")
     .eq("id", user.id)
     .single();
 
   if (profile && profile.gamification_enabled === false) {
     return NextResponse.json({ enabled: false, reason: "user_disabled" });
+  }
+
+  /* DPDP s.9(3) — no tracking or behavioural monitoring of a child.
+     Streaks and badges are behavioural monitoring by any honest reading:
+     they exist to observe repeat behaviour and shape it. This is not a
+     preference, so it is checked before profiles.gamification_enabled
+     rather than alongside it — a minor cannot switch it back on, and
+     neither can the account holder on their behalf.
+
+     mustWithholdTracking treats an unknown age as a minor. That will
+     withhold streaks from adults whose date of birth predates the age
+     gate, which is the right way round: the cost is a missing feature
+     until they fill in a birthday, and the alternative cost is showing a
+     child something the Act forbids. */
+  if (mustWithholdTracking({ dateOfBirth: profile?.date_of_birth, age: profile?.age })) {
+    return NextResponse.json({ enabled: false, reason: "minor_protection" });
   }
 
   const { data: subRow } = await supabase
@@ -54,7 +71,10 @@ export async function GET(request: NextRequest) {
       .is("family_member_id", null),
     supabase.from("daily_context").select("day_type").eq("user_id", user.id),
     supabase.from("pantry_items").select("item_key").eq("user_id", user.id).eq("in_stock", true),
-    supabase.from("family_members").select("id, full_name, gamification_enabled").eq("account_id", user.id),
+    supabase
+      .from("family_members")
+      .select("id, full_name, gamification_enabled, age")
+      .eq("account_id", user.id),
   ]);
 
   const logs = ownLogs ?? [];
@@ -66,7 +86,15 @@ export async function GET(request: NextRequest) {
   const vratDaysUsed = (contextRows ?? []).filter((c) => c.day_type === "vrat").length;
   const festivalDaysUsed = (contextRows ?? []).filter((c) => c.day_type === "festival").length;
 
-  const activeFamilyMembers = (familyMembers ?? []).filter((m) => m.gamification_enabled !== false);
+  /* The household streaks are the same behavioural monitoring as the
+     account holder's own, applied to people who never consented to
+     anything — and family_members.age starts at 0. s.9(3) reaches them
+     too, so a child in the household is excluded from streak scoring
+     entirely rather than merely hidden in the UI: the number should not
+     be computed, not just not shown. */
+  const activeFamilyMembers = (familyMembers ?? []).filter(
+    (m) => m.gamification_enabled !== false && !mustWithholdTracking({ age: m.age })
+  );
   const familyLogCounts = await Promise.all(
     activeFamilyMembers.map((m) =>
       supabase.from("daily_meal_logs").select("log_date").eq("user_id", user.id).eq("family_member_id", m.id)

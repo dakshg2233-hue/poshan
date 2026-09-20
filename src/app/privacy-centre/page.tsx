@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PrivacyCenter } from "@/components/poshan/privacy-center";
+import { YourData } from "@/components/poshan/your-data";
 import { DashboardNavbar } from "@/components/poshan/dashboard-navbar";
 
 export const metadata: Metadata = {
@@ -18,6 +19,13 @@ export default function PrivacyCentrePage() {
       <DashboardNavbar />
       <main className="w-[min(760px,100%-2.5rem)] mx-auto py-8 md:py-12">
         <PrivacyCenter />
+        {/* The rights against Poshan itself, below the record of who else
+            has looked. Same page on purpose: someone who came to check on
+            their data should not have to discover that erasing it lives
+            somewhere different. */}
+        <div className="mt-14 border-t pt-10" style={{ borderColor: "var(--line)" }}>
+          <YourData />
+        </div>
       </main>
     </>
   );

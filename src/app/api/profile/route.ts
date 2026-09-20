@@ -92,6 +92,16 @@ export async function POST(request: NextRequest) {
     "portion_scale",
     "gamification_enabled",
     "leaderboard_opt_in",
+    /* DPDP s.14 nomination, and the s.9 age source. date_of_birth is
+       writable because the person is the only one who knows it; the
+       gates that read it (gamification, parental consent) all re-derive
+       minor status server-side, so a client editing this cannot grant
+       itself anything — it can only change which protections apply. */
+    "date_of_birth",
+    "nominee_name",
+    "nominee_email",
+    "nominee_relationship",
+    "nominee_updated_at",
   ] as const;
 
   const updates = Object.fromEntries(

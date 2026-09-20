@@ -4,10 +4,23 @@ import { useState } from "react";
 import { useLang } from "./lang-provider";
 import { TDEECalculatorUI, type TDEEResult } from "./tdee-calculator-ui";
 import { MacroPersonalizer } from "./macro-personalizer";
+import { MinorGate } from "./minor-gate";
+import { MINOR_AGE } from "@/lib/dpdp";
 import { REGIONS, DIETS, type RegionKey, type DietKey, type GoalKey } from "@/lib/poshan-data";
 import type { ActivityLevel, Sex } from "@/lib/energy-requirement";
 
-type OnboardingStep = "welcome" | "tdee" | "goal" | "region-diet" | "macros" | "complete";
+type OnboardingStep =
+  | "welcome"
+  | "tdee"
+  | "goal"
+  /* Reached only when the age just entered is under 18. Sits
+     immediately after "tdee" because that is the step that first
+     tells us, and before "region-diet" because everything after it
+     is profile data we may not store yet. */
+  | "minor-gate"
+  | "region-diet"
+  | "macros"
+  | "complete";
 
 /* The steps the progress bar tracks, in order. "goal" is deliberately
    absent: it is part of the TDEE step's own form, not a screen of its
@@ -48,7 +61,12 @@ export function OnboardingFlow({ onComplete, isPremium }: { onComplete?: (data: 
       sex: tdeeData.gender,
       activityLevel: tdeeData.activity,
     });
-    setStep("region-diet");
+    /* DPDP s.9(1): a child's data may not be processed until a guardian
+       has verifiably consented, so the branch happens here — the first
+       moment Poshan knows — rather than at save time, when the rest of the
+       profile would already have been collected on the strength of a
+       consent nobody had given. */
+    setStep(tdeeData.age < MINOR_AGE ? "minor-gate" : "region-diet");
   };
 
   const handleRegionDietSelect = (region: RegionKey, diet: DietKey) => {
@@ -185,6 +203,14 @@ export function OnboardingFlow({ onComplete, isPremium }: { onComplete?: (data: 
         )}
 
         {/* Region & Diet Selection */}
+        {step === "minor-gate" && (
+          <MinorGate
+            age={data.age ?? 0}
+            onSent={() => setStep("region-diet")}
+            onSkip={() => setStep("region-diet")}
+          />
+        )}
+
         {step === "region-diet" && (
           <div key={step} className="panel-in">
             <h2 style={{ fontSize: "1.5rem", fontWeight: 600, marginBottom: "30px" }}>

@@ -16,6 +16,11 @@ export interface FamilyMember {
   sex: "male" | "female" | null;
   activity_level: "sedentary" | "moderate" | "heavy" | null;
   tdee: number | null;
+  /* DPDP s.5 — why the account holder may hold this person's details.
+     Null on rows created before the age gate existed; those are the
+     backfill queue, not a permission. */
+  notice_ack_basis: "self_declared_guardian" | "informed_adult" | null;
+  notice_ack_at: string | null;
   created_at: string;
   updated_at: string;
 }

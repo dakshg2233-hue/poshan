@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AuthSection, Field } from "@/components/ui/auth-section-1";
+import { ConsentNotice } from "@/components/poshan/consent-notice";
 import { browserClient, supabaseReady } from "@/lib/supabase-browser";
 
 type Step = "email" | "otp" | "done";
@@ -55,6 +56,10 @@ function LoginForm() {
   const [email, setEmail] = useState(() => searchParams.get("email")?.slice(0, 254) ?? "");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
+  /* s.5 notice acceptance. Starts false and is never defaulted true: this
+     same form creates the account, so sending a code without it is the
+     moment Poshan would begin processing without having given notice. */
+  const [noticeAccepted, setNoticeAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
@@ -89,6 +94,11 @@ function LoginForm() {
       setError(
         "Supabase is not configured yet. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local."
       );
+      return;
+    }
+
+    if (!noticeAccepted) {
+      setError("Please read and accept the notice before continuing.");
       return;
     }
 
@@ -145,6 +155,28 @@ function LoginForm() {
     }
 
     setStep("done");
+
+    /* Record the s.5 notice acceptance now rather than at tick time.
+       Before this point there is no account to attach it to, and a consent
+       row keyed to an anonymous id that never becomes a user is evidence
+       of nothing. Awaited, not fired and forgotten: the row is the only
+       proof the notice was given, and a navigation that beats the request
+       would lose it silently. A failure here is deliberately not fatal to
+       the sign-in — the user did consent, and blocking them because our
+       bookkeeping failed would be the wrong end of the stick. */
+    try {
+      await fetch("/api/privacy/consents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          purpose: "account_and_health_data",
+          granted: true,
+          lang: "en",
+        }),
+      });
+    } catch {
+      /* Logged by the route if it arrives; nothing useful to do here. */
+    }
 
     // Check if user is new (just signed up) and needs onboarding
     const sb = browserClient();
@@ -223,11 +255,13 @@ function LoginForm() {
               hint="We'll send a one-time code. No password is stored."
             />
 
+            <ConsentNotice accepted={noticeAccepted} onChange={setNoticeAccepted} />
+
             {error && <ErrorNote>{error}</ErrorNote>}
 
             <button
               type="submit"
-              disabled={busy}
+              disabled={busy || !noticeAccepted}
               data-magnetic
               className="min-h-12 rounded-full font-extrabold text-[0.95rem] cursor-pointer disabled:opacity-60"
               style={{ background: "var(--kesar-fill)", color: "#fff" }}

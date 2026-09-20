@@ -22,6 +22,10 @@ const EMPTY_FORM = {
   region: "" as "" | "north" | "south" | "east" | "west",
   goal: "" as "" | "loss" | "muscle" | "diabetes" | "pcos" | "thyroid",
   activity_level: "" as "" | "sedentary" | "moderate" | "heavy",
+  /* DPDP s.5. Empty is a valid state the form refuses to submit,
+     never a default — the whole point is that the account holder
+     chooses it deliberately for each person they add. */
+  notice_ack_basis: "" as "" | "self_declared_guardian" | "informed_adult",
 };
 
 /**
@@ -78,6 +82,23 @@ export function FamilyProfiles({ isPremium }: { isPremium: boolean }) {
       setFormError("A name is required.");
       return;
     }
+    if (!form.notice_ack_basis) {
+      setFormError("Please confirm how you may add this person's details.");
+      return;
+    }
+    if (
+      form.age &&
+      Number(form.age) < 18 &&
+      form.notice_ack_basis !== "self_declared_guardian"
+    ) {
+      /* Caught here as well as server-side so the person finds out before
+         filling in the rest of the form, not after submitting it. The
+         server check is the one that counts. */
+      setFormError(
+        "Anyone under 18 can only be added by their parent or guardian, and we will email them for permission."
+      );
+      return;
+    }
     setSubmitting(true);
     try {
       await addMember({
@@ -91,6 +112,7 @@ export function FamilyProfiles({ isPremium }: { isPremium: boolean }) {
         region: form.region || null,
         goal: form.goal || null,
         activity_level: form.activity_level || null,
+        notice_ack_basis: form.notice_ack_basis,
       });
       setForm(EMPTY_FORM);
       setAdding(false);
@@ -266,6 +288,45 @@ export function FamilyProfiles({ isPremium }: { isPremium: boolean }) {
               <option value="moderate">Moderate</option>
               <option value="heavy">Heavy</option>
             </select>
+
+            {/* DPDP s.5 / s.9. This person is not the account holder, and
+                nothing else in this form acknowledges that their details
+                belong to them. Two options rather than one tickbox, because
+                "I am their guardian" and "they know" are different legal
+                positions with different consequences — only the first one
+                permits adding a child. */}
+            <fieldset className="col-span-2 rounded-lg p-3" style={{ background: "var(--roti-2)" }}>
+              <legend className="px-1 text-[0.8rem] font-semibold">
+                These are someone else&apos;s details
+              </legend>
+              <label className="flex items-start gap-2 text-[0.82rem] leading-snug">
+                <input
+                  type="radio"
+                  name="notice_ack_basis"
+                  checked={form.notice_ack_basis === "informed_adult"}
+                  onChange={() => setForm((f) => ({ ...f, notice_ack_basis: "informed_adult" }))}
+                  className="mt-0.5"
+                />
+                <span>They are an adult and they know I am adding them.</span>
+              </label>
+              <label className="mt-1.5 flex items-start gap-2 text-[0.82rem] leading-snug">
+                <input
+                  type="radio"
+                  name="notice_ack_basis"
+                  checked={form.notice_ack_basis === "self_declared_guardian"}
+                  onChange={() =>
+                    setForm((f) => ({ ...f, notice_ack_basis: "self_declared_guardian" }))
+                  }
+                  className="mt-0.5"
+                />
+                <span>
+                  I am their parent or guardian.
+                  {form.age && Number(form.age) < 18 ? (
+                    <strong> We will email you for permission before their data is used.</strong>
+                  ) : null}
+                </span>
+              </label>
+            </fieldset>
 
             {formError && <p className="col-span-2 text-sm text-red-600">{formError}</p>}
 

@@ -85,3 +85,91 @@ export async function sendConfirmationEmail(email: string) {
     `,
   });
 }
+
+/**
+ * Minimal HTML escaping for values interpolated into an email body.
+ *
+ * The templates above drop caller-supplied strings straight into markup.
+ * For a lead notification read by the Poshan team that is untidy; for the
+ * guardian email below, where a child's account holder chooses the name,
+ * it is an injection vector pointed at a stranger's inbox. Escaped here
+ * rather than trusting the caller, because the caller is exactly who
+ * cannot be trusted.
+ */
+function esc(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/**
+ * Asks a parent or guardian to confirm, under DPDP s.9(1), that a child's
+ * data may be processed.
+ *
+ * The link is the verification. Nothing in the app may treat the child's
+ * data as consented-to until the guardian follows it, which is the whole
+ * difference between this and a checkbox claiming "I am a parent".
+ *
+ * Written plainly and with the refusal path stated first, because the
+ * person receiving it did not ask for it and may not know what Poshan is.
+ * An email that buries "if this wasn't you, ignore it" under marketing is
+ * not seeking consent, it is manufacturing it.
+ */
+export async function sendGuardianConsentEmail(params: {
+  guardianEmail: string;
+  guardianName: string;
+  childName: string;
+  confirmUrl: string;
+  expiresHours: number;
+}) {
+  const guardian = esc(params.guardianName);
+  const child = esc(params.childName);
+  const url = esc(params.confirmUrl);
+
+  return resendClient().emails.send({
+    from: "Poshan <privacy@poshan.co.in>",
+    to: params.guardianEmail,
+    subject: `Permission needed for ${child}'s nutrition profile`,
+    html: `
+      <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #1a1a1a;">
+        <h2 style="margin: 0 0 16px 0; font-size: 20px;">Someone has asked to add ${child} to Poshan</h2>
+
+        <p style="font-size: 15px; line-height: 1.6;">
+          Hello ${guardian}, Poshan is a nutrition app used in India. Someone has
+          entered ${child}&rsquo;s details &mdash; age, height, weight and dietary
+          preferences &mdash; and named you as their parent or guardian.
+        </p>
+
+        <p style="font-size: 15px; line-height: 1.6;">
+          <strong>Indian law requires your permission before we may hold a
+          child&rsquo;s data.</strong> Until you give it, we will not use
+          ${child}&rsquo;s details for anything, and we will never show them
+          streaks, badges or leaderboards &mdash; tracking a child&rsquo;s
+          behaviour is not permitted regardless of what you decide here.
+        </p>
+
+        <p style="font-size: 15px; line-height: 1.6;">
+          <strong>If you were not expecting this email, do nothing.</strong>
+          The request expires by itself in ${params.expiresHours} hours and the
+          details are deleted.
+        </p>
+
+        <p style="margin: 28px 0;">
+          <a href="${url}"
+             style="background: #C75B12; color: #fff; padding: 13px 22px; border-radius: 999px; text-decoration: none; font-weight: 600; font-size: 15px;">
+            Yes, I give permission
+          </a>
+        </p>
+
+        <p style="font-size: 13px; color: #666; line-height: 1.6;">
+          You can withdraw this permission at any time by replying to this
+          email. Questions or complaints go to our Grievance Officer at
+          <a href="mailto:dakshg2233@gmail.com" style="color: #C75B12;">dakshg2233@gmail.com</a>.
+        </p>
+      </div>
+    `,
+  });
+}
