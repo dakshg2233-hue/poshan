@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isMinor } from "@/lib/dpdp";
 import { getAuthedSupabase } from "@/lib/api-auth";
 import { recommendToday, PANTRY_STAPLES, type PantryStapleKey, type CostTier, type DayType } from "@/lib/daily-engine";
 import { estimateMaintenanceKcal, type ActivityLevel } from "@/lib/energy-requirement";
@@ -35,6 +36,42 @@ export async function GET(request: NextRequest) {
 
   if (!target) {
     return NextResponse.json({ error: "Profile not found." }, { status: 404 });
+  }
+
+  /* DPDP s.9(1) — a child's data may not be processed until a guardian has
+     verifiably consented, and building a meal plan from their age, height
+     and weight is exactly the processing the section means.
+     
+     Inert rather than invisible, and the choice matters. Hiding an
+     unconsented child's profile entirely would read to the account holder
+     as data loss, and the obvious response to data loss is to type it in
+     again — which manufactures more unconsented children's data than
+     leaving it visible ever would. So the profile stays where they put it,
+     the name they typed is still shown back to them, and only the
+     processing stops.
+     
+     Returns 200 with a reason rather than an error status: nothing has gone
+     wrong, a permission is outstanding, and the client needs to render a
+     "waiting for their guardian" state rather than a failure. */
+  if (familyMemberId && isMinor({ age: (target as { age?: number | null }).age ?? null }) === true) {
+    const { data: consent } = await supabase
+      .from("parental_consents")
+      .select("id")
+      .eq("family_member_id", familyMemberId)
+      .not("verified_at", "is", null)
+      .is("revoked_at", null)
+      .maybeSingle();
+
+    if (!consent) {
+      return NextResponse.json({
+        blocked: "awaiting_parental_consent",
+        familyMemberId,
+        name: (target as { full_name?: string }).full_name ?? null,
+        message:
+          "We need a parent or guardian's permission before we can build a plan " +
+          "for anyone under 18. Once they confirm, this works normally.",
+      });
+    }
   }
 
   const [{ data: conditionRows }, { data: recentLogs }, { data: pantryRows }, { data: contextRow }] =

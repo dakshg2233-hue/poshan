@@ -141,8 +141,10 @@ export default function Privacy() {
         </p>
         <p>
           If you are under 18, or you add a family member who is, we ask for a
-          guardian&apos;s email and send them a request. Until they confirm, the
-          profile is marked as awaiting permission. Streaks, badges and
+          guardian&apos;s email and send them a request. Until they confirm, we
+          do not build a plan from that child&apos;s details — the profile stays
+          visible to whoever entered it, marked as awaiting permission, but it
+          is not used. Streaks, badges and
           leaderboards stay switched off for anyone under 18 regardless of what
           the guardian answers — that is not a setting either of you can change,
           because it is not ours to offer.

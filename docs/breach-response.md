@@ -99,15 +99,54 @@ what produces a notification that has to be corrected later.
 
 ## 4. Notifying
 
-### The Board
+### Two regulators, not one
 
-Report to the Data Protection Board of India. Do this even where the risk
-looks low — the duty to report is not conditioned on our own assessment of
-severity the way GDPR's is.
+This is the part most breach plans get wrong. An Indian data breach can
+trigger **two separate obligations with different deadlines, different
+recipients and different content**. Satisfying one does not satisfy the
+other.
 
-**[TO CONFIRM: the Board's current reporting channel and the exact deadline
-under the DPDP Rules as commenced. Check before an incident, not during one.
-Nothing in this file should be relied on for the deadline.]**
+| | CERT-In | Data Protection Board |
+|---|---|---|
+| Deadline | **6 hours** from detection | Initial: **without delay**. Detailed: **72 hours** |
+| Basis | CERT-In Directions, 2022 (IT Act s.70B) | DPDP Rules, 2025 — Rule 7 |
+| Trigger | Cyber security incident | Personal data breach |
+| Penalty | IT Act | Up to ₹200 crore |
+
+Six hours is among the shortest reporting windows in the world, and the
+Directions are worded broadly enough that they are generally read as
+applying to almost any body corporate operating in India — which includes
+Poshan. **[TO CONFIRM with counsel: whether Poshan is in scope, and which
+incident categories apply.]** Assume yes until told otherwise; the cost of
+over-reporting is a form, and the cost of under-reporting is a penalty.
+
+The practical consequence for whoever is holding this page at 2am: **the
+six-hour clock is the one that will run out first.** Do not spend it
+perfecting the Board report.
+
+### The Board — what to send, and when
+
+Rule 7 is a two-stage process:
+
+1. **Without delay** — an initial intimation: the nature, extent, timing
+   and location of the breach, and its likely impact. Short. Send it as
+   soon as you can describe the shape of the thing, not once you fully
+   understand it.
+2. **Within 72 hours** of becoming aware — the detailed report: updated
+   description, the circumstances that led to it, remedial and mitigation
+   measures taken, and findings on who caused it.
+
+The Board may grant longer than 72 hours, but only on a **reasoned written
+request** — so if you are going to need it, ask before the deadline rather
+than explaining afterwards.
+
+Every breach is reportable regardless of severity. There is no materiality
+threshold to hide behind, unlike GDPR's risk-based test.
+
+**[TO CONFIRM: the Board's current filing channel — portal URL or email —
+and the prescribed CERT-In incident form. Look both up now and paste them
+here. Finding out where to file while the clock runs is the single most
+avoidable delay in this document.]**
 
 ### The people affected
 
@@ -127,6 +166,35 @@ being told their health data leaked can tell the difference, and the tone
 is what they will remember.
 
 ---
+
+## 4b. A conflict to resolve before it matters
+
+The CERT-In Directions also require **ICT system logs to be retained for
+180 days** within Indian jurisdiction, and NTP-synchronised clocks so that
+timestamps across systems agree.
+
+Poshan's retention policy, in `retention_policy`, currently sets windows
+shorter than that on two tables:
+
+| Table | Window | Concern |
+|---|---|---|
+| `rate_limits` | 7 days | Abuse counters. Arguably a security log. |
+| `webhook_events` | 90 days | Payment events. Arguably an audit trail. |
+
+These were chosen against DPDP s.8(7) — erase once the purpose is served —
+without CERT-In's retention floor in view. The two duties genuinely pull in
+opposite directions: one says delete promptly, the other says keep for 180
+days.
+
+**[TO CONFIRM with counsel: whether either table counts as a "log" under
+the Directions.]** If they do, lengthen the windows in `retention_policy`
+rather than disabling retention — it is a data change, one row each, no
+deploy.
+
+Worth noting what is *not* in tension: `chat_messages` at 180 days is
+already at the floor, and the health tables have no retention window at all
+while an account lives. The conflict is narrow, and it is better to find it
+here than in a regulator's question.
 
 ## 5. Afterwards
 

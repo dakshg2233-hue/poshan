@@ -114,18 +114,18 @@ export async function GET(request: NextRequest) {
     rows.map((m) => ({
       ...m,
       /* True means: we are holding this child's details but may not act on
-         them yet. The UI surfaces it as a pending state on the profile.
+         them yet.
 
-         NOT YET COMPLETE, and worth being plain about rather than letting
-         the flag imply more than it does. Setting this excludes the child
-         from every behavioural feature (gamification filters on the same
-         age test), and marks the profile in the UI. It does not yet stop
-         /api/daily building a meal plan for them. Closing that gap means
-         deciding a product question this code cannot decide on its own —
-         whether an unconsented child's profile should be inert or simply
-         invisible — so it is left visible here instead of being quietly
-         half-done. The privacy policy is worded to match what this
-         actually does, not what it should eventually do. */
+         Enforced, not merely reported. /api/daily refuses to build a plan
+         for an unconsented minor, and the gamification routes exclude them
+         from every behavioural feature. This flag is what lets the UI say
+         why rather than leaving the account holder staring at a profile
+         that silently does nothing.
+
+         Inert rather than invisible: hiding the profile would read as data
+         loss, and the answer to data loss is to type it in again, which
+         would manufacture more unconsented children's data than showing it
+         ever does. */
       consentPending: isMinor({ age: m.age }) === true && !consented.has(m.id as string),
     }))
   );

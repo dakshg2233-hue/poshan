@@ -6,7 +6,16 @@ import type { NextConfig } from "next";
  * The Content-Security-Policy is the important one: it means that even if
  * something injects a script tag, the browser refuses to run it unless it
  * comes from an origin listed here. Razorpay's checkout domain is allowed
- * because their hosted payment window has to load; nothing else third-party is.
+ * because their hosted payment window has to load, and Google Tag Manager
+ * because the consent-gated analytics in consent.tsx loads from it. Nothing
+ * else third-party is.
+ *
+ * The GTM entry is load-bearing in a way that is easy to remove by accident.
+ * Without it the browser blocks the analytics script outright, and Poshan
+ * goes on asking people to consent to measurement that cannot happen — a
+ * cookie banner for tracking that never runs. If analytics is ever dropped,
+ * remove the banner in the same change rather than leaving it asking for a
+ * permission nobody acts on.
  */
 const csp = [
   "default-src 'self'",
@@ -16,12 +25,15 @@ const csp = [
   // in production for no reason, since nothing at runtime actually needs
   // eval() there. Scoped out the same way upgrade-insecure-requests below
   // already is.
-  `script-src 'self' 'unsafe-inline' ${process.env.NODE_ENV === "production" ? "" : "'unsafe-eval' "}https://checkout.razorpay.com https://*.razorpay.com`,
+  `script-src 'self' 'unsafe-inline' ${process.env.NODE_ENV === "production" ? "" : "'unsafe-eval' "}https://checkout.razorpay.com https://*.razorpay.com https://www.googletagmanager.com`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://*.razorpay.com",
   "font-src 'self' data:",
   // Supabase and Razorpay APIs, plus the Gemini call is server-side only.
-  "connect-src 'self' https://*.supabase.co https://*.razorpay.com wss://*.supabase.co",
+  // Google Analytics beacons go to google-analytics.com, not to the tag
+  // manager domain the script came from — allowing only the script source
+  // would load gtag successfully and then silently drop every event.
+  "connect-src 'self' https://*.supabase.co https://*.razorpay.com wss://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com",
   // Razorpay opens its payment window in an iframe.
   "frame-src https://*.razorpay.com https://api.razorpay.com",
   "media-src 'self' blob:",
