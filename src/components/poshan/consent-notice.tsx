@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { NOTICE_ITEMS, PROCESSORS, NOTICE_VERSION } from "@/lib/dpdp";
+import { NOTICE_ITEMS, PROCESSORS, NOTICE_VERSION, FIDUCIARY } from "@/lib/dpdp";
 
 /**
  * The notice DPDP s.5 requires, shown before an account exists.
@@ -51,8 +51,8 @@ export function ConsentNotice({
     >
       <p className="text-[0.82rem] leading-relaxed">
         {L({
-          en: "Creating an account means we store your email, the body measurements you enter, any health conditions you select, and your lab values — to build and keep your plan, and nothing else.",
-          hi: "खाता बनाने का अर्थ है कि हम आपका ईमेल, आपके दर्ज शारीरिक माप, चुनी गई स्वास्थ्य स्थितियाँ और जाँच मान रखते हैं — केवल आपकी योजना बनाने और बनाए रखने के लिए, और किसी काम के लिए नहीं।",
+          en: `Creating an account means ${FIDUCIARY.legalName} stores your email, the body measurements you enter, any health conditions you select, and your lab values — to build and keep your plan, and nothing else.`,
+          hi: `खाता बनाने का अर्थ है कि ${FIDUCIARY.legalName} आपका ईमेल, आपके दर्ज शारीरिक माप, चुनी गई स्वास्थ्य स्थितियाँ और जाँच मान रखती है — केवल आपकी योजना बनाने और बनाए रखने के लिए, और किसी काम के लिए नहीं।`,
         })}
       </p>
 
@@ -93,8 +93,8 @@ export function ConsentNotice({
 
           <p style={{ color: "var(--ink-soft)" }}>
             {L({
-              en: "You can withdraw consent, download everything we hold, or delete your account at any time from the Privacy centre. Complaints go to our Grievance Officer, and after that to the Data Protection Board of India.",
-              hi: "आप कभी भी गोपनीयता केंद्र से सहमति वापस ले सकते हैं, अपना सारा डेटा डाउनलोड कर सकते हैं, या खाता मिटा सकते हैं। शिकायतें हमारे शिकायत अधिकारी को, और उसके बाद भारतीय डेटा संरक्षण बोर्ड को जाती हैं।",
+              en: `You can withdraw consent, download everything we hold, or delete your account at any time from the Privacy centre. Complaints go to our Grievance Officer, ${FIDUCIARY.grievanceOfficer.name} (${FIDUCIARY.grievanceOfficer.email}), and after that to the Data Protection Board of India.`,
+              hi: `आप कभी भी गोपनीयता केंद्र से सहमति वापस ले सकते हैं, अपना सारा डेटा डाउनलोड कर सकते हैं, या खाता मिटा सकते हैं। शिकायतें हमारे शिकायत अधिकारी ${FIDUCIARY.grievanceOfficer.name} (${FIDUCIARY.grievanceOfficer.email}) को, और उसके बाद भारतीय डेटा संरक्षण बोर्ड को जाती हैं।`,
             })}
           </p>
 

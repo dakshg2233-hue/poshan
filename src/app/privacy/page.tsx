@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { NOTICE_VERSION, PROCESSORS } from "@/lib/dpdp";
+import { NOTICE_VERSION, PROCESSORS, FIDUCIARY } from "@/lib/dpdp";
 
 export const metadata: Metadata = {
   title: "Privacy, Poshan",
@@ -46,9 +46,9 @@ export default function Privacy() {
       <section className="mt-10 grid gap-4 text-[0.95rem] leading-relaxed">
         <p>
           This is written to meet India&apos;s Digital Personal Data Protection Act,
-          2023. In its language, you are the <em>Data Principal</em> and Poshan
-          Nutrition Pvt Ltd is the <em>Data Fiduciary</em>: the rights below are
-          yours, and the duties are ours.
+          2023. In its language, you are the <em>Data Principal</em> and{" "}
+          {FIDUCIARY.legalName} is the <em>Data Fiduciary</em>: the rights below
+          are yours, and the duties are ours.
         </p>
 
         <h2 className="mt-6 text-[1.3rem]" style={{ fontFamily: "var(--font-display)" }}>What we store</h2>
@@ -198,11 +198,11 @@ export default function Privacy() {
           complaints or grievances about how your data is handled can be raised with:
         </p>
         <p>
-          <strong>Daksh</strong>, Grievance Officer
+          <strong>{FIDUCIARY.grievanceOfficer.name}</strong>, Grievance Officer
           <br />
-          Email: <a href="mailto:dakshg2233@gmail.com" style={{ color: "var(--kesar)" }}>dakshg2233@gmail.com</a>
+          Email: <a href={`mailto:${FIDUCIARY.grievanceOfficer.email}`} style={{ color: "var(--kesar)" }}>{FIDUCIARY.grievanceOfficer.email}</a>
           <br />
-          Phone: <a href="tel:+918595607565" style={{ color: "var(--kesar)" }}>+91 85956 07565</a>
+          Phone: <a href={`tel:${FIDUCIARY.grievanceOfficer.phone}`} style={{ color: "var(--kesar)" }}>{FIDUCIARY.grievanceOfficer.phoneDisplay}</a>
         </p>
         <p className="text-[0.85rem]" style={{ color: "var(--ink-soft)" }}>
           If we do not resolve your complaint, you may take it to the Data
@@ -211,17 +211,18 @@ export default function Privacy() {
 
         <h2 className="mt-6 text-[1.3rem]" style={{ fontFamily: "var(--font-display)" }}>Contact</h2>
         <p>
-          <strong>Poshan Nutrition Pvt Ltd</strong>, Delhi, India — the Data
-          Fiduciary responsible for the data described above.
+          <strong>{FIDUCIARY.legalName}</strong>, {FIDUCIARY.city},{" "}
+          {FIDUCIARY.country} — the Data Fiduciary responsible for the data
+          described above.
           <br />
           {/* [TO CONFIRM: the registered office's street address and the CIN.
               The entity name is confirmed and stated; "Delhi" is a city, not
               an address for service, and a Data Principal who wants to send
               a formal notice cannot do it with this alone. Narrower than the
               gap it replaces, but still a gap. */}
-          Email: <a href="mailto:dakshg2233@gmail.com" style={{ color: "var(--kesar)" }}>dakshg2233@gmail.com</a>
+          Email: <a href={`mailto:${FIDUCIARY.grievanceOfficer.email}`} style={{ color: "var(--kesar)" }}>{FIDUCIARY.grievanceOfficer.email}</a>
           <br />
-          Phone: <a href="tel:+918595607565" style={{ color: "var(--kesar)" }}>+91 85956 07565</a>
+          Phone: <a href={`tel:${FIDUCIARY.grievanceOfficer.phone}`} style={{ color: "var(--kesar)" }}>{FIDUCIARY.grievanceOfficer.phoneDisplay}</a>
         </p>
         <p className="text-[0.8rem]" style={{ color: "var(--ink-soft)" }}>
           Data protection queries go to the same address. Full contact details: <Link href="/contact" style={{ color: "var(--kesar)" }}>/contact</Link>.

@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { FIDUCIARY } from "./dpdp";
 
 /**
  * Built on first use, not at module scope. `new Resend(undefined)` throws
@@ -166,8 +167,9 @@ export async function sendGuardianConsentEmail(params: {
 
         <p style="font-size: 13px; color: #666; line-height: 1.6;">
           You can withdraw this permission at any time by replying to this
-          email. Questions or complaints go to our Grievance Officer at
-          <a href="mailto:dakshg2233@gmail.com" style="color: #C75B12;">dakshg2233@gmail.com</a>.
+          email. Questions or complaints go to ${esc(FIDUCIARY.grievanceOfficer.name)},
+          Grievance Officer at ${esc(FIDUCIARY.legalName)} —
+          <a href="mailto:${esc(FIDUCIARY.grievanceOfficer.email)}" style="color: #C75B12;">${esc(FIDUCIARY.grievanceOfficer.email)}</a>.
         </p>
       </div>
     `,

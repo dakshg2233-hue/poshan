@@ -46,6 +46,49 @@ export function isConsentPurpose(v: unknown): v is ConsentPurpose {
   return typeof v === "string" && (CONSENT_PURPOSES as readonly string[]).includes(v);
 }
 
+/**
+ * Who Poshan legally is, and who answers for it.
+ *
+ * s.5(1) requires the notice to identify the Data Fiduciary, and s.8(9)
+ * requires a published contact for the person who handles grievances. Both
+ * had been spread across the privacy page, the terms page, the consent
+ * notice, the guardian email and the export route as hand-typed literals —
+ * the same address written out sixteen times in eight files.
+ *
+ * That is fine right up until one of them changes. A grievance address that
+ * is correct on the privacy policy and stale in the email actually sent to
+ * a child's guardian is worse than either being wrong on its own, because
+ * nobody discovers it: the guardian writes to a dead address and simply
+ * never hears back, and from Poshan's side that looks identical to a parent
+ * who chose not to reply.
+ *
+ * One definition, imported everywhere it is shown.
+ */
+export const FIDUCIARY = {
+  /** The registered company. Named in the notice, the policy and the terms. */
+  legalName: "Poshan Nutrition Pvt Ltd",
+  city: "Delhi",
+  country: "India",
+
+  /**
+   * The s.8(9) officer. Singular by Daksh's decision on 20 September 2026 —
+   * valid, since the Act asks for a contact rather than a committee, but it
+   * does mean every grievance lands with one person and no fallback. If a
+   * second name is ever added, this is the only place it needs to go.
+   */
+  grievanceOfficer: {
+    name: "Daksh",
+    email: "dakshg2233@gmail.com",
+    phone: "+918595607565",
+    /** Spaced for reading; the tel: link uses `phone` above. */
+    phoneDisplay: "+91 85956 07565",
+  },
+} as const;
+
+/** "Poshan Nutrition Pvt Ltd, Delhi, India" — for a one-line attribution. */
+export const FIDUCIARY_LINE =
+  `${FIDUCIARY.legalName}, ${FIDUCIARY.city}, ${FIDUCIARY.country}`;
+
 /** s.9 applies below this age. Not a tunable — it is the statute. */
 export const MINOR_AGE = 18;
 

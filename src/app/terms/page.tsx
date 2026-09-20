@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { COLLEGE_PLAN, PREMIUM } from "@/lib/poshan-data";
+import { FIDUCIARY } from "@/lib/dpdp";
 
 export const metadata: Metadata = {
   title: "Terms, Poshan",
@@ -98,8 +99,9 @@ export default function Terms() {
 
         <h2 className="mt-6 text-[1.3rem]" style={{ fontFamily: "var(--font-display)" }}>Governing law</h2>
         <p>
-          Poshan is operated by <strong>Poshan Nutrition Pvt Ltd</strong>,
-          Delhi, India. These terms are governed by the laws of India, and the
+          Poshan is operated by <strong>{FIDUCIARY.legalName}</strong>,{" "}
+          {FIDUCIARY.city}, {FIDUCIARY.country}. These terms are governed by the
+          laws of India, and the
           courts of India have jurisdiction over any dispute arising from them.
           {/* [TO CONFIRM: the registered office's street address and the CIN,
               and — separately — that this name matches the entity on the
@@ -111,9 +113,9 @@ export default function Terms() {
 
         <h2 className="mt-6 text-[1.3rem]" style={{ fontFamily: "var(--font-display)" }}>Contact</h2>
         <p>
-          <a href="mailto:dakshg2233@gmail.com" style={{ color: "var(--kesar)" }}>dakshg2233@gmail.com</a>
+          <a href={`mailto:${FIDUCIARY.grievanceOfficer.email}`} style={{ color: "var(--kesar)" }}>{FIDUCIARY.grievanceOfficer.email}</a>
           {" · "}
-          <a href="tel:+918595607565" style={{ color: "var(--kesar)" }}>+91 85956 07565</a>
+          <a href={`tel:${FIDUCIARY.grievanceOfficer.phone}`} style={{ color: "var(--kesar)" }}>{FIDUCIARY.grievanceOfficer.phoneDisplay}</a>
           <br />
           Full contact details: <Link href="/contact" style={{ color: "var(--kesar)" }}>/contact</Link>.
         </p>

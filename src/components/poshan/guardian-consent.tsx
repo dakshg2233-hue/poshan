@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { FIDUCIARY } from "@/lib/dpdp";
 
 /**
  * What a parent or guardian sees when they follow the s.9(1) link.
@@ -51,8 +52,8 @@ const MESSAGES: Record<string, { en: string; hi: string }> = {
     hi: "यह अनुरोध पहले ही अस्वीकार किया जा चुका है। अब आपसे कुछ और अपेक्षित नहीं है।",
   },
   unconfigured: {
-    en: "Something is wrong on our side. Please write to dakshg2233@gmail.com.",
-    hi: "हमारी ओर से कोई समस्या है। कृपया dakshg2233@gmail.com पर लिखें।",
+    en: `Something is wrong on our side. Please write to ${FIDUCIARY.grievanceOfficer.email}.`,
+    hi: `हमारी ओर से कोई समस्या है। कृपया ${FIDUCIARY.grievanceOfficer.email} पर लिखें।`,
   },
 };
 
@@ -132,8 +133,8 @@ export function GuardianConsent({ token }: { token: string }) {
   if (state.phase === "done") {
     const copy = {
       confirmed: {
-        en: "Thank you. Permission recorded — you can withdraw it at any time by writing to dakshg2233@gmail.com.",
-        hi: "धन्यवाद। अनुमति दर्ज कर ली गई — आप इसे कभी भी dakshg2233@gmail.com पर लिखकर वापस ले सकते हैं।",
+        en: `Thank you. Permission recorded — you can withdraw it at any time by writing to ${FIDUCIARY.grievanceOfficer.email}.`,
+        hi: `धन्यवाद। अनुमति दर्ज कर ली गई — आप इसे कभी भी ${FIDUCIARY.grievanceOfficer.email} पर लिखकर वापस ले सकते हैं।`,
       },
       refused: {
         en: "Recorded. We will not use this child's data, and nobody will ask you again about this request.",

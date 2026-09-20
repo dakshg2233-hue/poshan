@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLang } from "./lang-provider";
 import { recordCookieConsent, unloadAnalytics } from "./consent";
+import { FIDUCIARY } from "@/lib/dpdp";
 
 /**
  * The rights a Data Principal holds against Poshan itself — DPDP ss.6(4),
@@ -276,6 +277,60 @@ export function YourData() {
             : T({ en: "Delete my account permanently", hi: "मेरा खाता स्थायी रूप से मिटाएँ" })}
         </button>
       </div>
+
+      {/* ------------------------------------------- s.5(1), s.8(9), s.13
+          Who is actually holding this data, and who to complain to.
+
+          This was on the public privacy policy and nowhere inside the app,
+          which is backwards: the person most likely to want it is the one
+          already signed in and looking at their own records, not a visitor
+          reading the policy before creating an account. Someone who wants
+          to complain should not have to leave the screen they formed the
+          complaint on to find out who to complain to. */}
+      <footer
+        className="border-t pt-6 text-[0.84rem] leading-relaxed"
+        style={{ borderColor: "var(--line)", color: "var(--ink-soft)" }}
+      >
+        <p className="m-0">
+          {T({
+            en: "Your data is held by",
+            hi: "आपका डेटा रखने वाली कंपनी",
+          })}{" "}
+          <strong style={{ color: "var(--ink)" }}>{FIDUCIARY.legalName}</strong>
+          {", "}
+          {FIDUCIARY.city}
+          {", "}
+          {FIDUCIARY.country}
+          {"."}
+        </p>
+        <p className="mt-2 mb-0">
+          {T({
+            en: "Complaints about how it is handled go to our Grievance Officer",
+            hi: "इसे कैसे संभाला जाता है, इस पर शिकायतें हमारे शिकायत अधिकारी को जाती हैं",
+          })}
+          {", "}
+          {FIDUCIARY.grievanceOfficer.name} —{" "}
+          <a
+            href={`mailto:${FIDUCIARY.grievanceOfficer.email}`}
+            style={{ color: "var(--kesar)" }}
+          >
+            {FIDUCIARY.grievanceOfficer.email}
+          </a>
+          {" · "}
+          <a
+            href={`tel:${FIDUCIARY.grievanceOfficer.phone}`}
+            style={{ color: "var(--kesar)" }}
+          >
+            {FIDUCIARY.grievanceOfficer.phoneDisplay}
+          </a>
+        </p>
+        <p className="mt-2 mb-0">
+          {T({
+            en: "If we do not resolve it, you can take the complaint to the Data Protection Board of India.",
+            hi: "यदि हम इसे हल नहीं करते, तो आप शिकायत भारतीय डेटा संरक्षण बोर्ड तक ले जा सकते हैं।",
+          })}
+        </p>
+      </footer>
     </section>
   );
 }
