@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { FORCE_PREMIUM } from "@/lib/dev-flags";
 import { isMinor } from "@/lib/dpdp";
+import { checkFamilyBasis } from "@/lib/dpdp-rules";
 
 /**
  * Family profiles — Poshan Home only ("up to six family profiles" in
@@ -166,36 +167,24 @@ export async function POST(request: NextRequest) {
 
      Rejected rather than defaulted. A default here would be Poshan
      deciding, on the account holder's behalf, that a stranger consented. */
-  const basis = body.notice_ack_basis;
-  if (basis !== "self_declared_guardian" && basis !== "informed_adult") {
+  /* Both rules — a basis must be stated, and a child needs a guardian
+     specifically — live in dpdp-rules and are tested there. The age is read
+     from the row being written rather than from anything the client asserts
+     separately, so the two cannot disagree. */
+  const age = typeof fields.age === "number" ? fields.age : null;
+  const basisCheck = checkFamilyBasis(body.notice_ack_basis, age);
+  if (!basisCheck.ok) {
     return NextResponse.json(
       {
-        error:
-          "Confirm how you may provide this person's data: as their guardian, " +
-          "or as an adult who knows you are adding them.",
+        error: basisCheck.reason,
         field: "notice_ack_basis",
         allowed: ["self_declared_guardian", "informed_adult"],
       },
       { status: 400 }
     );
   }
-
-  /* s.9(1) — a child needs a guardian, not merely an adult who was told.
-     Checked against the age being written rather than trusting the basis
-     the client picked, because the two disagreeing is exactly the case
-     that matters: someone adding a nine-year-old as an "informed adult". */
-  const minor = isMinor({ age: typeof fields.age === "number" ? fields.age : null });
-  if (minor === true && basis !== "self_declared_guardian") {
-    return NextResponse.json(
-      {
-        error:
-          "This person is under 18. Only a parent or guardian may add them, " +
-          "and we will email that guardian for permission before their data is used.",
-        field: "notice_ack_basis",
-      },
-      { status: 400 }
-    );
-  }
+  const basis = basisCheck.basis;
+  const minor = isMinor({ age });
 
   const { data, error } = await supabase
     .from("family_members")

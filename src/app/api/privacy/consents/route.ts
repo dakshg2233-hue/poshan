@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { getAuthedSupabase } from "@/lib/api-auth";
-import {
-  CONSENT_PURPOSES,
-  NOTICE_VERSION,
-  isConsentPurpose,
-  type ConsentPurpose,
-} from "@/lib/dpdp";
+import { CONSENT_PURPOSES, NOTICE_VERSION, isConsentPurpose } from "@/lib/dpdp";
+import { latestConsentPerPurpose } from "@/lib/dpdp-rules";
 
 /**
  * The consent ledger — DPDP s.6, and the Fiduciary's burden of proving it.
@@ -133,29 +129,14 @@ export async function GET(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
-  const latest = new Map<ConsentPurpose, (typeof rows)[number]>();
-  for (const r of rows ?? []) {
-    /* Rows arrive newest-first, so the first sighting of a purpose is the
-       live one and everything after it is history. */
-    if (!latest.has(r.purpose as ConsentPurpose)) latest.set(r.purpose as ConsentPurpose, r);
-  }
-
+  /* The reduction lives in dpdp-rules so it can be tested directly — see
+     dpdp-rules.test.ts. "Newest row wins" is the rule the whole ledger
+     depends on, and it was previously expressed only here, reachable only
+     over HTTP. It also sorts for itself rather than relying on the ORDER BY
+     above, so this route staying correct does not depend on that clause
+     surviving a future edit. */
   return NextResponse.json({
     noticeVersion: NOTICE_VERSION,
-    consents: CONSENT_PURPOSES.map((p) => {
-      const row = latest.get(p);
-      return {
-        purpose: p,
-        /* null, not false: "never asked" is not "said no", and only one of
-           those should make a toggle look like the user turned it off. */
-        granted: row ? row.granted : null,
-        noticeVersion: row?.notice_version ?? null,
-        lang: row?.notice_lang ?? null,
-        at: row?.created_at ?? null,
-        /* True when the words changed since they agreed — the signal that
-           consent should be asked for again rather than assumed forward. */
-        stale: row ? row.notice_version !== NOTICE_VERSION : false,
-      };
-    }),
+    consents: latestConsentPerPurpose(rows ?? [], NOTICE_VERSION),
   });
 }

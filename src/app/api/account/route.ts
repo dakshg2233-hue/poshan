@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthedSupabase } from "@/lib/api-auth";
 import { serviceClient } from "@/lib/supabase";
+import { collectRazorpayIds, isDeleteConfirmed } from "@/lib/dpdp-rules";
 
 /**
  * Erasure — DPDP s.12(3), and the duty under s.8(7) to stop holding data
@@ -58,7 +59,7 @@ export async function DELETE(request: NextRequest) {
   } catch {
     /* An empty body is a missing confirmation, handled just below. */
   }
-  if (body.confirm !== "DELETE") {
+  if (!isDeleteConfirmed(body.confirm)) {
     return NextResponse.json(
       { error: "Confirmation required.", expected: "DELETE" },
       { status: 400 }
@@ -132,29 +133,18 @@ export async function DELETE(request: NextRequest) {
     service.from("checkout_orders").select("id, razorpay_subscription_id").eq("user_id", user.id),
   ]);
 
-  const orderIds = new Set<string>();
-  const paymentIds = new Set<string>();
-  const subIds = new Set<string>();
-
-  for (const s of subs ?? []) {
-    if (s.razorpay_order_id) orderIds.add(s.razorpay_order_id);
-    if (s.razorpay_payment_id) paymentIds.add(s.razorpay_payment_id);
-    if (s.razorpay_subscription_id) subIds.add(s.razorpay_subscription_id);
-  }
-  for (const o of orders ?? []) {
-    if (o.razorpay_subscription_id) subIds.add(o.razorpay_subscription_id);
-  }
+  const { orderIds, paymentIds, subscriptionIds } = collectRazorpayIds(subs, orders);
 
   for (const [column, ids] of [
     ["razorpay_order_id", orderIds],
     ["razorpay_payment_id", paymentIds],
-    ["razorpay_subscription_id", subIds],
+    ["razorpay_subscription_id", subscriptionIds],
   ] as const) {
-    if (ids.size === 0) continue;
+    if (ids.length === 0) continue;
     const { data: removed, error } = await service
       .from("payment_events")
       .delete()
-      .in(column, [...ids])
+      .in(column, ids)
       .select("id");
     if (error) return await fail(`Payment ledger cleanup failed: ${error.message}`);
     paymentsCleared += removed?.length ?? 0;

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serviceClient } from "@/lib/supabase";
+import { isValidConsentToken, tokenState } from "@/lib/dpdp-rules";
 
 /**
  * The guardian's half of the s.9(1) round trip.
@@ -23,10 +24,12 @@ import { serviceClient } from "@/lib/supabase";
 
 type Ctx = { params: Promise<{ token: string }> };
 
-const TOKEN_SHAPE = /^[a-f0-9]{32}$/;
-
 async function loadConsent(token: string) {
-  if (!TOKEN_SHAPE.test(token)) return { error: "invalid" as const };
+  /* Shape-checked before it ever reaches a query, so a malformed token
+     costs the same as a wrong one and tells the caller the same thing.
+     Both this and the state machine below live in dpdp-rules, where they
+     are tested directly rather than only through HTTP. */
+  if (!isValidConsentToken(token)) return { error: "invalid" as const };
 
   const service = serviceClient();
   if (!service) return { error: "unconfigured" as const };
@@ -43,10 +46,11 @@ async function loadConsent(token: string) {
     .maybeSingle();
 
   if (!row) return { error: "invalid" as const };
-  if (row.revoked_at) return { error: "revoked" as const };
-  if (row.token_expires_at && new Date(row.token_expires_at).getTime() < Date.now()) {
-    return { error: "expired" as const };
-  }
+
+  const state = tokenState(row);
+  if (state === "revoked") return { error: "revoked" as const };
+  if (state === "expired") return { error: "expired" as const };
+
   return { row, service };
 }
 

@@ -29,6 +29,33 @@ const KEY = "poshan-consent";
 const ANON_KEY = "poshan-anon-id";
 const ANALYTICS_ID = process.env.NEXT_PUBLIC_ANALYTICS_ID;
 
+/**
+ * KNOWN CONFLICT, and a deliberate non-fix — read before debugging this.
+ *
+ * The Content-Security-Policy in next.config.ts allows scripts only from
+ * 'self' and Razorpay. googletagmanager.com is not on that list, and
+ * google-analytics.com is not in connect-src either, so in production the
+ * browser blocks this script outright and nothing below ever runs. Setting
+ * NEXT_PUBLIC_ANALYTICS_ID does not change that.
+ *
+ * The effect is that Poshan currently asks people to consent to
+ * measurement that then does not happen. Harmless in the direction it
+ * fails — no data is collected, which is the private outcome — but the
+ * consent request is misleading either way, and under DPDP asking for
+ * consent you do not act on is its own small dishonesty.
+ *
+ * Resolving it is a privacy decision, not an engineering one, which is why
+ * it is documented rather than quietly patched:
+ *
+ *   - To make analytics work, add https://www.googletagmanager.com to
+ *     script-src and https://*.google-analytics.com to connect-src. That
+ *     is a decision to let a third party observe your users.
+ *   - To keep the stricter CSP, remove the banner instead. A cookie
+ *     notice for tracking that cannot run is pure friction.
+ *
+ * Doing neither leaves both the banner and the block in place, which is
+ * the only option that is wrong on its own terms.
+ */
 function loadAnalytics() {
   if (!ANALYTICS_ID || document.getElementById("poshan-analytics")) return;
   const s = document.createElement("script");
