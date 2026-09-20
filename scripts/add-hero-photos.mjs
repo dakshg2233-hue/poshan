@@ -25,6 +25,14 @@ import sharp from "sharp";
 
 const DIR = "public/hero";
 const TARGET_WIDTH = 2000;
+/* The floor hero:check enforces, and the real requirement. Sources between
+   this and TARGET_WIDTH are kept at their own width rather than refused:
+   upscaling invents detail, but a genuine 1700px photograph is sharp at
+   1700px and the spec has always said 1600 is enough. Demanding 2000 here
+   while the README promised 1600 turned a documented minimum into a
+   stricter undocumented one — which is how a generated image that met the
+   spec got rejected for not meeting it. */
+const MIN_WIDTH = 1600;
 /* 1.833, matching hero:check. Derived rather than typed twice so the two
    scripts cannot drift into disagreeing about what the shape is. */
 const TARGET_HEIGHT = Math.round(TARGET_WIDTH / 1.833);
@@ -72,16 +80,21 @@ for (const input of inputs) {
 
   try {
     const src = await sharp(input).metadata();
-    if (src.width < TARGET_WIDTH) {
+    if (src.width < MIN_WIDTH) {
       /* Upscaling invents detail the hero then shows at full size. Better
          to refuse than to ship something that softens on a large screen. */
-      console.log(`  FAIL  ${name} — source is ${src.width}px wide, needs ${TARGET_WIDTH}+`);
+      console.log(`  FAIL  ${name} — source is ${src.width}px wide, needs ${MIN_WIDTH}+`);
       skipped++;
       continue;
     }
 
+    /* Never enlarge: a 1700px source becomes a 1700px hero, not a blurry
+       2000px one. */
+    const outWidth = Math.min(src.width, TARGET_WIDTH);
+    const outHeight = Math.round(outWidth / 1.833);
+
     await sharp(input)
-      .resize(TARGET_WIDTH, TARGET_HEIGHT, {
+      .resize(outWidth, outHeight, {
         fit: "cover",
         position: sharp.strategy.attention,
       })
@@ -89,7 +102,7 @@ for (const input of inputs) {
       .toFile(out);
 
     const kb = fs.statSync(out).size / 1024;
-    console.log(`  ok    ${name.padEnd(22)} ${TARGET_WIDTH}x${TARGET_HEIGHT}  ${kb.toFixed(0)}KB`);
+    console.log(`  ok    ${name.padEnd(22)} ${outWidth}x${outHeight}  ${kb.toFixed(0)}KB`);
     added++;
   } catch (e) {
     console.log(`  FAIL  ${name} — ${e.message}`);
