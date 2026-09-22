@@ -17,6 +17,20 @@ dish line.
 Variety comes from the food: different colours, different vessels, different
 shapes of dish. Not from different treatments.
 
+## One dish per generation. Never a grid.
+
+The single most likely way to waste an afternoon here: asking the model for
+all twelve at once and getting back one contact sheet.
+
+It looks like a win — twelve dishes, one prompt, and the styling is usually
+right. But the model spends its output resolution on the whole sheet, not on
+each dish. A 1672x941 grid of twelve is **418x313 per dish**, which is about
+a quarter of what the hero needs, and no amount of upscaling puts back detail
+that was never captured. `npm run hero:add` refuses sources under 1600px for
+exactly this reason, so the whole batch bounces.
+
+Twelve separate generations. Each one a single dish, 16:9, full resolution.
+
 ## Settings
 
 - **Aspect ratio: 16:9.** Closest to the 1.83 the hero wants, so the crop
