@@ -114,6 +114,9 @@ async function reconcileCharge(subscriptionId: string, amountPaise: number): Pro
  * Called on the webhook's `subscription.charged` event — the source of
  * truth for every actual billing cycle, initial or renewal alike.
  */
+/* Razorpay subscription states after which no charge should grant access. */
+const ENDED_STATUSES = new Set(["cancelled", "completed", "halted", "expired"]);
+
 export async function provisionRecurringCharge(
   subscriptionId: string,
   paymentId: string,
@@ -129,7 +132,18 @@ export async function provisionRecurringCharge(
   /* `current_end` is Razorpay's own record of when the cycle just paid for
      runs out — authoritative, not computed here. */
   const currentEnd = subscription.current_end as number | undefined;
-  if (!userId || !currentEnd) return false;
+  /* false means "try again later", and the webhook turns it into a 500
+     that Razorpay retries. A subscription with no Poshan user on it (the
+     Razorpay account is shared) will never succeed, so it is true: done,
+     nothing to grant. Retrying it would never end. */
+  if (!userId || !currentEnd) return true;
+
+  /* Webhooks are not delivered in order. A subscription.charged that was
+     retried hours later can land after subscription.cancelled, and
+     upserting "active" here would quietly restore access the customer
+     cancelled. The subscription was just fetched from Razorpay, so its
+     status is the current truth: if it has ended, record nothing. */
+  if (ENDED_STATUSES.has(String(subscription.status))) return true;
 
   const db = serviceClient();
   if (!db) return false;

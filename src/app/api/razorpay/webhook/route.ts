@@ -172,7 +172,15 @@ export async function POST(request: Request) {
      row to "active" once real money has actually moved. Every other
      subscribed event reaches here too and must not grant anything. */
   if (event.event === "subscription.charged" && amount) {
-    await provisionRecurringCharge(subscriptionId, paymentId, amount);
+    const provisioned = await provisionRecurringCharge(subscriptionId, paymentId, amount);
+    if (!provisioned) {
+      /* The event id was recorded as handled before any of this ran. Left
+         in place, Razorpay's retry would be answered "duplicate" and a
+         customer who paid would never get access. Forget the delivery
+         and fail, so the retry arrives as new and runs again. */
+      if (eventId && db) await db.from("webhook_events").delete().eq("razorpay_event_id", eventId);
+      return Response.json({ error: "Provisioning failed; retry." }, { status: 500 });
+    }
   }
 
   /* Always 2xx on a verified event, otherwise Razorpay retries forever. */
