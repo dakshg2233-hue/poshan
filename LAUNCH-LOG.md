@@ -289,9 +289,12 @@ is usually the dish.
 
 1. **Rotate the key.** The old secret was pasted into chat twice and must not
    reach production.
-2. **Create the three plans.** `scripts/` has a script that reads ₹299, ₹2,499
-   and ₹999 from the app's own constants, so the plans cannot disagree with what
-   `checkout_orders` records as the expected price.
+2. **Create the three plans.** `npm run razorpay:plans` shows what is missing,
+   and `npm run razorpay:plans -- --create` makes it. It reads ₹299, ₹2,499 and
+   ₹999 from the app's own constants, so the plans cannot disagree with what
+   `checkout_orders` records as the expected price, and it prints the three
+   `RAZORPAY_PLAN_ID_*` lines to paste. (This entry described the script
+   before it existed; it was written on 26 September.)
 3. **Set the webhook secret.** The URL is right; the secret still says "Not
    provided", and until it is set every delivery is rejected. Cut the 49
    subscribed events to the five the code handles: `subscription.charged`,

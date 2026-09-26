@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "hero:check": "node scripts/check-hero-photos.mjs",
-    "hero:add": "node scripts/add-hero-photos.mjs"
+    "hero:add": "node scripts/add-hero-photos.mjs",
+    "razorpay:plans": "node --env-file-if-exists=.env.local scripts/create-razorpay-plans.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.123.0",
