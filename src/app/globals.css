@@ -2321,7 +2321,7 @@ body {
    and deliberately NOT the rest of Poshan's design language: hard pixel
    edges, no border-radius, no blur, a beveled-GUI look built from layered
    box-shadow instead of any shipped texture asset. Everything here lives
-   under .mc-ui, so GAMIFICATION_ENABLED=false (dev-flags.ts) or a
+   under .mc-ui, so GAMIFICATION_ENABLED being off (dev-flags.ts) or a
    per-user opt-out hiding the components that use these classes removes
    the whole skin with them — nothing here leaks into the rest of the
    site's typography or color tokens. */

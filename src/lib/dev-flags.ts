@@ -33,14 +33,21 @@ export const FORCE_PREMIUM = forcePremiumEnabled(
 );
 
 /**
- * App-wide kill switch for the gamification layer (streaks-with-grace,
- * badges, household/public leaderboards) — set
- * NEXT_PUBLIC_GAMIFICATION_ENABLED=false to hide all of it instantly if
- * it isn't working out, with no code change and no redeploy of anything
- * beyond this one env var. Defaults to on. A per-user
+ * App-wide switch for the gamification layer (streaks-with-grace,
+ * badges, household/public leaderboards). Set
+ * NEXT_PUBLIC_GAMIFICATION_ENABLED=true to show it; anything else,
+ * including the variable being absent, keeps it hidden.
+ *
+ * Defaults to off. It used to default to on, with `=false` as the kill
+ * switch, which meant the safe state depended on a variable surviving in
+ * a hosting dashboard: delete it while tidying env vars, or set up a new
+ * deploy without it, and public leaderboards went live unannounced. Now
+ * losing the variable fails closed, and turning it on is a deliberate
+ * act. Changing it needs a rebuild, since NEXT_PUBLIC_ values are inlined
+ * at build time. A per-user
  * profiles.gamification_enabled toggle sits alongside this for someone
  * who personally wants it off without affecting anyone else — this flag
  * is the "turn it off for everyone" lever, that one is "turn it off for
  * me."
  */
-export const GAMIFICATION_ENABLED = process.env.NEXT_PUBLIC_GAMIFICATION_ENABLED !== "false";
+export const GAMIFICATION_ENABLED = process.env.NEXT_PUBLIC_GAMIFICATION_ENABLED === "true";

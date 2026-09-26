@@ -332,8 +332,10 @@ is usually the dish.
 - **`git revert 8c7eb53`** undoes the rotating hero alone. Nothing depends on it.
 - `COLLEGE_VERIFICATION=on` turns student verification on. It is built and
   tested, including the lookalike domains a naive `endsWith` would wave through.
-- `NEXT_PUBLIC_GAMIFICATION_ENABLED=false` keeps streaks, badges and
-  leaderboards off. **Deleting the variable turns them on** — the default is on.
+- Streaks, badges and leaderboards are off unless
+  `NEXT_PUBLIC_GAMIFICATION_ENABLED=true`. Since 26 September the default is
+  off, so a missing variable keeps them hidden. It used to be the other way
+  round, where deleting the variable turned them on.
 - `NEXT_PUBLIC_FORCE_PREMIUM` must never be set in production. The code now
   refuses it in a production build regardless, but do not set it.
 - Netlify's durable cache can serve a stale page after a deploy. Check with a
