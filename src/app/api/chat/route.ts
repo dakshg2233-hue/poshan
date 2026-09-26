@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import Anthropic from "@anthropic-ai/sdk";
 import { serviceClient } from "@/lib/supabase";
-import { clientIp, rateLimit, tooMany, readJsonCapped } from "@/lib/rate-limit";
+import { clientIp, rateLimitShared, tooMany, readJsonCapped } from "@/lib/rate-limit";
 import { buildNutritionContext, buildHealthContext } from "@/lib/chat-knowledge";
 import { checkAiSafety, gateAiReply, SAFE_REPLACEMENT } from "@/lib/ai-safety";
 import { startOfTodayIso } from "@/lib/day";
@@ -56,7 +56,7 @@ Rules, non-negotiable:
 - Keep answers conversational and short unless the user asks for detail.`;
 
 export async function POST(request: NextRequest) {
-  const gate = rateLimit(`chat:${clientIp(request)}`, { limit: 20, windowMs: 60_000 });
+  const gate = await rateLimitShared(`chat:${clientIp(request)}`, { limit: 20, windowMs: 60_000 });
   if (!gate.ok) return tooMany(gate.retryAfter);
 
   const apiKey = process.env.ANTHROPIC_API_KEY;

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serviceClient } from "@/lib/supabase";
-import { clientIp, rateLimit, tooMany, readJsonCapped } from "@/lib/rate-limit";
+import { clientIp, rateLimitShared, tooMany, readJsonCapped } from "@/lib/rate-limit";
 
 const MAX_FAMILY_MEMBERS = 5;
 
@@ -28,7 +28,7 @@ const WRITABLE = [
  * token guessing.
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ token: string }> }) {
-  const gate = rateLimit(`invite:${clientIp(request)}`, { limit: 20, windowMs: 60_000 });
+  const gate = await rateLimitShared(`invite:${clientIp(request)}`, { limit: 20, windowMs: 60_000 });
   if (!gate.ok) return tooMany(gate.retryAfter);
 
   const { token } = await params;
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ token: string }> }) {
-  const gate = rateLimit(`invite:${clientIp(request)}`, { limit: 10, windowMs: 60_000 });
+  const gate = await rateLimitShared(`invite:${clientIp(request)}`, { limit: 10, windowMs: 60_000 });
   if (!gate.ok) return tooMany(gate.retryAfter);
 
   const { token } = await params;

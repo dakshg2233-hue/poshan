@@ -4,7 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 import { COLLEGE_PLAN, PREMIUM } from "@/lib/poshan-data";
 import { canBuyCollegePlan } from "@/lib/college-eligibility";
 import { serviceClient } from "@/lib/supabase";
-import { clientIp, rateLimit, tooMany, readJsonCapped } from "@/lib/rate-limit";
+import { clientIp, rateLimitShared, tooMany, readJsonCapped } from "@/lib/rate-limit";
 
 /**
  * Creates a Razorpay Subscription, not a one-time Order.
@@ -31,7 +31,7 @@ import { clientIp, rateLimit, tooMany, readJsonCapped } from "@/lib/rate-limit";
 export async function POST(request: NextRequest) {
   /* Subscription creation costs a Razorpay API call, so it is worth rate
      limiting purely to stop someone running up your account. */
-  const gate = rateLimit(`subscription:${clientIp(request)}`, { limit: 8, windowMs: 60_000 });
+  const gate = await rateLimitShared(`subscription:${clientIp(request)}`, { limit: 8, windowMs: 60_000 });
   if (!gate.ok) return tooMany(gate.retryAfter);
 
   const keyId = process.env.RAZORPAY_KEY_ID;

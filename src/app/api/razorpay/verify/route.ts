@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { serviceClient } from "@/lib/supabase";
-import { clientIp, rateLimit, tooMany, readJsonCapped } from "@/lib/rate-limit";
+import { clientIp, rateLimitShared, tooMany, readJsonCapped } from "@/lib/rate-limit";
 import { provisionTrialStart } from "@/lib/razorpay-provision";
 
 /**
@@ -37,7 +37,7 @@ type Body = {
 };
 
 export async function POST(request: Request) {
-  const gate = rateLimit(`verify:${clientIp(request)}`, { limit: 10, windowMs: 60_000 });
+  const gate = await rateLimitShared(`verify:${clientIp(request)}`, { limit: 10, windowMs: 60_000 });
   if (!gate.ok) return tooMany(gate.retryAfter);
 
   const keySecret = process.env.RAZORPAY_KEY_SECRET;

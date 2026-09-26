@@ -1,6 +1,6 @@
 import { serviceClient } from "@/lib/supabase";
 import { emailReady, sendClinicLeadEmail } from "@/lib/email";
-import { clientIp, rateLimit, tooMany, readJsonCapped } from "@/lib/rate-limit";
+import { clientIp, rateLimitShared, tooMany, readJsonCapped } from "@/lib/rate-limit";
 
 /**
  * Hospital/Enterprise "Talk to us" form.
@@ -25,7 +25,7 @@ type Body = {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: Request) {
-  const gate = rateLimit(`clinic-lead:${clientIp(request)}`, { limit: 5, windowMs: 60_000 });
+  const gate = await rateLimitShared(`clinic-lead:${clientIp(request)}`, { limit: 5, windowMs: 60_000 });
   if (!gate.ok) return tooMany(gate.retryAfter);
 
   const parsed = await readJsonCapped<Body>(request, 8_192);

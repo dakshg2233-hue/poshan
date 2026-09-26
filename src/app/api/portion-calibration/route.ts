@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getAuthedSupabase } from "@/lib/api-auth";
-import { clientIp, rateLimit, tooMany, readJsonCapped } from "@/lib/rate-limit";
+import { clientIp, rateLimitShared, tooMany, readJsonCapped } from "@/lib/rate-limit";
 import { askVision } from "@/lib/vision-router";
 
 /**
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
   const auth = await getAuthedSupabase(request);
   if ("error" in auth) return auth.error;
 
-  const gate = rateLimit(`portion-cal:${clientIp(request)}`, { limit: 10, windowMs: 60_000 });
+  const gate = await rateLimitShared(`portion-cal:${clientIp(request)}`, { limit: 10, windowMs: 60_000 });
   if (!gate.ok) return tooMany(gate.retryAfter);
 
   if (!process.env.OPENAI_API_KEY && !process.env.OMNIROUTE_API_KEY) {
