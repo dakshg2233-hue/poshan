@@ -30,7 +30,12 @@ import { PROCESSORS, NOTICE_VERSION } from "@/lib/dpdp";
  * got away — patient_id genuinely means something different from user_id
  * in the clinician tables, and flattening them would lose that.
  */
-const OWNED_TABLES: { table: string; column: string }[] = [
+/* `columns` is for a table whose grant hides a column from the signed-in
+   user. select("*") on such a table fails outright, so it lists what the
+   user may read. parental_consents hides verification_token: the minor
+   whose consent it is must not be able to read the link meant for the
+   guardian. */
+const OWNED_TABLES: { table: string; column: string; columns?: string }[] = [
   { table: "profiles", column: "id" },
   { table: "biomarker_readings", column: "user_id" },
   { table: "user_conditions", column: "user_id" },
@@ -53,7 +58,14 @@ const OWNED_TABLES: { table: string; column: string }[] = [
   { table: "patient_links", column: "patient_id" },
   { table: "audit_log", column: "patient_id" },
   { table: "consent_records", column: "user_id" },
-  { table: "parental_consents", column: "minor_user_id" },
+  {
+    table: "parental_consents",
+    column: "minor_user_id",
+    columns:
+      "id, minor_user_id, family_member_id, guardian_name, guardian_email, guardian_phone, " +
+      "guardian_relationship, verification_method, token_expires_at, verified_at, revoked_at, " +
+      "notice_version, notice_lang, created_at",
+  },
 ];
 
 export async function GET(request: NextRequest) {
@@ -68,8 +80,8 @@ export async function GET(request: NextRequest) {
      action, and firing twenty-three concurrent queries at the connection
      pool to save a few hundred milliseconds on a once-a-year request is a
      bad trade for a database that is also serving everyone else. */
-  for (const { table, column } of OWNED_TABLES) {
-    const { data: rows, error } = await supabase.from(table).select("*").eq(column, user.id);
+  for (const { table, column, columns } of OWNED_TABLES) {
+    const { data: rows, error } = await supabase.from(table).select(columns ?? "*").eq(column, user.id);
     if (error) {
       /* A table that does not exist yet — the migration has not been run —
          must not take the whole export down with it. Reported by name so
