@@ -40,7 +40,7 @@ export default function Privacy() {
         Privacy
       </h1>
       <p className="mt-2 text-[0.85rem]" style={{ color: "var(--ink-soft)" }}>
-        Last updated: 20 September 2026 · Notice version {NOTICE_VERSION}
+        Last updated: 26 September 2026 · Notice version {NOTICE_VERSION}
       </p>
 
       <section className="mt-10 grid gap-4 text-[0.95rem] leading-relaxed">
@@ -85,7 +85,7 @@ export default function Privacy() {
         <ul className="ml-5 list-disc grid gap-1">
           <li><strong>Chat messages</strong> — 180 days. They exist to give the assistant context within a course of questions, not to build a permanent health record.</li>
           <li><strong>Scan corrections</strong> — 365 days.</li>
-          <li><strong>Payment webhook records</strong> — 90 days.</li>
+          <li><strong>Payment webhook records</strong> — 180 days, the minimum CERT-In requires for system logs. They hold no personal data.</li>
           <li><strong>Abuse counters</strong> — 7 days.</li>
           <li><strong>Clinician access grants</strong> — whatever expiry you set when granting.</li>
         </ul>

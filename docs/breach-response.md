@@ -173,23 +173,27 @@ The CERT-In Directions also require **ICT system logs to be retained for
 180 days** within Indian jurisdiction, and NTP-synchronised clocks so that
 timestamps across systems agree.
 
-Poshan's retention policy, in `retention_policy`, currently sets windows
-shorter than that on two tables:
+Two tables had windows shorter than that, chosen against DPDP s.8(7)
+(erase once the purpose is served) without CERT-In's floor in view.
+Settled on 26 September 2026 (migration `20260926120000`), on what each
+table actually holds:
 
-| Table | Window | Concern |
+| Table | Window | Decision |
 |---|---|---|
-| `rate_limits` | 7 days | Abuse counters. Arguably a security log. |
-| `webhook_events` | 90 days | Payment events. Arguably an audit trail. |
+| `webhook_events` | 90 → **180 days** | A log: one row per Razorpay delivery, recording that an event arrived and when. It holds no personal data, so the longer window costs users nothing. |
+| `rate_limits` | 7 days, unchanged | Not a log: one row per key, overwritten in place every window. It never records that an event happened, so 180 days would preserve nothing. |
 
-These were chosen against DPDP s.8(7) — erase once the purpose is served —
-without CERT-In's retention floor in view. The two duties genuinely pull in
-opposite directions: one says delete promptly, the other says keep for 180
-days.
+This is Poshan's own reading, not counsel's. If counsel later says
+`rate_limits` counts too, the fix is one row in `retention_policy`, with no
+deploy. Keep the privacy policy's "How long we keep it" list in step with
+the table.
 
-**[TO CONFIRM with counsel: whether either table counts as a "log" under
-the Directions.]** If they do, lengthen the windows in `retention_policy`
-rather than disabling retention — it is a data change, one row each, no
-deploy.
+The same migration fixed a bug that meant retention had **never run**. Both
+rows named a `created_at` column that neither table has. `apply_retention()`
+ran every table in one call, so the first bad row rolled the whole call back
+and nothing was deleted anywhere, `chat_messages` included. Each table now
+runs on its own, and a failure is named in the result and in the Postgres
+logs.
 
 Worth noting what is *not* in tension: `chat_messages` at 180 days is
 already at the floor, and the health tables have no retention window at all
