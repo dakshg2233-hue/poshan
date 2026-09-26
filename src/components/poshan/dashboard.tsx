@@ -52,7 +52,7 @@ export function Dashboard() {
       {/* Today's advice sits first, directly under the (always-topmost) nav
           — not floating over the hero footage as chrome, and not buried
           below it either. */}
-      <div className="w-[min(1180px,100%-2.5rem)] mx-auto pt-5">
+      <div className="advice-slot w-[min(1180px,100%-2.5rem)] mx-auto">
         <AdviceBar />
       </div>
 

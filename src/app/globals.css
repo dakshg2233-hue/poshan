@@ -1018,7 +1018,15 @@ main#top section:not(#hero) {
   --panel: var(--roti);
   --panel-ink: var(--ink);
   isolation: isolate;
+  /* clip, not hidden. Both cut off the ::before glow below, which spills
+     25% past every edge. But hidden still makes a scroll container, just
+     one without scrollbars, so anything that scrolls into view (a click, a
+     focus, dismissing the advice bar) could slide the whole tab panel
+     sideways and leave the hero sitting 70px off the left of the screen.
+     clip has nothing to scroll. hidden stays first as the fallback for
+     Safari before 16. */
   overflow: hidden;
+  overflow: clip;
   /* No !important. It was defeating the token system it sat on top of, and
      nothing here needs to outrank anything. */
   background-color: var(--roti);
@@ -2064,6 +2072,18 @@ body {
    below it like every other section. */
 #hero {
   margin-top: calc(-1 * var(--nav-h));
+}
+/* Except when the advice bar is showing above it. The pull-up assumed the
+   hero came first, so with the bar in place it slid 52px up over the bar
+   and hid its lower half. The slot's spacing lives here rather than as a
+   padding class on the element, because a dismissed bar renders nothing
+   and an empty slot with padding left a 20px strip of page between the
+   nav and the photograph. :empty collapses it completely. */
+.advice-slot:not(:empty) {
+  padding: 1.25rem 0;
+}
+.advice-slot:not(:empty) + #hero {
+  margin-top: 0;
 }
 
 /* Advice-of-the-day ticker: two identical copies of the text placed side by
