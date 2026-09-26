@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { TimelineKind } from "@/lib/timeline";
+import { mayBeSignedIn } from "@/lib/supabase-browser";
 
 export interface TimelineEvent {
   id: string;
@@ -30,6 +31,7 @@ type FetchOutcome =
 
 async function fetchTimeline(): Promise<FetchOutcome> {
   try {
+    if (!(await mayBeSignedIn())) return { kind: "signed-out" };
     const r = await fetch("/api/timeline");
     if (r.status === 401) return { kind: "signed-out" };
     if (!r.ok) return { kind: "error", message: "Could not load your timeline." };

@@ -23,3 +23,20 @@ export function browserClient(): SupabaseClient | null {
 
 export const supabaseReady = () =>
   Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
+/**
+ * False when this browser holds no session, so the visitor is certainly
+ * signed out. It reads the stored session and makes no network call.
+ *
+ * Hooks check this before calling an authenticated route. Otherwise every
+ * signed-out visitor to a public page sends a request that can only 401,
+ * and the browser logs each one as a red console error. True does not
+ * prove the session is still valid, so callers keep their 401 handling.
+ * Without Supabase configured it returns true and the server decides.
+ */
+export async function mayBeSignedIn(): Promise<boolean> {
+  const supabase = browserClient();
+  if (!supabase) return true;
+  const { data } = await supabase.auth.getSession();
+  return data.session !== null;
+}

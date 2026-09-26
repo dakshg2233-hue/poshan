@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { browserClient, supabaseReady } from "@/lib/supabase-browser";
+import { browserClient, mayBeSignedIn, supabaseReady } from "@/lib/supabase-browser";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
 export interface Profile {
@@ -81,6 +81,15 @@ async function loadProfile(): Promise<void> {
 
   inFlight = (async () => {
     try {
+      /* Known locally, so a signed-out visitor sends no request that can
+         only 401. The 401 branch below still covers a session the server
+         no longer accepts. */
+      if (!(await mayBeSignedIn())) {
+        errorCache = null;
+        setProfileCache(null);
+        return;
+      }
+
       const response = await fetch("/api/profile");
       /* 401 means signed out. That is a normal state, not a failure:
          surfacing it as an error would light up the UI for every visitor. */
