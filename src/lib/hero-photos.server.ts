@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { DEFAULT_HERO_PHOTO, HERO_DIR } from "./hero-photos";
+import { DEFAULT_HERO_PHOTO } from "./hero-photos";
 
 /**
  * Every hero photograph, found by reading the folder.
@@ -22,7 +22,11 @@ const IMAGE_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".avif"]);
 export function heroPhotos(): string[] {
   let names: string[] = [];
   try {
-    names = fs.readdirSync(path.join(process.cwd(), HERO_DIR));
+    /* Spelled out rather than built from HERO_DIR. The bundler cannot see
+       through a variable, so it assumed any file might be read and traced
+       the whole project, public/ included, into every server function. A
+       literal path limits that to this one folder. */
+    names = fs.readdirSync(path.join(process.cwd(), "public", "hero"));
   } catch {
     /* No folder is not a crash: the fallback still paints. */
     return [DEFAULT_HERO_PHOTO];

@@ -13,5 +13,7 @@
  */
 export const DEFAULT_HERO_PHOTO = "/hero/thali.jpg";
 
-/** Where to drop new photographs. Referenced in the note in the folder. */
+/** Where to drop new photographs. Referenced in the note in the folder.
+    hero-photos.server.ts spells the same path out as a literal, for the
+    bundler; change both together. */
 export const HERO_DIR = "public/hero";

@@ -10,7 +10,7 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
         /* Signed-in surfaces and API routes have nothing to index, and
            /login carries a ?next= parameter that would create duplicates. */
-        disallow: ["/api/", "/dashboard", "/profile", "/login"],
+        disallow: ["/api/", "/dashboard", "/profile", "/login", "/dev"],
       },
     ],
     sitemap: `${SITE}/sitemap.xml`,
