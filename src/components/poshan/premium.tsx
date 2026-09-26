@@ -315,6 +315,7 @@ export function Premium({ signedIn }: { signedIn: boolean }) {
  */
 export function BuildYourPlan({
   baseKcal,
+  bmi,
   goal,
   setGoal,
   diet,
@@ -324,6 +325,7 @@ export function BuildYourPlan({
   signedIn,
 }: {
   baseKcal: number;
+  bmi?: number;
   goal: GoalKey;
   setGoal: (g: GoalKey) => void;
   diet: DietKey;
@@ -333,7 +335,7 @@ export function BuildYourPlan({
   signedIn: boolean;
 }) {
   const { T } = useLang();
-  const plan = buildPlan(region, diet, goal, baseKcal);
+  const plan = buildPlan(region, diet, goal, baseKcal, bmi);
 
   return (
     <div

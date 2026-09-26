@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthedSupabase } from "@/lib/api-auth";
 import { recommendWeek, PANTRY_STAPLES, type PantryStapleKey } from "@/lib/daily-engine";
-import { estimateMaintenanceKcal, type ActivityLevel } from "@/lib/energy-requirement";
+import { bmiOf, estimateMaintenanceKcal, type ActivityLevel } from "@/lib/energy-requirement";
 import type { GoalKey, DietKey, RegionKey } from "@/lib/poshan-data";
 import type { ConditionKey } from "@/lib/conditions";
 import { daysAgo } from "@/lib/day";
@@ -50,11 +50,18 @@ export async function GET(request: NextRequest) {
     supabase.from("pantry_items").select("item_key, in_stock").eq("user_id", user.id),
   ]);
 
+  /* Body first, saved tdee as fallback: the same order as /api/daily, and
+     for the same reason. */
   const maintenanceKcal =
-    target.tdee ??
     (target.weight_kg && target.age && target.sex && target.activity_level
-      ? estimateMaintenanceKcal(target.weight_kg, target.age, target.sex, target.activity_level as ActivityLevel)
-      : null);
+      ? estimateMaintenanceKcal(
+          target.weight_kg,
+          target.age,
+          target.sex,
+          target.activity_level as ActivityLevel,
+          target.height_cm
+        )
+      : null) ?? target.tdee;
 
   const pantryStaples = (pantryRows ?? [])
     .filter((r) => r.in_stock)
@@ -67,6 +74,7 @@ export async function GET(request: NextRequest) {
       diet: (target.diet as DietKey) ?? "veg",
       goal: target.goal as GoalKey,
       maintenanceKcal,
+      bmi: bmiOf(target.weight_kg, target.height_cm),
       conditions: (conditionRows ?? []).map((c) => c.condition as ConditionKey),
       recentDishIds: (recentLogs ?? []).map((l) => l.dish_id),
       pantryStaples,

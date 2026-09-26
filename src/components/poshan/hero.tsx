@@ -94,7 +94,7 @@ export function Hero({
 
   const maintenanceKcal =
     age !== undefined && sex && activityLevel
-      ? estimateMaintenanceKcal(weight, age, sex, activityLevel)
+      ? estimateMaintenanceKcal(weight, age, sex, activityLevel, height)
       : null;
 
   /* Read once at mount, then burn it, so the first render of this session

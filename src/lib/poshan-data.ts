@@ -1,3 +1,4 @@
+import { dailyTargetKcal } from "./energy-requirement";
 /**
  * Poshan domain data.
  * BMI thresholds follow the ICMR / WHO Asia-Pacific cutoffs for Asian-Indian
@@ -607,13 +608,14 @@ export function buildPlan(
   region: RegionKey,
   diet: DietKey,
   goal: GoalKey,
-  baseKcal: number
+  baseKcal: number,
+  bmi?: number | null
 ) {
   const meals = KITCHEN[region][diet];
   const g = GOALS.find((x) => x.key === goal)!;
   return {
     meals,
-    kcal: Math.max(1200, baseKcal + g.kcal),
+    kcal: dailyTargetKcal(baseKcal, g.kcal, bmi),
     focus: g.focus,
     goalLabel: g.label,
   };

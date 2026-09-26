@@ -10,6 +10,7 @@
  * poshan-data.ts) only exists at the dish-id level, in conditions.ts.
  */
 
+import { dailyTargetKcal } from "./energy-requirement";
 import {
   MEAL_LIBRARY,
   GOALS,
@@ -87,6 +88,9 @@ export function draftCarePlan(input: {
   diet: DietKey;
   goal: GoalKey;
   maintenanceKcal: number | null;
+  /** Body mass index when height and weight are known. Below 18.5 no
+   *  deficit is applied, whatever the goal (see dailyTargetKcal). */
+  bmi?: number | null;
   conditions: ConditionKey[];
   /** "Plan templates your practice can reuse" (CLINIC_TIERS). A template
    *  only ever supplies a starting *preference* per meal-time — every
@@ -98,7 +102,7 @@ export function draftCarePlan(input: {
   template?: { id: string; time: MealTime }[];
 }): CarePlanDraft {
   const goalDef = GOALS.find((g) => g.key === input.goal);
-  const targetKcal = Math.max(1200, (input.maintenanceKcal ?? 2000) + (goalDef?.kcal ?? 0));
+  const targetKcal = dailyTargetKcal(input.maintenanceKcal ?? 2000, goalDef?.kcal ?? 0, input.bmi);
   const goalTags = GOAL_TAGS[input.goal] ?? [];
   const perMealBudget = targetKcal / MEAL_TIMES.length;
 

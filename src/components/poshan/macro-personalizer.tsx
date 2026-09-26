@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { useLang } from "./lang-provider";
 import { GOALS, type GoalKey, filterMeals } from "@/lib/poshan-data";
+import { dailyTargetKcal } from "@/lib/energy-requirement";
 
 interface MacroTarget {
   protein: number;
@@ -26,7 +27,7 @@ export function MacroPersonalizer({
 
   const macroTargets = useMemo((): MacroTarget => {
     const goalData = GOALS.find((g) => g.key === customGoal)!;
-    const dailyCals = Math.max(1200, tdee + goalData.kcal);
+    const dailyCals = dailyTargetKcal(tdee, goalData.kcal);
 
     let proteinGrams = 0;
     let proteinPct = 0;

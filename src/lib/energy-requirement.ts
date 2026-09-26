@@ -14,7 +14,8 @@
  * actual weight and physical activity of that population" — i.e. this
  * kcal/kg figure times a person's real weight, not the reference body
  * weight in the table (65kg men, 55kg women), is the intended way to
- * individualise it. That's what estimateMaintenanceKcal does below.
+ * individualise it. That holds across the healthy range. At the extremes
+ * of BMI it does not, and effectiveWeightKg below corrects for that.
  *
  * Scoped to adults: the report's kcal/kg approach is for adults specifically
  * — children and adolescents get fixed age-and-sex energy totals in the same
@@ -62,18 +63,94 @@ const KCAL_PER_KG: Record<Sex, Record<ActivityLevel, number>> = {
 
 const ADULT_MIN_AGE = 19;
 
+/* Asian-Indian adult BMI cutoffs (WHO expert consultation 2004, adopted
+   by ICMR): under 18.5 is underweight, 23 and over is overweight. */
+export const BMI_UNDERWEIGHT = 18.5;
+export const BMI_OVERWEIGHT = 23;
+
+/** Floor under any goal-adjusted target, unless maintenance is lower. */
+export const MIN_TARGET_KCAL = 1200;
+
+/* How much of the weight above the overweight cutoff counts. The standard
+   clinical "adjusted body weight" uses a quarter: fat tissue burns far
+   less energy per kilogram than lean tissue does. */
+const EXCESS_WEIGHT_FACTOR = 0.25;
+
+export function bmiOf(weightKg: number, heightCm: number | null | undefined): number | null {
+  if (!heightCm || heightCm <= 0 || !weightKg || weightKg <= 0) return null;
+  return weightKg / (heightCm / 100) ** 2;
+}
+
+/**
+ * The weight to multiply the ICMR kcal/kg figure by.
+ *
+ * Actual weight within the healthy range. Outside it, actual weight gives
+ * nonsense at both ends, which the audit on 26 September 2026 measured:
+ *
+ * - Obese: a sedentary man of 170kg at 175cm (BMI 55.5) came out at 5,440
+ *   kcal maintenance and 5,040 kcal on "weight loss", which is a surplus
+ *   for him and the opposite of what he asked for. The per-kg figure
+ *   assumes energy-hungry lean tissue, and most of the extra weight is
+ *   not. Above BMI 23 only a quarter of the excess counts, measured from
+ *   the weight at BMI 23 so the result is continuous at the cutoff.
+ * - Underweight: a woman of 30kg at 155cm (BMI 12.5) came out at 900 kcal,
+ *   which would keep her underweight. Below BMI 18.5 the weight at 18.5 is
+ *   used, so the plan feeds the body she needs to reach, not the one she
+ *   has.
+ *
+ * Without a height there is no BMI, so actual weight is used as before.
+ */
+export function effectiveWeightKg(weightKg: number, heightCm?: number | null): number {
+  const bmi = bmiOf(weightKg, heightCm);
+  if (bmi === null) return weightKg;
+  const m2 = (heightCm! / 100) ** 2;
+  if (bmi < BMI_UNDERWEIGHT) return BMI_UNDERWEIGHT * m2;
+  if (bmi > BMI_OVERWEIGHT) {
+    const atCutoff = BMI_OVERWEIGHT * m2;
+    return atCutoff + EXCESS_WEIGHT_FACTOR * (weightKg - atCutoff);
+  }
+  return weightKg;
+}
+
 /**
  * Returns the estimated maintenance calories for an adult, or null if the
  * inputs don't support an honest estimate (age below the range the ICMR-NIN
  * adult table applies to, or a physical activity level not yet chosen).
+ * Pass the height whenever it is known: without it the weight cannot be
+ * corrected at the extremes (see effectiveWeightKg).
  */
 export function estimateMaintenanceKcal(
   weightKg: number,
   age: number,
   sex: Sex,
-  activityLevel: ActivityLevel
+  activityLevel: ActivityLevel,
+  heightCm?: number | null
 ): number | null {
   if (age < ADULT_MIN_AGE) return null;
   const perKg = KCAL_PER_KG[sex][activityLevel];
-  return Math.round(weightKg * perKg);
+  return Math.round(effectiveWeightKg(weightKg, heightCm) * perKg);
+}
+
+/**
+ * The day's calorie target: maintenance plus the goal's adjustment, with
+ * two safety rules every surface shares.
+ *
+ * - No deficit for an underweight person (BMI under 18.5), whatever goal
+ *   they picked. "Blood sugar" or "PCOS" still shape which dishes are
+ *   chosen, but eating less is not safe advice at that weight.
+ * - A deficit never lands above maintenance. The 1,200 kcal floor used to
+ *   be applied on its own, so someone with a 1,100 kcal maintenance on
+ *   "weight loss" was told to eat 1,200, a surplus.
+ *
+ * Surpluses are left alone, and bmi is optional because some surfaces do
+ * not know the height.
+ */
+export function dailyTargetKcal(
+  maintenanceKcal: number,
+  goalDeltaKcal: number,
+  bmi?: number | null
+): number {
+  const delta = bmi != null && bmi < BMI_UNDERWEIGHT ? Math.max(0, goalDeltaKcal) : goalDeltaKcal;
+  if (delta >= 0) return Math.max(MIN_TARGET_KCAL, maintenanceKcal + delta);
+  return Math.max(Math.min(MIN_TARGET_KCAL, maintenanceKcal), maintenanceKcal + delta);
 }

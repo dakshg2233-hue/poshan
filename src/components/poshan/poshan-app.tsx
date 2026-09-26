@@ -280,6 +280,7 @@ function MainContent({
       <TabPanel tab="scanner">
         <ScannerPage
           baseKcal={plan.kcal}
+          bmi={bmi}
           goal={goal}
           setGoal={setGoal}
           diet={diet}

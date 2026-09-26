@@ -72,7 +72,7 @@ export function TDEECalculatorUI({ onComplete }: { onComplete?: (result: TDEERes
   const handleCalculate = () => {
     /* Null below the age the ICMR adult table covers — the model declines to
        guess rather than quietly extrapolating onto a teenager. */
-    const maintenance = estimateMaintenanceKcal(weight, age, gender, activity);
+    const maintenance = estimateMaintenanceKcal(weight, age, gender, activity, height);
     if (maintenance === null) {
       setResult(null);
       setTooYoung(true);
@@ -85,7 +85,7 @@ export function TDEECalculatorUI({ onComplete }: { onComplete?: (result: TDEERes
     else if (bmi >= 25) band = "obese";
     else if (bmi >= 23) band = "over";
 
-    const adjustedCals = getAdjustedCalories(maintenance, goal);
+    const adjustedCals = getAdjustedCalories(maintenance, goal, bmi);
     const bandBaseline = 2000; // Standard baseline for comparison
     const comparison = compareToBand(maintenance, bandBaseline);
 

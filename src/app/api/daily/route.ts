@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isMinor } from "@/lib/dpdp";
 import { getAuthedSupabase } from "@/lib/api-auth";
 import { recommendToday, PANTRY_STAPLES, type PantryStapleKey, type CostTier, type DayType } from "@/lib/daily-engine";
-import { estimateMaintenanceKcal, type ActivityLevel } from "@/lib/energy-requirement";
+import { bmiOf, estimateMaintenanceKcal, type ActivityLevel } from "@/lib/energy-requirement";
 import type { GoalKey, DietKey, RegionKey } from "@/lib/poshan-data";
 import type { ConditionKey } from "@/lib/conditions";
 import { daysAgo, today as todayIst } from "@/lib/day";
@@ -106,16 +106,22 @@ export async function GET(request: NextRequest) {
   const todayLogs = (recentLogs ?? []).filter((l) => l.log_date === today);
   const yesterdayLogs = (recentLogs ?? []).filter((l) => l.log_date !== today);
 
+  /* Computed from the body when the profile has what it needs, and the
+     saved tdee only as a fallback. The saved figure is a snapshot of
+     whatever formula onboarding ran at the time, so it goes stale when the
+     model is corrected (26 September 2026: obese and underweight
+     estimates) or when the person's weight changes. */
   const maintenanceKcal =
-    target.tdee ??
     (target.weight_kg && target.age && target.sex && target.activity_level
       ? estimateMaintenanceKcal(
           target.weight_kg,
           target.age,
           target.sex,
-          target.activity_level as ActivityLevel
+          target.activity_level as ActivityLevel,
+          target.height_cm
         )
-      : null);
+      : null) ?? target.tdee;
+  const bmi = bmiOf(target.weight_kg, target.height_cm);
 
   const pantryStaples = (pantryRows ?? [])
     .filter((r) => r.in_stock)
@@ -128,6 +134,7 @@ export async function GET(request: NextRequest) {
         diet: (target.diet as DietKey) ?? "veg",
         goal: target.goal as GoalKey,
         maintenanceKcal,
+        bmi,
         conditions: (conditionRows ?? []).map((c) => c.condition as ConditionKey),
         recentDishIds: (recentLogs ?? []).map((l) => l.dish_id),
         pantryStaples,

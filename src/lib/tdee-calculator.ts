@@ -1,3 +1,4 @@
+import { dailyTargetKcal } from "./energy-requirement";
 /**
  * TDEE (Total Daily Energy Expenditure) calculator using Mifflin-St Jeor formula.
  * Calculates maintenance calories based on weight, height, age, gender, and activity level.
@@ -76,9 +77,8 @@ export const GOAL_ADJUSTMENTS: Record<string, number> = {
 /**
  * Get adjusted calorie target for a specific goal.
  */
-export function getAdjustedCalories(tdee: number, goal: string): number {
-  const adjustment = GOAL_ADJUSTMENTS[goal] || 0;
-  return Math.max(1200, tdee + adjustment); // Minimum 1200 kcal for safety
+export function getAdjustedCalories(tdee: number, goal: string, bmi?: number | null): number {
+  return dailyTargetKcal(tdee, GOAL_ADJUSTMENTS[goal] || 0, bmi);
 }
 
 /**

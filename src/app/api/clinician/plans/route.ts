@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireClinician } from "@/lib/api-auth";
 import { logAudit } from "@/lib/audit-log";
 import { draftCarePlan } from "@/lib/clinician-plan";
-import { estimateMaintenanceKcal, type ActivityLevel, type Sex } from "@/lib/energy-requirement";
+import { bmiOf, estimateMaintenanceKcal, type ActivityLevel, type Sex } from "@/lib/energy-requirement";
 import type { ConditionKey } from "@/lib/conditions";
 import type { DietKey, GoalKey, RegionKey } from "@/lib/poshan-data";
 
@@ -74,7 +74,8 @@ export async function POST(request: NextRequest) {
           profile.weight_kg,
           profile.age,
           profile.sex as Sex,
-          profile.activity_level as ActivityLevel
+          profile.activity_level as ActivityLevel,
+          profile.height_cm
         )
       : null;
 
@@ -83,6 +84,7 @@ export async function POST(request: NextRequest) {
     diet: (profile.diet as DietKey | null) ?? "veg",
     goal: (profile.goal as GoalKey | null) ?? "loss",
     maintenanceKcal,
+    bmi: bmiOf(profile.weight_kg, profile.height_cm),
     conditions,
     template: template?.dishes,
   });

@@ -16,6 +16,7 @@
  * whether today is a busy day.
  */
 
+import { dailyTargetKcal } from "./energy-requirement";
 import {
   MEAL_LIBRARY,
   GOALS,
@@ -221,6 +222,9 @@ export function recommendToday(input: {
   diet: DietKey;
   goal: GoalKey;
   maintenanceKcal: number | null;
+  /** Body mass index when height and weight are known. Below 18.5 no
+   *  deficit is applied, whatever the goal (see dailyTargetKcal). */
+  bmi?: number | null;
   conditions: ConditionKey[];
   /** Dish ids logged in the last two days — deprioritised so today doesn't just repeat them. */
   recentDishIds: string[];
@@ -237,7 +241,7 @@ export function recommendToday(input: {
   festivalName?: string;
 }): DailyRecommendation {
   const goalDef = GOALS.find((g) => g.key === input.goal);
-  const targetKcal = Math.max(1200, (input.maintenanceKcal ?? 2000) + (goalDef?.kcal ?? 0));
+  const targetKcal = dailyTargetKcal(input.maintenanceKcal ?? 2000, goalDef?.kcal ?? 0, input.bmi);
   const goalTags = GOAL_TAGS[input.goal] ?? [];
   const perMealBudget = targetKcal / MEAL_TIMES.length;
   const recent = new Set(input.recentDishIds);

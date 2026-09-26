@@ -5,6 +5,8 @@ import { useLang } from "./lang-provider";
 import { GOALS, type Band, type GoalKey, type DietKey } from "@/lib/poshan-data";
 import {
   estimateMaintenanceKcal,
+  effectiveWeightKg,
+  dailyTargetKcal,
   type Sex,
   type ActivityLevel,
 } from "@/lib/energy-requirement";
@@ -125,12 +127,12 @@ export function ThaliInteractive({
   const { T, lang } = useLang();
 
   const model = useMemo(() => {
-    const { weight, goal, age, sex, activityLevel } = profile;
+    const { height, weight, goal, age, sex, activityLevel } = profile;
 
     /* The exact figure when the profile supports one. */
     const measured =
       age !== undefined && sex && activityLevel
-        ? estimateMaintenanceKcal(weight, age, sex, activityLevel)
+        ? estimateMaintenanceKcal(weight, age, sex, activityLevel, height)
         : null;
 
     /* And when it doesn't, still weight × kcal/kg — just at the midpoint of
@@ -149,12 +151,13 @@ export function ThaliInteractive({
        replaces, and the copy below still says this is a band-level estimate
        until the profile is filled in. */
     const NEUTRAL_KCAL_PER_KG = 40.5;
-    const maintenance = measured ?? Math.round(weight * NEUTRAL_KCAL_PER_KG);
+    const maintenance =
+      measured ?? Math.round(effectiveWeightKg(weight, height) * NEUTRAL_KCAL_PER_KG);
 
     /* Goal deltas come from GOALS, so changing the product's tuning in one
        place changes it here too. */
     const goalDelta = GOALS.find((g) => g.key === goal)?.kcal ?? 0;
-    const daily = Math.max(1200, Math.round((maintenance + goalDelta) / 10) * 10);
+    const daily = Math.round(dailyTargetKcal(maintenance, goalDelta, bmi) / 10) * 10;
 
     /* The prototype's scale, unchanged: how big this meal is relative to a
        reference one, nudged by BMI band and goal, then clamped so a plate
@@ -194,7 +197,7 @@ export function ThaliInteractive({
     );
 
     return { daily, mealTarget: daily / MEALS_PER_DAY, q, total, estimated: measured === null };
-  }, [profile, band]);
+  }, [profile, band, bmi]);
 
   /* Where the marker sits on the arc. The scale is deliberately not linear
      in BMI: the three cutoffs are evenly spaced around the arc so the

@@ -23,6 +23,7 @@ import type { GoalKey, DietKey, RegionKey } from "@/lib/poshan-data";
  */
 export function ScannerPage({
   baseKcal,
+  bmi,
   goal,
   setGoal,
   diet,
@@ -33,6 +34,7 @@ export function ScannerPage({
   isPremium,
 }: {
   baseKcal: number;
+  bmi?: number;
   goal: GoalKey;
   setGoal: (g: GoalKey) => void;
   diet: DietKey;
@@ -76,6 +78,7 @@ export function ScannerPage({
 
           <BuildYourPlan
             baseKcal={baseKcal}
+            bmi={bmi}
             goal={goal}
             setGoal={setGoal}
             diet={diet}
