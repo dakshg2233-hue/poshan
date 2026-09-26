@@ -40,6 +40,10 @@ function resendClient() {
  * and SPF records it gives you. Those go in Netlify DNS now, not GoDaddy,
  * since the nameservers moved to Netlify.
  */
+/* Every field here comes from a public form anyone can post without
+   signing in, so all of it is escaped. Raw, it was HTML injection into
+   the founder's own inbox: a "lead" could carry links and markup styled
+   to look like anything. */
 export async function sendClinicLeadEmail(lead: {
   tier: "hospital" | "enterprise";
   name: string;
@@ -56,9 +60,9 @@ export async function sendClinicLeadEmail(lead: {
     html: `
       <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <h2 style="margin: 0 0 16px 0;">New ${lead.tier} enquiry</h2>
-        <p><strong>Organisation:</strong> ${lead.org}</p>
-        <p><strong>Contact:</strong> ${lead.name} · ${lead.email}${lead.phone ? ` · ${lead.phone}` : ""}</p>
-        ${lead.message ? `<p><strong>Message:</strong><br>${lead.message}</p>` : ""}
+        <p><strong>Organisation:</strong> ${esc(lead.org)}</p>
+        <p><strong>Contact:</strong> ${esc(lead.name)} · ${esc(lead.email)}${lead.phone ? ` · ${esc(lead.phone)}` : ""}</p>
+        ${lead.message ? `<p><strong>Message:</strong><br>${esc(lead.message)}</p>` : ""}
       </div>
     `,
   });

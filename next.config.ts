@@ -83,9 +83,12 @@ const nextConfig: NextConfig = {
             value: "max-age=63072000; includeSubDomains; preload",
           },
           {
-            // The scanner needs the camera; nothing else is granted.
+            // The scanner needs the camera and voice logging needs the
+            // microphone, both on Poshan's own origin only. microphone=()
+            // used to block it outright, so the Today tab's voice logger
+            // could never start: the browser refused before it asked.
             key: "Permissions-Policy",
-            value: "camera=(self), microphone=(), geolocation=(), payment=(self)",
+            value: "camera=(self), microphone=(self), geolocation=(), payment=(self)",
           },
           { key: "X-DNS-Prefetch-Control", value: "off" },
         ],
